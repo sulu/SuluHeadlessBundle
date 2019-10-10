@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit colors="true" bootstrap="Tests/bootstrap.php">
+   <testsuites>
+        <testsuite name="Sulu Headless Bundle">
+            <directory>Tests</directory>
+        </testsuite>
+    </testsuites>
+
+    <filter>
+        <whitelist addUncoveredFilesFromWhitelist="true">
+            <directory>.</directory>
+            <exclude>
+                <directory>vendor</directory>
+            </exclude>
+        </whitelist>
+    </filter>
+
+    <php>
+        <env name="KERNEL_CLASS" value="Sulu\Bundle\HeadlessBundle\Tests\Application\Kernel"/>
+    </php>
+</phpunit>

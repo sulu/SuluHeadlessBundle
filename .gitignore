@@ -1,0 +1,24 @@
+# PHPUnit
+/phpunit.xml
+.phpunit.result.cache
+
+# composer
+/composer.phar
+/composer.lock
+/auth.json
+/vendor
+
+# IDEs
+.idea/*
+*.iml
+*~
+
+# System files
+.DS_Store
+
+# tests
+Tests/Application/var
+Tests/Application/.env.test.local
+
+# php-cs-fixer
+.php_cs.cache
