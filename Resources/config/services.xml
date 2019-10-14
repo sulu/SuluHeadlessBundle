@@ -15,5 +15,42 @@
             alias="sulu_headless.api_controller.navigation"
             public="true"
         />
+
+        <service
+            id="sulu_headless.structure_resolver"
+            class="Sulu\Bundle\HeadlessBundle\Content\StructureResolver"
+            public="true"
+        >
+            <argument type="service" id="sulu_headless.content_resolver"/>
+        </service>
+
+        <service
+            id="sulu_headless.content_resolver"
+            class="Sulu\Bundle\HeadlessBundle\Content\ContentResolver"
+            public="true"
+        >
+            <argument type="collection"/>
+        </service>
+
+        <service
+            id="sulu_headless.content_resolver.media_selection"
+            class="Sulu\Bundle\HeadlessBundle\Content\Resolver\MediaSelectionResolver"
+        >
+            <argument type="service" id="sulu_media.media_manager"/>
+            <argument type="service" id="sulu_media.format_cache"/>
+            <argument type="service" id="jms_serializer"/>
+
+            <tag name="sulu_headless.content_type_resolver"/>
+        </service>
+
+        <service
+            id="sulu_headless.content_resolver.block"
+            class="Sulu\Bundle\HeadlessBundle\Content\Resolver\BlockResolver"
+            lazy="true"
+        >
+            <argument type="service" id="sulu_headless.content_resolver"/>
+
+            <tag name="sulu_headless.content_type_resolver"/>
+        </service>
     </services>
 </container>
