@@ -1,0 +1,72 @@
+{
+    "_embedded": {
+        "items": [
+            {
+                "id": "@uuid@",
+                "uuid": "@uuid@",
+                "nodeType": 1,
+                "path": "\/test-1",
+                "changed": "@string@.isDateTime()",
+                "created": "@string@.isDateTime()",
+                "publishedState": true,
+                "published": "@string@.isDateTime()",
+                "title": "Test 1",
+                "locale": "de",
+                "webspaceKey": "sulu_io",
+                "template": "default",
+                "parent": "@uuid@",
+                "url": "\/test-1",
+                "urls": {
+                    "de": "\/test-1"
+                },
+                "authored": "@string@.isDateTime()",
+                "order": 20,
+                "excerpt": {
+                    "title": "",
+                    "more": "",
+                    "description": "",
+                    "categories": [],
+                    "audience_targeting_groups": [],
+                    "tags": [],
+                    "icon": [],
+                    "images": []
+                },
+                "children": []
+            },
+            {
+                "id": "@uuid@",
+                "uuid": "@uuid@",
+                "nodeType": 1,
+                "path": "\/test-2",
+                "changed": "@string@.isDateTime()",
+                "created": "@string@.isDateTime()",
+                "publishedState": true,
+                "published": "@string@.isDateTime()",
+                "title": "Test 2",
+                "locale": "de",
+                "webspaceKey": "sulu_io",
+                "template": "default",
+                "parent": "@uuid@",
+                "url": "\/test-2",
+                "urls": {
+                    "de": "\/test-2"
+                },
+                "authored": "@string@.isDateTime()",
+                "order": 30,
+                "excerpt": {
+                    "title": "",
+                    "more": "",
+                    "description": "",
+                    "categories": [],
+                    "audience_targeting_groups": [],
+                    "tags": [],
+                    "icon": [],
+                    "images": []
+                },
+                "children": []
+            }
+        ]
+    }
+}
+
+

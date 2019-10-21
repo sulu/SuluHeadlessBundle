@@ -13,85 +13,65 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Tests\Functional\Controller;
 
-use Ramsey\Uuid\Uuid;
-use Sulu\Bundle\PageBundle\Document\PageDocument;
-use Sulu\Bundle\TestBundle\Testing\SuluTestCase;
-use Sulu\Component\DocumentManager\DocumentManagerInterface;
-use Sulu\Component\PHPCR\SessionManager\SessionManagerInterface;
+use Sulu\Bundle\HeadlessBundle\Tests\Functional\BaseTestCase;
+use Sulu\Bundle\HeadlessBundle\Tests\Traits\CreatePageTrait;
 use Symfony\Component\HttpFoundation\Response;
 
-class HeadlessWebsiteControllerTest extends SuluTestCase
+class HeadlessWebsiteControllerTest extends BaseTestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
+    use CreatePageTrait;
 
-        $this->initPhpcr();
+    public static function setUpBeforeClass(): void
+    {
+        self::initPhpcr();
+
+        self::createPage([
+            'title' => 'Test',
+            'url' => '/test',
+        ]);
     }
 
     public function testIndexAction(): void
     {
-        $page = $this->createPage('Test', '/test');
-
         $websiteClient = $this->createWebsiteClient();
-        $websiteClient->request('GET', $page->getResourceSegment() . '.json');
+        $websiteClient->request('GET', '/test.json');
 
         $response = $websiteClient->getResponse();
-        $this->assertInstanceOf(Response::class, $response);
-        $result = json_decode((string) $response->getContent(), true);
-        $this->assertSame(200, $response->getStatusCode());
 
-        /** @var \DateTimeImmutable $authored */
-        $authored = $page->getAuthored();
-
-        $this->assertSame(
-            [
-                'id' => $page->getUuid(),
-                'type' => 'page',
-                'template' => $page->getStructureType(),
-                'content' => [
-                    'title' => 'Test',
-                    'url' => '/test',
-                    'article' => '',
-                ],
-                'view' => [
-                    'title' => [],
-                    'url' => [],
-                    'article' => [],
-                ],
-                'extension' => [],
-                'authored' => $authored->format(\DateTimeImmutable::ISO8601),
-                'changed' => $page->getChanged()->format(\DateTimeImmutable::ISO8601),
-                'created' => $page->getCreated()->format(\DateTimeImmutable::ISO8601),
-            ],
-            $result
+        $this->assertResponseContent(
+            'headless_website__test_index.json',
+            $response,
+            Response::HTTP_OK
         );
     }
 
-    private function createPage(string $title, string $resourceSegment, string $locale = 'de'): PageDocument
+    public function testIndexHtmlAction(): void
     {
-        /** @var DocumentManagerInterface $documentManager */
-        $documentManager = $this->getContainer()->get('sulu_document_manager.document_manager');
+        $websiteClient = $this->createWebsiteClient();
+        $websiteClient->request('GET', '/test');
 
-        /** @var SessionManagerInterface $sessionManager */
-        $sessionManager = $this->getContainer()->get('sulu.phpcr.session');
+        $response = $websiteClient->getResponse();
+        $this->assertInstanceOf(Response::class, $response);
 
-        /** @var PageDocument $page */
-        $page = $documentManager->create('page');
+        $content = $response->getContent();
+        $this->assertIsString($content);
 
-        $uuidReflection = new \ReflectionProperty(PageDocument::class, 'uuid');
-        $uuidReflection->setAccessible(true);
-        $uuidReflection->setValue($page, Uuid::uuid4()->toString());
+        $this->assertStringContainsString('window.SITE_DATA =', $content);
 
-        $page->setTitle($title);
-        $page->setStructureType('default');
-        $page->setParent($documentManager->find($sessionManager->getContentPath('sulu_io')));
-        $page->setResourceSegment($resourceSegment);
+        $jsonContent = str_replace([
+            '<script>window.SITE_DATA = ',
+            ';</script>',
+        ], '', $content);
 
-        $documentManager->persist($page, $locale);
-        $documentManager->publish($page, $locale);
-        $documentManager->flush();
+        // Replace HTML response content with Json to match if the same data is set to the template.
+        $response->setContent($jsonContent);
 
-        return $page;
+        $this->assertInstanceOf(Response::class, $response);
+
+        $this->assertResponseContent(
+            'headless_website__test_index.json',
+            $response,
+            Response::HTTP_OK
+        );
     }
 }

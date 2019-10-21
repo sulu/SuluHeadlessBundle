@@ -5,7 +5,7 @@
 
     <key>default</key>
 
-    <view>::default</view>
+    <view>headless</view>
     <controller>Sulu\Bundle\HeadlessBundle\Controller\HeadlessWebsiteController::indexAction</controller>
     <cacheLifetime>2400</cacheLifetime>
 

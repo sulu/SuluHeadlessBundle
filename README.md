@@ -33,8 +33,8 @@ return [
 
 Add routes to website routing `config/routes/sulu_website.yml`:
 
-````yaml
+```yaml
 sulu_headless:
     type: portal
-    resource: "@SuluHeadlessBundle/Resources/config/routing_website.xml"
+    resource: "@SuluHeadlessBundle/Resources/config/routing_website.yml"
 ```

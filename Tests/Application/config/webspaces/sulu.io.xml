@@ -23,6 +23,12 @@
                     <title lang="en">Mainnavigation</title>
                 </meta>
             </context>
+
+            <context key="footer">
+                <meta>
+                    <title lang="en">Footernavigation</title>
+                </meta>
+            </context>
         </contexts>
     </navigation>
 

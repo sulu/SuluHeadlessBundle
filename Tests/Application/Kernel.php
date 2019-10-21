@@ -32,4 +32,9 @@ class Kernel extends SuluTestKernel
         parent::registerContainerConfiguration($loader);
         $loader->load(__DIR__ . '/config/config.yml');
     }
+
+    public function getProjectDir()
+    {
+        return __DIR__;
+    }
 }

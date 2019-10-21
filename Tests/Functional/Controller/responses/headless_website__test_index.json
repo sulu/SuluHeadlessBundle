@@ -1,0 +1,19 @@
+{
+    "id": "@uuid@",
+    "type": "page",
+    "template": "default",
+    "content": {
+        "title": "Test",
+        "url": "\/test",
+        "article": ""
+    },
+    "view": {
+        "title": [],
+        "url": [],
+        "article": []
+    },
+    "extension": [],
+    "authored": "@string@.isDateTime()",
+    "changed": "@string@.isDateTime()",
+    "created": "@string@.isDateTime()"
+}
