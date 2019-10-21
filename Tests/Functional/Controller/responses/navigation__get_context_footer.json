@@ -1,0 +1,28 @@
+{
+    "_embedded": {
+        "items": [
+            {
+                "id": "@uuid@",
+                "uuid": "@uuid@",
+                "nodeType": 1,
+                "path": "\/test-3",
+                "changed": "@string@.isDateTime()",
+                "created": "@string@.isDateTime()",
+                "publishedState": true,
+                "published": "@string@.isDateTime()",
+                "title": "Test 3",
+                "locale": "de",
+                "webspaceKey": "sulu_io",
+                "template": "default",
+                "parent": "@uuid@",
+                "url": "\/test-3",
+                "urls": {
+                    "de": "\/test-3"
+                },
+                "authored": "@string@.isDateTime()",
+                "order": 40,
+                "children": []
+            }
+        ]
+    }
+}

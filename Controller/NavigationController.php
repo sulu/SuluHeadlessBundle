@@ -15,13 +15,14 @@ namespace Sulu\Bundle\HeadlessBundle\Controller;
 
 use JMS\Serializer\SerializerInterface;
 use Sulu\Bundle\WebsiteBundle\Navigation\NavigationMapperInterface;
+use Sulu\Component\Rest\ListBuilder\CollectionRepresentation;
 use Sulu\Component\Rest\RequestParametersTrait;
 use Sulu\Component\Webspace\Analyzer\Attributes\RequestAttributes;
 use Sulu\Component\Webspace\Webspace;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class NavigationApiController
+class NavigationController
 {
     use RequestParametersTrait;
 
@@ -50,17 +51,19 @@ class NavigationApiController
         $webspace = $attributes->getAttribute('webspace');
         $locale = $request->getLocale();
 
-        $navigation = $this->navigationMapper->getRootNavigation(
-            $webspace->getKey(),
-            $locale,
-            (int) $this->getRequestParameter($request, 'depth', false, 1),
-            $this->getBooleanRequestParameter($request, 'flat', false, false),
-            $context,
-            $this->getBooleanRequestParameter($request, 'excerpt', false, false)
-        );
+        $uuid = $request->query->get('uuid');
+        $depth = (int) $this->getRequestParameter($request, 'depth', false, 1);
+        $flat = $this->getBooleanRequestParameter($request, 'flat', false, false);
+
+        $excerpt = $this->getBooleanRequestParameter($request, 'excerpt', false, false);
+
+        $navigation = $this->loadNavigation($webspace->getKey(), $locale, $depth, $flat, $context, $excerpt, $uuid);
 
         return new Response(
-            $this->serializer->serialize($navigation, 'json'),
+            $this->serializer->serialize(
+                new CollectionRepresentation($navigation, 'items'),
+                'json'
+            ),
             200,
             [
                 'Content-Type' => 'application/json',
@@ -68,31 +71,37 @@ class NavigationApiController
         );
     }
 
-    public function getByParentAction(Request $request, string $uuid, string $context): Response
-    {
-        /** @var RequestAttributes $attributes */
-        $attributes = $request->attributes->get('_sulu');
+    /**
+     * @return mixed[]
+     */
+    protected function loadNavigation(
+        string $webspaceKey,
+        string $locale,
+        int $depth,
+        bool $flat,
+        string $context,
+        bool $excerpt,
+        ?string $uuid = null
+    ): array {
+        if ($uuid) {
+            return $this->navigationMapper->getNavigation(
+                $uuid,
+                $webspaceKey,
+                $locale,
+                $depth,
+                $flat,
+                $context,
+                $excerpt
+            );
+        }
 
-        /** @var Webspace $webspace */
-        $webspace = $attributes->getAttribute('webspace');
-        $locale = $request->getLocale();
-
-        $navigation = $this->navigationMapper->getNavigation(
-            $uuid,
-            $webspace->getKey(),
+        return $navigation = $this->navigationMapper->getRootNavigation(
+            $webspaceKey,
             $locale,
-            (int) $this->getRequestParameter($request, 'depth', false, 1),
-            $this->getBooleanRequestParameter($request, 'flat', false, false),
+            $depth,
+            $flat,
             $context,
-            $this->getBooleanRequestParameter($request, 'excerpt', false, false)
-        );
-
-        return new Response(
-            $this->serializer->serialize($navigation, 'json'),
-            200,
-            [
-                'Content-Type' => 'application/json',
-            ]
+            $excerpt
         );
     }
 }

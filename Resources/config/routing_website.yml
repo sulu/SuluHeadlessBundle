@@ -1,9 +1,4 @@
 sulu_headless.api.navigation:
     path: /api/navigations/{context}
     defaults:
-        _controller: sulu_headless.api_controller.navigation:getAction
-
-sulu_headless.api.navigation_parent:
-    path: /api/navigations/{context}/parent/{uuid}
-    defaults:
-        _controller: sulu_headless.api_controller.navigation:getByParentAction
+        _controller: sulu_headless.controller.navigation:getAction

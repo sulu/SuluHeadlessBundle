@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <services>
+        <service
+            id="sulu_headless.content_resolver.media_selection"
+            class="Sulu\Bundle\HeadlessBundle\Content\Resolver\MediaSelectionResolver"
+        >
+            <argument type="service" id="sulu_media.media_manager"/>
+            <argument type="service" id="sulu_media.format_cache"/>
+            <argument type="service" id="jms_serializer"/>
+
+            <tag name="sulu_headless.content_type_resolver"/>
+        </service>
+
+        <service
+            id="sulu_headless.content_resolver.block"
+            class="Sulu\Bundle\HeadlessBundle\Content\Resolver\BlockResolver"
+            lazy="true"
+        >
+            <argument type="service" id="sulu_headless.content_resolver"/>
+
+            <tag name="sulu_headless.content_type_resolver"/>
+        </service>
+    </services>
+</container>

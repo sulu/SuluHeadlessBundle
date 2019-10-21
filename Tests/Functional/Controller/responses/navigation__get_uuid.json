@@ -1,0 +1,50 @@
+{
+    "_embedded": {
+        "items": [
+            {
+                "id": "@uuid@",
+                "uuid": "@uuid@",
+                "nodeType": 1,
+                "path": "/test-1/test-1a",
+                "changed": "@string@.isDateTime()",
+                "created": "@string@.isDateTime()",
+                "publishedState": true,
+                "published": "@string@.isDateTime()",
+                "title": "Test 1A",
+                "locale": "de",
+                "webspaceKey": "sulu_io",
+                "template": "default",
+                "parent": "@uuid@",
+                "url": "/test-1a",
+                "urls": {
+                    "de": "/test-1a"
+                },
+                "authored": "@string@.isDateTime()",
+                "order": 20,
+                "children": []
+            },
+            {
+                "id": "@uuid@",
+                "uuid": "@uuid@",
+                "nodeType": 1,
+                "path": "/test-1/test-1b",
+                "changed": "@string@.isDateTime()",
+                "created": "@string@.isDateTime()",
+                "publishedState": true,
+                "published": "@string@.isDateTime()",
+                "title": "Test 1B",
+                "locale": "de",
+                "webspaceKey": "sulu_io",
+                "template": "default",
+                "parent": "@uuid@",
+                "url": "/test-1b",
+                "urls": {
+                    "de": "/test-1b"
+                },
+                "authored": "@string@.isDateTime()",
+                "order": 30,
+                "children": []
+            }
+        ]
+    }
+}
