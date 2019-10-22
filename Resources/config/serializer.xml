@@ -9,7 +9,6 @@
             class="Sulu\Bundle\AdminBundle\Serializer\Handler\RepresentationSubscriber"
         >
             <tag name="jms_serializer.event_subscriber"/>
-            <tag name="sulu.context" context="website"/>
         </service>
     </services>
 </container>
