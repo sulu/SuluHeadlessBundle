@@ -5,7 +5,7 @@
     "description": "Add simpler headless functionality to the Sulu CMS.",
     "require": {
         "php": "^7.2",
-        "sulu/sulu": "^2.0"
+        "sulu/sulu": "dev-release/2.0 as 2.0.1"
     },
     "require-dev": {
         "coduo/php-matcher": "^3.2",
