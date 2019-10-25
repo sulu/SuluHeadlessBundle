@@ -66,3 +66,21 @@ lint:
         - echo "waiting for mysql container startup" && sleep 5
         - php composer.phar bootstrap-test-environment
         - php composer.phar lint
+
+js-website:
+    stage: test
+    image: node:10
+    variables:
+        NODE_OPTIONS: --max-old-space-size=1536
+    before_script:
+        - npm config set cache "$(pwd)/.npm-cache"
+    script:
+        - cd Resources/js-website
+        - npm install
+        - npm run lint
+        - npm run depcruise
+        - npm run build
+    cache:
+        key: npm
+        paths:
+            - .npm-cache/

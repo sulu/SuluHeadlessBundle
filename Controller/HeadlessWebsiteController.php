@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Controller;
 
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
+use Sulu\Bundle\PreviewBundle\Preview\Preview;
 use Sulu\Component\Content\Compat\PageInterface;
 use Sulu\Component\Content\Compat\StructureInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -24,6 +25,9 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 class HeadlessWebsiteController extends AbstractController
 {
     /**
+     * We cannot set the typehint of the $structure parameter to PageInterface because the ArticleBundle does not
+     * implement that interface. Therefore we need to define the type via phpdoc to satisfy phpstan.
+     *
      * @param PageInterface $structure
      */
     public function indexAction(
@@ -32,22 +36,13 @@ class HeadlessWebsiteController extends AbstractController
         bool $preview = false,
         bool $partial = false
     ): Response {
+        /** @var string $requestFormat */
         $requestFormat = $request->getRequestFormat();
-        /** @var PageInterface $structure */
-        $viewTemplate = $structure->getView() . '.' . $requestFormat . '.twig';
-
-        if ('json' !== $request->getRequestFormat() && !$this->get('twig')->getLoader()->exists($viewTemplate)) {
-            throw new HttpException(
-                406,
-                sprintf('Page does not exist in "%s" format.', $requestFormat)
-            );
-        }
-
         $data = $this->resolveStructure($structure);
         $json = $this->serializeData($data);
 
         if ('json' !== $request->getRequestFormat()) {
-            return $this->render($viewTemplate, [
+            return $this->renderTemplateResponse($structure, $requestFormat, $preview, [
                 'jsonData' => $json,
                 'data' => $data,
             ]);
@@ -60,6 +55,35 @@ class HeadlessWebsiteController extends AbstractController
                 'Content-Type' => 'application/json',
             ]
         );
+    }
+
+    /**
+     * @param PageInterface $structure
+     * @param mixed[] $parameters
+     */
+    private function renderTemplateResponse(
+        StructureInterface $structure,
+        string $requestFormat,
+        bool $preview,
+        array $parameters
+    ): Response {
+        $viewTemplate = $structure->getView() . '.' . $requestFormat . '.twig';
+
+        if (!$this->get('twig')->getLoader()->exists($viewTemplate)) {
+            throw new HttpException(
+                406,
+                sprintf('Page does not exist in "%s" format.', $requestFormat)
+            );
+        }
+
+        if ($preview) {
+            $parameters['previewParentTemplate'] = $viewTemplate;
+            $parameters['previewContentReplacer'] = Preview::CONTENT_REPLACER;
+
+            return $this->render('SuluWebsiteBundle:Preview:preview.html.twig', $parameters);
+        }
+
+        return $this->render($viewTemplate, $parameters);
     }
 
     /**
