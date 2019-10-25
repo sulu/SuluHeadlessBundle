@@ -1,0 +1,50 @@
+{
+  "name": "sulu-headless-bundle",
+  "description": "A collection of react components to build a headless frontend based on Sulu",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "build": "webpack index.js -o build/index.js --module-bind js=babel-loader -p --display-modules --sort-modules-by size",
+    "watch": "webpack index.js -w -o build/index.js --module-bind js=babel-loader --mode=development --devtool source-map",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "depcruise": "depcruise src -c dependency-cruiser.json"
+  },
+  "peerDependencies": {
+    "core-js": "^3.0.0",
+    "loglevel": "^1.0.0",
+    "mobx": "^4.0.0",
+    "mobx-react": "^5.0.0",
+    "prop-types": "^15.7.0",
+    "react": "^16.8.0",
+    "react-dom": "^16.8.0",
+    "whatwg-fetch": "^3.0.0",
+    "history": "^4.10.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.6.0",
+    "@babel/plugin-proposal-class-properties": "^7.5.5",
+    "@babel/plugin-proposal-decorators": "^7.6.0",
+    "@babel/preset-env": "^7.6.0",
+    "@babel/preset-react": "^7.0.0",
+    "babel-eslint": "^10.0.3",
+    "babel-loader": "^8.0.6",
+    "core-js": "^3.2.1",
+    "dependency-cruiser": "^5.1.1",
+    "eslint": "^6.4.0",
+    "eslint-config-ma": "^1.1.0",
+    "eslint-plugin-compat": "^3.3.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-react": "^7.14.3",
+    "loglevel": "^1.6.4",
+    "mobx": "^4.13.0",
+    "mobx-react": "^5.4.4",
+    "prop-types": "^15.7.2",
+    "react": "^16.9.0",
+    "react-dom": "^16.9.0",
+    "webpack": "^4.40.2",
+    "webpack-cli": "^3.3.8",
+    "whatwg-fetch": "^3.0.0",
+    "history": "^4.10.1"
+  }
+}
