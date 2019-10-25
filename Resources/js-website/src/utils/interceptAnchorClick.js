@@ -2,15 +2,11 @@ import router from '../services/router';
 
 // eslint-disable-next-line require-jsdoc
 function findClickedAnchorElement(clickTarget) {
-    if (clickTarget.tagName.toLowerCase() === 'a') {
+    if (clickTarget.tagName && clickTarget.tagName.toLowerCase() === 'a') {
         return clickTarget;
     }
 
-    if (clickTarget.parentNode) {
-        return findClickedAnchorElement(clickTarget.parentNode);
-    }
-
-    return null;
+    return clickTarget.parentNode ? findClickedAnchorElement(clickTarget.parentNode) : null;
 }
 
 /**
