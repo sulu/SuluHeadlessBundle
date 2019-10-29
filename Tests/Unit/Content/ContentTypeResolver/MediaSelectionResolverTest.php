@@ -11,15 +11,14 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\Resolver;
+namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
 
-use JMS\Serializer\SerializerInterface;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Prophecy\ObjectProphecy;
+use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\MediaSelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
-use Sulu\Bundle\HeadlessBundle\Content\Resolver\MediaSelectionResolver;
+use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializer;
 use Sulu\Bundle\MediaBundle\Api\Media;
-use Sulu\Bundle\MediaBundle\Media\FormatCache\FormatCacheInterface;
 use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
 use Sulu\Component\Content\Compat\PropertyInterface;
 
@@ -31,14 +30,9 @@ class MediaSelectionResolverTest extends TestCase
     private $mediaManager;
 
     /**
-     * @var FormatCacheInterface|ObjectProphecy
+     * @var MediaSerializer|ObjectProphecy
      */
-    private $formatCache;
-
-    /**
-     * @var SerializerInterface|ObjectProphecy
-     */
-    private $serializer;
+    private $mediaSerializer;
 
     /**
      * @var MediaSelectionResolver
@@ -48,14 +42,17 @@ class MediaSelectionResolverTest extends TestCase
     protected function setUp(): void
     {
         $this->mediaManager = $this->prophesize(MediaManagerInterface::class);
-        $this->formatCache = $this->prophesize(FormatCacheInterface::class);
-        $this->serializer = $this->prophesize(SerializerInterface::class);
+        $this->mediaSerializer = $this->prophesize(MediaSerializer::class);
 
         $this->mediaResolver = new MediaSelectionResolver(
             $this->mediaManager->reveal(),
-            $this->formatCache->reveal(),
-            $this->serializer->reveal()
+            $this->mediaSerializer->reveal()
         );
+    }
+
+    public function testGetContentType(): void
+    {
+        self::assertSame('media_selection', $this->mediaResolver::getContentType());
     }
 
     public function testResolve(): void
@@ -74,33 +71,14 @@ class MediaSelectionResolverTest extends TestCase
 
         $this->mediaManager->getByIds([1, 2], 'en')->willReturn([$media1->reveal(), $media2->reveal()]);
 
-        $data1 = [
+        $this->mediaSerializer->serialize($media1)->willReturn([
             'id' => 1,
-            'formats' => [],
-            'storageOptions' => [],
-            'thumbnails' => [],
-            'versions' => [],
-            'downloadCounter' => [],
-            '_hash' => [],
-        ];
-        $this->serializer->serialize($media1, 'json')->willReturn(json_encode($data1));
-
-        $data2 = [
+            'formatUri' => '/media/1/{format}/media-1.jpg?v=1-0',
+        ]);
+        $this->mediaSerializer->serialize($media2)->willReturn([
             'id' => 2,
-            'formats' => [],
-            'storageOptions' => [],
-            'thumbnails' => [],
-            'versions' => [],
-            'downloadCounter' => [],
-            '_hash' => [],
-        ];
-        $this->serializer->serialize($media2, 'json')->willReturn(json_encode($data2));
-
-        $this->formatCache->getMediaUrl(1, 'media-1', '{format}', 1, 0)
-            ->willReturn('/media/1/{format}/media-1.jpg?v=1-0');
-
-        $this->formatCache->getMediaUrl(2, 'media-2', '{format}', 1, 0)
-            ->willReturn('/media/2/{format}/media-2.jpg?v=1-0');
+            'formatUri' => '/media/2/{format}/media-2.jpg?v=1-0',
+        ]);
 
         $property = $this->prophesize(PropertyInterface::class);
 

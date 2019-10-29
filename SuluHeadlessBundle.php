@@ -13,8 +13,10 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle;
 
-use Sulu\Bundle\HeadlessBundle\Content\Resolver\ContentTypeResolverInterface;
+use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\ContentTypeResolverInterface;
+use Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver\DataProviderResolverInterface;
 use Sulu\Bundle\HeadlessBundle\DependencyInjection\ContentTypeResolverCompilerPass;
+use Sulu\Bundle\HeadlessBundle\DependencyInjection\DataProviderResolverCompilerPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
@@ -26,8 +28,12 @@ class SuluHeadlessBundle extends Bundle
     public function build(ContainerBuilder $container)
     {
         $container->addCompilerPass(new ContentTypeResolverCompilerPass());
+        $container->addCompilerPass(new DataProviderResolverCompilerPass());
 
         $container->registerForAutoconfiguration(ContentTypeResolverInterface::class)
             ->addTag('sulu_headless.content_type_resolver');
+
+        $container->registerForAutoconfiguration(DataProviderResolverInterface::class)
+            ->addTag('sulu_headless.data_provider_resolver');
     }
 }

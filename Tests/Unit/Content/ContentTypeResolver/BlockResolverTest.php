@@ -11,13 +11,13 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\Resolver;
+namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
 
 use PHPUnit\Framework\TestCase;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\HeadlessBundle\Content\ContentResolverInterface;
+use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\BlockResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
-use Sulu\Bundle\HeadlessBundle\Content\Resolver\BlockResolver;
 use Sulu\Component\Content\Compat\Block\BlockPropertyInterface;
 use Sulu\Component\Content\Compat\Block\BlockPropertyType;
 use Sulu\Component\Content\Compat\PropertyInterface;
@@ -39,6 +39,11 @@ class BlockResolverTest extends TestCase
         $this->contentResolver = $this->prophesize(ContentResolverInterface::class);
 
         $this->blockResolver = new BlockResolver($this->contentResolver->reveal());
+    }
+
+    public function testGetContentType(): void
+    {
+        self::assertSame('block', $this->blockResolver::getContentType());
     }
 
     public function testResolve(): void

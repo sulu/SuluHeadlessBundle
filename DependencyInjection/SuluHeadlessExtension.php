@@ -29,5 +29,7 @@ class SuluHeadlessExtension extends Extension
         $loader->load('services.xml');
         $loader->load('controllers.xml');
         $loader->load('content-type-resolvers.xml');
+        $loader->load('data-provider-resolvers.xml');
+        $loader->load('serializers.xml');
     }
 }

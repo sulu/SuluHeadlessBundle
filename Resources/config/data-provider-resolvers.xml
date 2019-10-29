@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <services>
+        <service
+            id="sulu_headless.provider_resolver.media"
+            class="Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver\MediaResolver"
+        >
+            <argument type="service" id="sulu_media.smart_content.data_provider.media"/>
+            <argument type="service" id="sulu_headless.serializer.media"/>
+
+            <tag name="sulu_headless.data_provider_resolver"/>
+        </service>
+    </services>
+</container>

@@ -5,21 +5,35 @@
     <services>
         <service
             id="sulu_headless.content_resolver.media_selection"
-            class="Sulu\Bundle\HeadlessBundle\Content\Resolver\MediaSelectionResolver"
+            class="Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\MediaSelectionResolver"
         >
             <argument type="service" id="sulu_media.media_manager"/>
-            <argument type="service" id="sulu_media.format_cache"/>
-            <argument type="service" id="jms_serializer"/>
+            <argument type="service" id="sulu_headless.serializer.media"/>
 
             <tag name="sulu_headless.content_type_resolver"/>
         </service>
 
         <service
             id="sulu_headless.content_resolver.block"
-            class="Sulu\Bundle\HeadlessBundle\Content\Resolver\BlockResolver"
+            class="Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\BlockResolver"
             lazy="true"
         >
             <argument type="service" id="sulu_headless.content_resolver"/>
+
+            <tag name="sulu_headless.content_type_resolver"/>
+        </service>
+
+        <service
+            id="sulu_headless.content_resolver.smart_content"
+            class="Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\SmartContentResolver"
+            lazy="true"
+        >
+            <argument type="collection"/>
+            <argument type="service" id="sulu_tag.tag_manager"/>
+            <argument type="service" id="request_stack"/>
+            <argument type="service" id="sulu_tag.tag_request_handler"/>
+            <argument type="service" id="sulu_category.category_request_handler"/>
+            <argument type="service" id="sulu_audience_targeting.target_group_store" on-invalid="null"/>
 
             <tag name="sulu_headless.content_type_resolver"/>
         </service>
