@@ -17,21 +17,21 @@ use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 
-class ContentTypeResolverCompilerPass implements CompilerPassInterface
+class DataProviderResolverCompilerPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container)
     {
-        $definition = $container->findDefinition('sulu_headless.content_resolver');
+        $definition = $container->findDefinition('sulu_headless.content_resolver.smart_content');
 
-        // find all service IDs with the sulu_headless.content_type_resolver tag
-        $taggedServices = $container->findTaggedServiceIds('sulu_headless.content_type_resolver');
+        // find all service IDs with the sulu_headless.data_provider_resolver tag
+        $taggedServices = $container->findTaggedServiceIds('sulu_headless.data_provider_resolver');
 
         $references = [];
         foreach ($taggedServices as $id => $tags) {
             $serviceDefinition = $container->getDefinition($id);
 
             /** @var callable $callable */
-            $callable = [$serviceDefinition->getClass(), 'getContentType'];
+            $callable = [$serviceDefinition->getClass(), 'getDataProvider'];
             $references[\call_user_func($callable)] = new Reference($id);
         }
 

@@ -33,7 +33,7 @@ test-unit:
     script:
         - docker-php-ext-enable xdebug
         - php composer.phar phpunit -- Tests/Unit --coverage-php var/coverage.php --coverage-html coverage-report --log-junit var/junit.xml
-        # - php Tests/coverage-checker.php "line" "Model" "$METHOD_COVERAGE_THRESHOLD"
+        - php Tests/coverage-checker.php "line" "95" "Content"
     artifacts:
         name: coverage-report
         expire_in: 7 days

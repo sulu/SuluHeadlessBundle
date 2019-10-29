@@ -18,8 +18,8 @@ use Prophecy\Argument;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\HeadlessBundle\Content\ContentResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentResolverInterface;
+use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\ContentTypeResolverInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
-use Sulu\Bundle\HeadlessBundle\Content\Resolver\ContentTypeResolverInterface;
 use Sulu\Component\Content\Compat\PropertyInterface;
 
 class ContentResolverTest extends TestCase

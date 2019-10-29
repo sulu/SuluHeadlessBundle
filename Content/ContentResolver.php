@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Content;
 
-use Sulu\Bundle\HeadlessBundle\Content\Resolver\ContentTypeResolverInterface;
+use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\ContentTypeResolverInterface;
 use Sulu\Component\Content\Compat\PropertyInterface;
 
 class ContentResolver implements ContentResolverInterface
