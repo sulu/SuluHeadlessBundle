@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Controller;
 
 use JMS\Serializer\SerializerInterface;
+use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializer;
 use Sulu\Bundle\WebsiteBundle\Navigation\NavigationMapperInterface;
 use Sulu\Component\Rest\ListBuilder\CollectionRepresentation;
 use Sulu\Component\Rest\RequestParametersTrait;
@@ -36,10 +37,19 @@ class NavigationController
      */
     private $serializer;
 
-    public function __construct(NavigationMapperInterface $navigationMapper, SerializerInterface $serializer)
-    {
+    /**
+     * @var MediaSerializer
+     */
+    private $mediaSerializer;
+
+    public function __construct(
+        NavigationMapperInterface $navigationMapper,
+        SerializerInterface $serializer,
+        MediaSerializer $mediaSerializer
+    ) {
         $this->navigationMapper = $navigationMapper;
         $this->serializer = $serializer;
+        $this->mediaSerializer = $mediaSerializer;
     }
 
     public function getAction(Request $request, string $context): Response
@@ -54,10 +64,12 @@ class NavigationController
         $uuid = $request->query->get('uuid');
         $depth = (int) $this->getRequestParameter($request, 'depth', false, 1);
         $flat = $this->getBooleanRequestParameter($request, 'flat', false, false);
-
         $excerpt = $this->getBooleanRequestParameter($request, 'excerpt', false, false);
 
         $navigation = $this->loadNavigation($webspace->getKey(), $locale, $depth, $flat, $context, $excerpt, $uuid);
+
+        // need to serialize the media entities inside the excerpt to keep the media serialization consistent
+        $navigation = $this->serializeExcerptMedia($navigation);
 
         return new Response(
             $this->serializer->serialize(
@@ -103,5 +115,31 @@ class NavigationController
             $context,
             $excerpt
         );
+    }
+
+    /**
+     * @param mixed[] $navigation
+     *
+     * @return mixed[]
+     */
+    private function serializeExcerptMedia(array $navigation): array
+    {
+        foreach ($navigation as $itemIndex => $navigationItem) {
+            if (\array_key_exists('excerpt', $navigationItem)) {
+                foreach ($navigationItem['excerpt']['icon'] as $iconIndex => $iconMedia) {
+                    $navigation[$itemIndex]['excerpt']['icon'][$iconIndex] = $this->mediaSerializer->serialize(
+                        $iconMedia
+                    );
+                }
+
+                foreach ($navigationItem['excerpt']['images'] as $imageIndex => $imageMedia) {
+                    $navigation[$itemIndex]['excerpt']['images'][$imageIndex] = $this->mediaSerializer->serialize(
+                        $imageMedia
+                    );
+                }
+            }
+        }
+
+        return $navigation;
     }
 }

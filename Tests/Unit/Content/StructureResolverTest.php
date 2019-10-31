@@ -59,8 +59,11 @@ class StructureResolverTest extends TestCase
     public function testResolve(): void
     {
         $now = new \DateTimeImmutable();
+        $parentStructure = $this->prophesize(StructureBridge::class);
+        $parentStructure->getUuid()->willReturn('parent-id');
 
         $this->structure->getUuid()->willReturn('123-123-123');
+        $this->structure->getParent()->willReturn($parentStructure->reveal());
         $this->structure->getWebspaceKey()->willReturn('sulu_io');
         $this->structure->getLanguageCode()->willReturn('en');
 
@@ -107,6 +110,7 @@ class StructureResolverTest extends TestCase
         $this->assertSame(
             [
                 'id' => '123-123-123',
+                'parentId' => 'parent-id',
                 'type' => 'page',
                 'template' => 'default',
                 'content' => [

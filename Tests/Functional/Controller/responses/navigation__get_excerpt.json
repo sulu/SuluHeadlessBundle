@@ -60,7 +60,38 @@
                     "categories": [],
                     "audience_targeting_groups": [],
                     "tags": [],
-                    "icon": [],
+                    "icon": [
+                        {
+                            "id": "@integer@",
+                            "locale": "de",
+                            "collection": "@integer@",
+                            "size": "@integer@",
+                            "mimeType": "image/png",
+                            "title": "Test Image",
+                            "description": "",
+                            "version": 1,
+                            "subVersion": 0,
+                            "name": "test-image.png",
+                            "type": {
+                                "name": "image",
+                                "id": 2
+                            },
+                            "isImage": true,
+                            "isVideo": false,
+                            "isAudio": false,
+                            "isDocument": false,
+                            "publishLanguages": [],
+                            "contentLanguages": [],
+                            "tags": [],
+                            "url": "@string@",
+                            "changed": "@string@.isDateTime()",
+                            "created": "@string@.isDateTime()",
+                            "properties": [],
+                            "categories": [],
+                            "targetGroups": [ ],
+                            "formatUri": "@string@"
+                        }
+                    ],
                     "images": []
                 },
                 "children": []
