@@ -14,12 +14,16 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Tests\Functional\Controller;
 
 use Sulu\Bundle\HeadlessBundle\Tests\Functional\BaseTestCase;
+use Sulu\Bundle\HeadlessBundle\Tests\Traits\CreateMediaTrait;
 use Sulu\Bundle\HeadlessBundle\Tests\Traits\CreatePageTrait;
+use Sulu\Bundle\MediaBundle\DataFixtures\ORM\LoadCollectionTypes;
+use Sulu\Bundle\MediaBundle\DataFixtures\ORM\LoadMediaTypes;
 use Symfony\Component\HttpFoundation\Response;
 
 class NavigationControllerTest extends BaseTestCase
 {
     use CreatePageTrait;
+    use CreateMediaTrait;
 
     /**
      * @var string
@@ -29,6 +33,16 @@ class NavigationControllerTest extends BaseTestCase
     public static function setUpBeforeClass(): void
     {
         self::initPhpcr();
+
+        // create collection types and media types
+        $collectionTypeFixture = new LoadCollectionTypes();
+        $collectionTypeFixture->load(self::getEntityManager());
+        $mediaTypeFixture = new LoadMediaTypes();
+        $mediaTypeFixture->load(self::getEntityManager());
+
+        $collection = self::createCollection('Test Collection', 'de');
+        $media = self::createMedia('Test Image', $collection, 'de');
+        self::getEntityManager()->flush();
 
         self::$page1Uuid = self::createPage([
             'title' => 'Test 1',
@@ -43,6 +57,11 @@ class NavigationControllerTest extends BaseTestCase
             'url' => '/test-2',
             'navigationContexts' => [
                 'main',
+            ],
+            'excerpt' => [
+                'icon' => [
+                    'ids' => [$media->getId()],
+                ],
             ],
         ]);
 

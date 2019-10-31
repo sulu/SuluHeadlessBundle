@@ -10,6 +10,7 @@
         >
             <argument type="service" id="sulu_website.navigation_mapper"/>
             <argument type="service" id="jms_serializer.serializer"/>
+            <argument type="service" id="sulu_headless.serializer.media"/>
         </service>
     </services>
 </container>

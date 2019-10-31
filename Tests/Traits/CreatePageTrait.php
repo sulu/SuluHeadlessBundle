@@ -41,10 +41,18 @@ trait CreatePageTrait
             throw new \RuntimeException('Expected a title as string is given.');
         }
 
+        $extensionData = [
+            'seo' => $data['seo'] ?? [],
+            'excerpt' => $data['excerpt'] ?? [],
+        ];
+        unset($data['excerpt']);
+        unset($data['seo']);
+
         $document->setLocale($locale);
         $document->setTitle($data['title']);
         $document->setStructureType($data['template'] ?? 'default');
         $document->setResourceSegment($data['url'] ?? '/' . strtolower($data['title']));
+        $document->setExtensionsData($extensionData);
 
         if ($data['published'] ?? true) {
             $document->setWorkflowStage(WorkflowStage::PUBLISHED);
