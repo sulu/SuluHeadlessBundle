@@ -12,7 +12,7 @@ function findClickedAnchorElement(clickTarget) {
 /**
  * This function is responsible for calling the respective functions of the router instead of navigating the browser
  * when an anchor that points to the current host is clicked.
- * It must be registered as an event listener on the document.
+ * It should be registered as clock handler on the outermost react element.
  */
 export default (clickEvent) => {
     // Do not call router if the default was already prevented by another listener
