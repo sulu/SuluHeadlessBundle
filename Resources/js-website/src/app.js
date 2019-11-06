@@ -10,11 +10,13 @@ function startApp(container, rootComponent) {
     const appContainer = container || document.getElementById('sulu-headless-container');
     const RootComponent = rootComponent || ViewRenderer;
 
-    document.addEventListener('click', interceptAnchorClick);
-    ReactDOM.render(
-        <RootComponent/>,
-        appContainer
+    const appElement = (
+        <div onClick={interceptAnchorClick}>
+            <RootComponent/>,
+        </div>
     );
+
+    ReactDOM.render(appElement, appContainer);
 }
 
 export {

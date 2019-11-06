@@ -70,10 +70,7 @@ class HeadlessWebsiteController extends AbstractController
         $viewTemplate = $structure->getView() . '.' . $requestFormat . '.twig';
 
         if (!$this->get('twig')->getLoader()->exists($viewTemplate)) {
-            throw new HttpException(
-                406,
-                sprintf('Page does not exist in "%s" format.', $requestFormat)
-            );
+            throw new HttpException(406, sprintf('Page does not exist in "%s" format.', $requestFormat));
         }
 
         if ($preview) {
