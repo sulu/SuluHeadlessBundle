@@ -19,6 +19,7 @@ use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializer;
 use Sulu\Bundle\MediaBundle\Api\Media;
 use Sulu\Bundle\MediaBundle\Media\FormatCache\FormatCacheInterface;
+use Sulu\Bundle\MediaBundle\Media\ImageConverter\ImageConverterInterface;
 use Sulu\Component\Serializer\ArraySerializerInterface;
 
 class MediaSerializerTest extends TestCase
@@ -27,6 +28,11 @@ class MediaSerializerTest extends TestCase
      * @var ArraySerializerInterface|ObjectProphecy
      */
     private $arraySerializer;
+
+    /**
+     * @var ImageConverterInterface|ObjectProphecy
+     */
+    private $imageConverter;
 
     /**
      * @var FormatCacheInterface|ObjectProphecy
@@ -41,10 +47,12 @@ class MediaSerializerTest extends TestCase
     protected function setUp(): void
     {
         $this->arraySerializer = $this->prophesize(ArraySerializerInterface::class);
+        $this->imageConverter = $this->prophesize(ImageConverterInterface::class);
         $this->formatCache = $this->prophesize(FormatCacheInterface::class);
 
         $this->mediaSerializer = new MediaSerializer(
             $this->arraySerializer->reveal(),
+            $this->imageConverter->reveal(),
             $this->formatCache->reveal(),
         );
     }
@@ -53,7 +61,8 @@ class MediaSerializerTest extends TestCase
     {
         $media1 = $this->prophesize(Media::class);
         $media1->getId()->willReturn(1);
-        $media1->getName()->willReturn('media-1');
+        $media1->getName()->willReturn('media-1.png');
+        $media1->getMimeType()->willReturn('image/png');
         $media1->getVersion()->willReturn(1);
         $media1->getSubVersion()->willReturn(0);
 
@@ -67,7 +76,9 @@ class MediaSerializerTest extends TestCase
             '_hash' => [],
         ]);
 
-        $this->formatCache->getMediaUrl(1, 'media-1', '{format}', 1, 0)
+        $this->imageConverter->getSupportedOutputImageFormats('image/png')->willReturn(['jpg']);
+
+        $this->formatCache->getMediaUrl(1, 'media-1.jpg', '{format}', 1, 0)
             ->willReturn('/media/1/{format}/media-1.jpg?v=1-0');
 
         $result = $this->mediaSerializer->serialize($media1->reveal());
@@ -82,7 +93,8 @@ class MediaSerializerTest extends TestCase
     {
         $media1 = $this->prophesize(Media::class);
         $media1->getId()->willReturn(1);
-        $media1->getName()->willReturn('media-1');
+        $media1->getName()->willReturn('media-1.png');
+        $media1->getMimeType()->willReturn('image/png');
         $media1->getVersion()->willReturn(1);
         $media1->getSubVersion()->willReturn(0);
 
@@ -98,14 +110,16 @@ class MediaSerializerTest extends TestCase
             '_hash' => [],
         ]);
 
-        $this->formatCache->getMediaUrl(1, 'media-1', '{format}', 1, 0)
-            ->willReturn('/media/1/{format}/media-1.jpg?v=1-0');
+        $this->imageConverter->getSupportedOutputImageFormats('image/png')->willReturn([]);
+
+        $this->formatCache->getMediaUrl(1, 'media-1.png', '{format}', 1, 0)
+            ->willReturn('/media/1/{format}/media-1.png?v=1-0');
 
         $result = $this->mediaSerializer->serialize($media1->reveal(), $context->reveal());
 
         $this->assertSame([
             'id' => 1,
-            'formatUri' => '/media/1/{format}/media-1.jpg?v=1-0',
+            'formatUri' => '/media/1/{format}/media-1.png?v=1-0',
         ], $result);
     }
 }

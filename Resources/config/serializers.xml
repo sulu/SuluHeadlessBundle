@@ -8,6 +8,7 @@
             class="Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializer"
         >
             <argument type="service" id="sulu_core.array_serializer"/>
+            <argument type="service" id="sulu_media.image.converter"/>
             <argument type="service" id="sulu_media.format_cache"/>
         </service>
     </services>
