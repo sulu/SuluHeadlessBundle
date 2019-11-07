@@ -6,8 +6,6 @@
                 "uuid": "@uuid@",
                 "nodeType": 1,
                 "path": "\/test-1",
-                "changed": "@string@.isDateTime()",
-                "created": "@string@.isDateTime()",
                 "publishedState": true,
                 "published": "@string@.isDateTime()",
                 "title": "Test 1",
@@ -19,7 +17,12 @@
                 "urls": {
                     "de": "\/test-1"
                 },
+                "author": null,
                 "authored": "@string@.isDateTime()",
+                "changer": null,
+                "changed": "@string@.isDateTime()",
+                "creator": null,
+                "created": "@string@.isDateTime()",
                 "order": 20,
                 "children": []
             },
@@ -28,8 +31,6 @@
                 "uuid": "@uuid@",
                 "nodeType": 1,
                 "path": "\/test-2",
-                "changed": "@string@.isDateTime()",
-                "created": "@string@.isDateTime()",
                 "publishedState": true,
                 "published": "@string@.isDateTime()",
                 "title": "Test 2",
@@ -41,7 +42,12 @@
                 "urls": {
                     "de": "\/test-2"
                 },
+                "author": null,
                 "authored": "@string@.isDateTime()",
+                "changer": null,
+                "changed": "@string@.isDateTime()",
+                "creator": null,
+                "created": "@string@.isDateTime()",
                 "order": 30,
                 "children": []
             }

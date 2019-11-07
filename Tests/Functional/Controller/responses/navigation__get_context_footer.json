@@ -6,8 +6,6 @@
                 "uuid": "@uuid@",
                 "nodeType": 1,
                 "path": "\/test-3",
-                "changed": "@string@.isDateTime()",
-                "created": "@string@.isDateTime()",
                 "publishedState": true,
                 "published": "@string@.isDateTime()",
                 "title": "Test 3",
@@ -19,7 +17,12 @@
                 "urls": {
                     "de": "\/test-3"
                 },
+                "author": null,
                 "authored": "@string@.isDateTime()",
+                "changer": null,
+                "changed": "@string@.isDateTime()",
+                "creator": null,
+                "created": "@string@.isDateTime()",
                 "order": 40,
                 "children": []
             }

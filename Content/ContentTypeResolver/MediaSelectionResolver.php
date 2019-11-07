@@ -15,6 +15,7 @@ namespace Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver;
 
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializer;
+use Sulu\Bundle\MediaBundle\Api\Media;
 use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
 use Sulu\Component\Content\Compat\PropertyInterface;
 
@@ -45,13 +46,34 @@ class MediaSelectionResolver implements ContentTypeResolverInterface
 
     public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView
     {
-        $medias = $this->mediaManager->getByIds($data['ids'], $locale);
+        if (null === $data) {
+            return new ContentView([]);
+        }
 
+        if (0 < \count($data) && \array_key_exists(0, $data) && $data[0] instanceof Media) {
+            // we do not need to load the media entities if they are already loaded
+            // this happens for example when resolving a smart-content property that uses the page provider
+
+            return new ContentView($this->resolveApiMedias($data));
+        }
+
+        $medias = $this->mediaManager->getByIds($data['ids'] ?? [], $locale);
+
+        return new ContentView($this->resolveApiMedias($medias), $data ?? []);
+    }
+
+    /**
+     * @param Media[] $medias
+     *
+     * @return array[]
+     */
+    private function resolveApiMedias(array $medias): array
+    {
         $content = [];
         foreach ($medias as $media) {
             $content[] = $this->mediaSerializer->serialize($media);
         }
 
-        return new ContentView($content, $data);
+        return $content;
     }
 }

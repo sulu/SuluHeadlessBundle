@@ -13,7 +13,10 @@
         "article": []
     },
     "extension": [],
+    "author": null,
     "authored": "@string@.isDateTime()",
+    "changer": null,
     "changed": "@string@.isDateTime()",
+    "creator": null,
     "created": "@string@.isDateTime()"
 }
