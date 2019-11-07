@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Controller;
 
+use JMS\Serializer\SerializationContext;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
 use Sulu\Bundle\PreviewBundle\Preview\Preview;
 use Sulu\Component\Content\Compat\PageInterface;
@@ -99,7 +100,11 @@ class HeadlessWebsiteController extends AbstractController
      */
     protected function serializeData(array $data): string
     {
-        return $this->get('jms_serializer')->serialize($data, 'json');
+        return $this->get('jms_serializer')->serialize(
+            $data,
+            'json',
+            (new SerializationContext())->setSerializeNull(true)
+        );
     }
 
     public static function getSubscribedServices()

@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Controller;
 
+use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializer;
 use Sulu\Bundle\WebsiteBundle\Navigation\NavigationMapperInterface;
@@ -74,7 +75,8 @@ class NavigationController
         return new Response(
             $this->serializer->serialize(
                 new CollectionRepresentation($navigation, 'items'),
-                'json'
+                'json',
+                (new SerializationContext())->setSerializeNull(true)
             ),
             200,
             [
