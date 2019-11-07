@@ -1,6 +1,5 @@
 {
     "id": "@uuid@",
-    "parentId": "@uuid@",
     "type": "page",
     "template": "default",
     "content": {

@@ -37,15 +37,11 @@ class StructureResolver implements StructureResolverInterface
         /** @var BasePageDocument $document */
         $document = $structure->getDocument();
 
-        /** @var StructureBridge|null $parent */
-        $parent = $structure->getParent();
-
         /** @var \DateTimeInterface $authored */
         $authored = $document->getAuthored();
 
         $data = [
             'id' => $structure->getUuid(),
-            'parentId' => $parent ? $parent->getUuid() : null,
             'type' => 'page',
             'template' => $document->getStructureType(),
             'content' => [],
