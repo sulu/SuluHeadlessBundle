@@ -12,7 +12,7 @@ function startApp(container, rootComponent) {
 
     const appElement = (
         <div onClick={interceptAnchorClick}>
-            <RootComponent/>,
+            <RootComponent/>
         </div>
     );
 
