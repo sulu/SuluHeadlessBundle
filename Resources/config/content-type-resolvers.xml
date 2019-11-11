@@ -4,6 +4,16 @@
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
     <services>
         <service
+        id="sulu_headless.content_resolver.category_selection"
+        class="Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\CategorySelectionResolver"
+        >
+            <argument type="service" id="sulu_category.category_manager"/>
+            <argument type="service" id="sulu_headless.serializer.category"/>
+
+            <tag name="sulu_headless.content_type_resolver"/>
+        </service>
+
+        <service
             id="sulu_headless.content_resolver.media_selection"
             class="Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\MediaSelectionResolver"
         >
