@@ -11,5 +11,13 @@
             <argument type="service" id="sulu_media.image.converter"/>
             <argument type="service" id="sulu_media.format_cache"/>
         </service>
+
+        <service
+            id="sulu_headless.serializer.category"
+            class="Sulu\Bundle\HeadlessBundle\Content\Serializer\CategorySerializer"
+        >
+            <argument type="service" id="sulu_core.array_serializer"/>
+            <argument type="service" id="sulu_headless.serializer.media"/>
+        </service>
     </services>
 </container>
