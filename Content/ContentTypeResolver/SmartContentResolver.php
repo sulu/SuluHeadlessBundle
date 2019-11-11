@@ -229,7 +229,7 @@ class SmartContentResolver implements ContentTypeResolverInterface
             throw new PageOutOfBoundsException($page);
         }
 
-        return $page;
+        return (int) $page;
     }
 
     /**
