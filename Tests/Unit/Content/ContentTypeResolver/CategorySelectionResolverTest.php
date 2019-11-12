@@ -11,7 +11,7 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\DataProviderResolver;
+namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
 
 use JMS\Serializer\SerializationContext;
 use PHPUnit\Framework\TestCase;
@@ -25,7 +25,7 @@ use Sulu\Bundle\HeadlessBundle\Content\Serializer\CategorySerializer;
 use Sulu\Bundle\MediaBundle\Api\Media;
 use Sulu\Component\Content\Compat\PropertyInterface;
 
-class CategoryResolverTest extends TestCase
+class CategorySelectionResolverTest extends TestCase
 {
     /**
      * @var CategoryManagerInterface|ObjectProphecy

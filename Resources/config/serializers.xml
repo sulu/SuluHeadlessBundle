@@ -4,6 +4,26 @@
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
     <services>
         <service
+            id="sulu_headless.serializer.account"
+            class="Sulu\Bundle\HeadlessBundle\Content\Serializer\AccountSerializer"
+        >
+            <argument type="service" id="sulu_core.array_serializer"/>
+            <argument type="service" id="sulu_headless.serializer.media"/>
+            <argument type="service" id="sulu_media.media_manager"/>
+        </service>
+
+        <service
+            id="sulu_headless.serializer.contact"
+            class="Sulu\Bundle\HeadlessBundle\Content\Serializer\ContactSerializer"
+        >
+            <argument type="service" id="sulu_core.array_serializer"/>
+            <argument type="service" id="sulu_media.media_manager"/>
+            <argument type="service" id="sulu_headless.serializer.media"/>
+            <argument type="service" id="sulu_contact.contact_title_repository"/>
+            <argument type="service" id="sulu_contact.position_repository"/>
+        </service>
+
+        <service
             id="sulu_headless.serializer.media"
             class="Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializer"
         >
