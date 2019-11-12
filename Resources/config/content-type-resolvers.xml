@@ -4,6 +4,18 @@
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
     <services>
         <service
+            id="sulu_headless.content_resolver.contact_account_selection"
+            class="Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\ContactAccountSelectionResolver"
+        >
+            <argument type="service" id="sulu_contact.contact_manager"/>
+            <argument type="service" id="sulu_contact.account_manager"/>
+            <argument type="service" id="sulu_headless.serializer.contact"/>
+            <argument type="service" id="sulu_headless.serializer.account"/>
+
+            <tag name="sulu_headless.content_type_resolver"/>
+        </service>
+
+        <service
         id="sulu_headless.content_resolver.category_selection"
         class="Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\CategorySelectionResolver"
         >
