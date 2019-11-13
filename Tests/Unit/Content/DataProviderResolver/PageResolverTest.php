@@ -15,13 +15,9 @@ namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\DataProviderResolver;
 
 use PHPUnit\Framework\TestCase;
 use Prophecy\Prophecy\ObjectProphecy;
-use Sulu\Bundle\HeadlessBundle\Content\ContentResolverInterface;
-use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver\PageResolver;
-use Sulu\Component\Content\Compat\PropertyInterface;
+use Sulu\Bundle\HeadlessBundle\Content\Serializer\PageSerializer;
 use Sulu\Component\Content\Compat\PropertyParameter;
-use Sulu\Component\Content\Compat\StructureInterface;
-use Sulu\Component\Content\Compat\StructureManagerInterface;
 use Sulu\Component\Content\SmartContent\PageDataProvider;
 use Sulu\Component\SmartContent\ArrayAccessItem;
 use Sulu\Component\SmartContent\Configuration\ProviderConfigurationInterface;
@@ -35,34 +31,9 @@ class PageResolverTest extends TestCase
     private $pageDataProvider;
 
     /**
-     * @var StructureManagerInterface|ObjectProphecy
+     * @var PageSerializer|ObjectProphecy
      */
-    private $structureManager;
-
-    /**
-     * @var ContentResolverInterface|ObjectProphecy
-     */
-    private $contentResolver;
-
-    /**
-     * @var StructureInterface|ObjectProphecy
-     */
-    private $defaultStructure;
-
-    /**
-     * @var StructureInterface|ObjectProphecy
-     */
-    private $excerptStructure;
-
-    /**
-     * @var PropertyInterface|ObjectProphecy
-     */
-    private $defaultTitleProperty;
-
-    /**
-     * @var PropertyInterface|ObjectProphecy
-     */
-    private $excerptTitleProperty;
+    private $pageSerializer;
 
     /**
      * @var PageResolver
@@ -72,26 +43,12 @@ class PageResolverTest extends TestCase
     protected function setUp(): void
     {
         $this->pageDataProvider = $this->prophesize(PageDataProvider::class);
-        $this->structureManager = $this->prophesize(StructureManagerInterface::class);
-        $this->contentResolver = $this->prophesize(ContentResolverInterface::class);
+        $this->pageSerializer = $this->prophesize(PageSerializer::class);
 
         $this->pageResolver = new PageResolver(
             $this->pageDataProvider->reveal(),
-            $this->structureManager->reveal(),
-            $this->contentResolver->reveal()
+            $this->pageSerializer->reveal(),
         );
-
-        $this->defaultStructure = $this->prophesize(StructureInterface::class);
-        $this->excerptStructure = $this->prophesize(StructureInterface::class);
-
-        $this->defaultTitleProperty = $this->prophesize(PropertyInterface::class);
-        $this->defaultStructure->getProperty('title')->willReturn($this->defaultTitleProperty->reveal());
-
-        $this->excerptTitleProperty = $this->prophesize(PropertyInterface::class);
-        $this->excerptStructure->getProperty('title')->willReturn($this->excerptTitleProperty->reveal());
-
-        $this->structureManager->getStructure('default')->willReturn($this->defaultStructure->reveal());
-        $this->structureManager->getStructure('excerpt')->willReturn($this->excerptStructure->reveal());
     }
 
     public function testGetContentType(): void
@@ -118,16 +75,15 @@ class PageResolverTest extends TestCase
     public function testResolve(): void
     {
         $item = $this->prophesize(ArrayAccessItem::class);
-        $item->jsonSerialize()->willReturn(
-            [
-                'id' => '123-123-123',
-                'template' => 'default',
-                'locale' => 'de',
-                'webspaceKey' => 'sulu_io',
-                'contentTitle' => 'This is a title',
-                'excerptTitle' => 'This is a excerpt title',
-            ]
-        );
+        $jsonData = [
+            'id' => '123-123-123',
+            'template' => 'default',
+            'locale' => 'de',
+            'webspaceKey' => 'sulu_io',
+            'contentTitle' => 'This is a title',
+            'excerptTitle' => 'This is a excerpt title',
+        ];
+        $item->jsonSerialize()->willReturn($jsonData);
 
         $providerResult = $this->prophesize(DataProviderResult::class);
         $providerResult->getHasNextPage()->willReturn(true);
@@ -144,21 +100,14 @@ class PageResolverTest extends TestCase
         $this->pageDataProvider->resolveResourceItems([], ['properties' => $properties], [], 10, 1, 5)
             ->willReturn($providerResult->reveal());
 
-        $this->defaultTitleProperty->setValue('This is a title')->shouldBeCalled();
-        $this->contentResolver->resolve(
-            'This is a title',
-            $this->defaultTitleProperty->reveal(),
-            'de',
-            ['webspaceKey' => 'sulu_io']
-        )->shouldBeCalled()->willReturn(new ContentView('This is another title'));
-
-        $this->excerptTitleProperty->setValue('This is a excerpt title')->shouldBeCalled();
-        $this->contentResolver->resolve(
-            'This is a excerpt title',
-            $this->excerptTitleProperty->reveal(),
-            'de',
-            ['webspaceKey' => 'sulu_io']
-        )->shouldBeCalled()->willReturn(new ContentView('This is another excerpt title'));
+        $this->pageSerializer->serialize($jsonData, $properties->getValue())->willReturn([
+            'id' => '123-123-123',
+            'template' => 'default',
+            'locale' => 'de',
+            'webspaceKey' => 'sulu_io',
+            'contentTitle' => 'This is another title',
+            'excerptTitle' => 'This is another excerpt title',
+        ]);
 
         $result = $this->pageResolver->resolve([], ['properties' => $properties], [], 10, 1, 5);
 

@@ -13,11 +13,8 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver;
 
-use Sulu\Bundle\HeadlessBundle\Content\ContentResolverInterface;
-use Sulu\Bundle\HeadlessBundle\Content\ContentView;
+use Sulu\Bundle\HeadlessBundle\Content\Serializer\PageSerializer;
 use Sulu\Component\Content\Compat\PropertyParameter;
-use Sulu\Component\Content\Compat\StructureInterface;
-use Sulu\Component\Content\Compat\StructureManagerInterface;
 use Sulu\Component\Content\SmartContent\PageDataProvider;
 use Sulu\Component\SmartContent\ArrayAccessItem;
 use Sulu\Component\SmartContent\Configuration\ProviderConfigurationInterface;
@@ -35,23 +32,16 @@ class PageResolver implements DataProviderResolverInterface
     private $pageDataProvider;
 
     /**
-     * @var StructureManagerInterface
+     * @var PageSerializer
      */
-    private $structureManager;
-
-    /**
-     * @var ContentResolverInterface
-     */
-    private $contentResolver;
+    private $pageSerializer;
 
     public function __construct(
         PageDataProvider $pageDataProvider,
-        StructureManagerInterface $structureManager,
-        ContentResolverInterface $contentResolver
+        PageSerializer $pageSerializer
     ) {
         $this->pageDataProvider = $pageDataProvider;
-        $this->structureManager = $structureManager;
-        $this->contentResolver = $contentResolver;
+        $this->pageSerializer = $pageSerializer;
     }
 
     public function getProviderConfiguration(): ProviderConfigurationInterface
@@ -96,73 +86,9 @@ class PageResolver implements DataProviderResolverInterface
 
         /** @var ArrayAccessItem $providerItem */
         foreach ($providerResult->getItems() as $providerItem) {
-            $items[] = $this->resolveProviderItem($providerItem, $properties);
+            $items[] = $this->pageSerializer->serialize($providerItem->jsonSerialize(), $properties);
         }
 
         return new DataProviderResult($items, $providerResult->getHasNextPage());
-    }
-
-    /**
-     * @param PropertyParameter[] $parameterProperties
-     *
-     * @return array[]
-     */
-    private function resolveProviderItem(ArrayAccessItem $providerItem, array $parameterProperties): array
-    {
-        $data = $providerItem->jsonSerialize();
-        $structure = $this->structureManager->getStructure($data['template']);
-        $excerpt = $this->structureManager->getStructure('excerpt');
-
-        foreach ($parameterProperties as $parameterProperty) {
-            /** @var string $targetPropertyName */
-            $targetPropertyName = $parameterProperty->getName();
-
-            /** @var string $propertyName */
-            $propertyName = $parameterProperty->getValue();
-
-            $propertyValue = $data[$targetPropertyName] ?? null;
-            if (null === $propertyValue) {
-                continue;
-            }
-
-            $locale = $data['locale'];
-            $webspaceKey = $data['webspaceKey'];
-
-            if (false !== strpos($propertyName, '.')) {
-                // the '.' is used to separate the extension from the property name.
-                $propertyName = explode('.', $propertyName)[1];
-
-                $contentView = $this->resolveProperty($excerpt, $propertyName, $locale, $webspaceKey, $propertyValue);
-                $data[$targetPropertyName] = $contentView->getContent();
-
-                continue;
-            }
-
-            $contentView = $this->resolveProperty($structure, $propertyName, $locale, $webspaceKey, $propertyValue);
-            $data[$targetPropertyName] = $contentView->getContent();
-        }
-
-        return $data;
-    }
-
-    /**
-     * @param mixed $value
-     */
-    private function resolveProperty(
-        StructureInterface $structure,
-        string $name,
-        string $locale,
-        string $webspaceKey,
-        $value
-    ): ContentView {
-        $property = $structure->getProperty($name);
-        $property->setValue($value);
-
-        return $this->contentResolver->resolve(
-            $value,
-            $property,
-            $locale,
-            ['webspaceKey' => $webspaceKey]
-        );
     }
 }

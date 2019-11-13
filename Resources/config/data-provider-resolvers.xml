@@ -18,8 +18,7 @@
             class="Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver\PageResolver"
         >
             <argument type="service" id="sulu_page.smart_content.data_provider.content"/>
-            <argument type="service" id="sulu.content.structure_manager"/>
-            <argument type="service" id="sulu_headless.content_resolver"/>
+            <argument type="service" id="sulu_headless.serializer.page"/>
 
             <tag name="sulu_headless.data_provider_resolver"/>
         </service>

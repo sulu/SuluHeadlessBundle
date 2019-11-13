@@ -4,6 +4,17 @@
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
     <services>
         <service
+            id="sulu_headless.content_resolver.page_selection"
+            class="Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\PageSelectionResolver"
+            lazy="true"
+        >
+            <argument type="service" id="sulu_headless.serializer.page"/>
+            <argument type="service" id="sulu_headless.content_resolver.page_selection_container_factory"/>
+
+            <tag name="sulu_headless.content_type_resolver"/>
+        </service>
+
+        <service
             id="sulu_headless.content_resolver.contact_account_selection"
             class="Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\ContactAccountSelectionResolver"
         >
@@ -16,8 +27,8 @@
         </service>
 
         <service
-        id="sulu_headless.content_resolver.category_selection"
-        class="Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\CategorySelectionResolver"
+            id="sulu_headless.content_resolver.category_selection"
+            class="Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\CategorySelectionResolver"
         >
             <argument type="service" id="sulu_category.category_manager"/>
             <argument type="service" id="sulu_headless.serializer.category"/>
