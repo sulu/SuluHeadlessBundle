@@ -41,6 +41,12 @@ export default (clickEvent) => {
         return;
     }
 
+    // Execute default action if pathname of the anchor is registered as external pathname
+    const externalPathnames = window.SULU_HEADLESS_EXTERNAL_PATHNAMES || [];
+    if (externalPathnames.indexOf(clickedAnchor.pathname) !== -1) {
+        return;
+    }
+
     // Execute the default action if the target of the anchor is not empty or _self
     if (clickedAnchor.target && clickedAnchor.target !== '_self') {
         return;
