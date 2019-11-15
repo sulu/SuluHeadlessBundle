@@ -69,7 +69,7 @@ class PageSelectionContainerFactory
     public function createContainer(
         array $data,
         array $params,
-        string $webspaceKey,
+        ?string $webspaceKey,
         string $locale,
         ?bool $showDrafts = null
     ): PageSelectionContainer {

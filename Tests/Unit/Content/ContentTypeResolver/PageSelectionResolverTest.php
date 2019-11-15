@@ -22,7 +22,6 @@ use Sulu\Bundle\HeadlessBundle\Content\Serializer\PageSerializer;
 use Sulu\Bundle\PageBundle\Content\PageSelectionContainer;
 use Sulu\Component\Content\Compat\PropertyInterface;
 use Sulu\Component\Content\Compat\PropertyParameter;
-use Sulu\Component\Content\Compat\StructureInterface;
 
 class PageSelectionResolverTest extends TestCase
 {
@@ -72,13 +71,9 @@ class PageSelectionResolverTest extends TestCase
             ]),
         ];
         $property->getParams()->willReturn($params);
-        $structure = $this->prophesize(StructureInterface::class);
-        $property->getStructure()->willReturn($structure->reveal());
-        $structure->getWebspaceKey()->willReturn('sulu');
-        $structure->getLanguageCode()->willReturn('en');
 
         $container = $this->prophesize(PageSelectionContainer::class);
-        $this->pageSelectionContainerFactory->createContainer($data, $params, 'sulu', 'en')
+        $this->pageSelectionContainerFactory->createContainer($data, $params, 'sulu', $locale)
             ->willReturn($container->reveal());
 
         $pages = [
@@ -149,7 +144,7 @@ class PageSelectionResolverTest extends TestCase
             ]
         );
 
-        $result = $this->pageSelectionResolver->resolve($data, $property->reveal(), $locale);
+        $result = $this->pageSelectionResolver->resolve($data, $property->reveal(), $locale, ['webspaceKey' => 'sulu']);
 
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame(
