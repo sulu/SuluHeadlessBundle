@@ -55,8 +55,8 @@ class PageSelectionResolver implements ContentTypeResolverInterface
         $pagesData = $this->pageSelectionContainerFactory->createContainer(
             $data,
             $params,
-            $property->getStructure()->getWebspaceKey(),
-            $property->getStructure()->getLanguageCode()
+            $attributes['webspaceKey'] ?? null,
+            $locale
         )->getData();
 
         /** @var PropertyParameter[] $propertyParameters */
