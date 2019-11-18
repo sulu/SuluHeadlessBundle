@@ -147,4 +147,16 @@ class ContactAccountSelectionResolverTest extends TestCase
             $result->getView()
         );
     }
+
+    public function testResolveDataIsNull(): void
+    {
+        $locale = 'en';
+        $property = $this->prophesize(PropertyInterface::class);
+
+        $result = $this->contactAccountResolver->resolve(null, $property->reveal(), $locale);
+
+        $this->assertSame([], $result->getContent());
+
+        $this->assertSame([], $result->getView());
+    }
 }
