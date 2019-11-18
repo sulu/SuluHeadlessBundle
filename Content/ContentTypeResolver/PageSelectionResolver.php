@@ -45,6 +45,10 @@ class PageSelectionResolver implements ContentTypeResolverInterface
 
     public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView
     {
+        if (null === $data) {
+            return new ContentView([]);
+        }
+
         /** @var PropertyParameter[] $params */
         $params = array_merge(
             ['properties' => new PropertyParameter('properties', [], 'collection')],

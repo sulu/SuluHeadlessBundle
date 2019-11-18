@@ -191,4 +191,16 @@ class PageSelectionResolverTest extends TestCase
             $result->getView()
         );
     }
+
+    public function testResolveDataIsNull(): void
+    {
+        $locale = 'en';
+        $property = $this->prophesize(PropertyInterface::class);
+
+        $result = $this->pageSelectionResolver->resolve(null, $property->reveal(), $locale);
+
+        $this->assertSame([], $result->getContent());
+
+        $this->assertSame([], $result->getView());
+    }
 }
