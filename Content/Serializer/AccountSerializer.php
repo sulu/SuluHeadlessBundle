@@ -54,6 +54,11 @@ class AccountSerializer
 
         unset($accountData['_hash']);
 
+        $note = $account->getNote();
+        if ($note) {
+            $accountData['note'] = $note;
+        }
+
         if (null !== $account->getLogo()) {
             /** @var mixed[] $logoData */
             $logoData = $account->getLogo();

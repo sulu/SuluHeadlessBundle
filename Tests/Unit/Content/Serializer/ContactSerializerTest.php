@@ -81,6 +81,7 @@ class ContactSerializerTest extends TestCase
     {
         $locale = 'en';
         $contact = $this->prophesize(Contact::class);
+        $contact->getNote()->willReturn('test-note');
         $contact->getAvatar()->willReturn([
             'id' => 2,
             'url' => '/media/2/download/sulu.png?v=1',
@@ -134,6 +135,7 @@ class ContactSerializerTest extends TestCase
                 'id' => 2,
                 'formatUri' => '/media/2/{format}/media-2.jpg?v=1-0',
             ],
+            'note' => 'test-note',
         ], $result);
     }
 
@@ -141,6 +143,7 @@ class ContactSerializerTest extends TestCase
     {
         $locale = 'en';
         $contact = $this->prophesize(Contact::class);
+        $contact->getNote()->willReturn(null);
         $contact->getAvatar()->willReturn([
             'id' => 2,
             'url' => '/media/2/download/sulu.png?v=1',
@@ -203,6 +206,7 @@ class ContactSerializerTest extends TestCase
     {
         $locale = 'en';
         $contact = $this->prophesize(Contact::class);
+        $contact->getNote()->willReturn(null);
         $contact->getAvatar()->willReturn(null);
 
         $context = $this->prophesize(SerializationContext::class);

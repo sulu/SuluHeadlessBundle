@@ -70,6 +70,11 @@ class ContactSerializer
 
         unset($contactData['_hash']);
 
+        $note = $contact->getNote();
+        if ($note) {
+            $contactData['note'] = $note;
+        }
+
         if (isset($contactData['title'])) {
             $contactData['title'] = $this->contactTitleRepository->find($contactData['title'])->getTitle();
         }
