@@ -63,6 +63,7 @@ class AccountSerializerTest extends TestCase
     {
         $locale = 'en';
         $account = $this->prophesize(Account::class);
+        $account->getNote()->willReturn('test-note');
         $account->getLogo()->willReturn([
             'id' => 1,
             'url' => '/media/2/download/sulu.png?v=1',
@@ -104,6 +105,7 @@ class AccountSerializerTest extends TestCase
                 'id' => 2,
                 'formatUri' => '/media/2/{format}/media-2.jpg?v=1-0',
             ],
+            'note' => 'test-note',
         ], $result);
     }
 
@@ -111,6 +113,7 @@ class AccountSerializerTest extends TestCase
     {
         $locale = 'en';
         $account = $this->prophesize(Account::class);
+        $account->getNote()->willReturn(null);
         $account->getLogo()->willReturn([
             'id' => 2,
             'url' => '/media/2/download/sulu.png?v=1',
@@ -161,6 +164,7 @@ class AccountSerializerTest extends TestCase
     {
         $locale = 'en';
         $account = $this->prophesize(Account::class);
+        $account->getNote()->willReturn(null);
         $account->getLogo()->willReturn(null);
 
         $context = $this->prophesize(SerializationContext::class);
