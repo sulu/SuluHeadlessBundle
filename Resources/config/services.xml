@@ -12,6 +12,7 @@
             <argument>%sulu.context%</argument>
             <argument type="expression">container.hasParameter('sulu.preview') ? parameter('sulu.preview') : false</argument>
         </service>
+
         <service
             id="sulu_headless.structure_resolver"
             class="Sulu\Bundle\HeadlessBundle\Content\StructureResolver"
@@ -19,6 +20,7 @@
         >
             <argument type="service" id="sulu_headless.content_resolver"/>
         </service>
+        <service id="Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface" alias="sulu_headless.structure_resolver"/>
 
         <service
             id="sulu_headless.content_resolver"
@@ -27,5 +29,6 @@
         >
             <argument type="collection"/>
         </service>
+        <service id="Sulu\Bundle\HeadlessBundle\Content\ContentResolverInterface" alias="sulu_headless.content_resolver"/>
     </services>
 </container>

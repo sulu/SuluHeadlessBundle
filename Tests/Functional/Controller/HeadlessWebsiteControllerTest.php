@@ -28,6 +28,12 @@ class HeadlessWebsiteControllerTest extends BaseTestCase
         self::createPage([
             'title' => 'Test',
             'url' => '/test',
+            'seo' => [
+                'description' => 'seo-description',
+            ],
+            'excerpt' => [
+                'title' => 'excerpt-title',
+            ],
         ]);
     }
 
