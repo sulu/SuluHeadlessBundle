@@ -79,6 +79,19 @@ class StructureResolverTest extends TestCase
         $this->pageDocument->getCreator()->willReturn(2);
         $this->pageDocument->getChanged()->willReturn($now);
         $this->pageDocument->getChanger()->willReturn(3);
+        $this->pageDocument->getExtensionsData()->willReturn([
+            'seo' => [
+                'title' => 'seo-title',
+                'noIndex' => false,
+            ],
+            'excerpt' => [
+                'title' => 'excerpt-title',
+                'categories' => [1, 2, 3],
+                'tags' => [1, 2, 3],
+                'icon' => [1, 2, 3],
+                'images' => [1, 2, 3],
+            ],
+        ]);
 
         $titleProperty = $this->prophesize(PropertyInterface::class);
         $titleProperty->getName()->willReturn('title');
@@ -123,14 +136,23 @@ class StructureResolverTest extends TestCase
                 ],
                 'view' => [
                     'title' => [],
-                    'media' => ['ids' => [1, 2, 3]], ],
-                'extension' => [],
+                    'media' => ['ids' => [1, 2, 3]],
+                ],
                 'author' => 1,
                 'authored' => $now->format(\DateTimeImmutable::ISO8601),
                 'changer' => 3,
                 'changed' => $now->format(\DateTimeImmutable::ISO8601),
                 'creator' => 2,
                 'created' => $now->format(\DateTimeImmutable::ISO8601),
+                'extension' => [
+                    'seo' => [
+                        'title' => 'seo-title',
+                        'noIndex' => false,
+                    ],
+                    'excerpt' => [
+                        'title' => 'excerpt-title',
+                    ],
+                ],
             ],
             $this->structureResolver->resolve($this->structure->reveal(), 'en')
         );
@@ -154,6 +176,7 @@ class StructureResolverTest extends TestCase
         $this->homepageDocument->getCreator()->willReturn(2);
         $this->homepageDocument->getChanged()->willReturn($now);
         $this->homepageDocument->getChanger()->willReturn(3);
+        $this->homepageDocument->getExtensionsData()->willReturn([]);
 
         $titleProperty = $this->prophesize(PropertyInterface::class);
         $titleProperty->getName()->willReturn('title');
@@ -199,7 +222,84 @@ class StructureResolverTest extends TestCase
                 'view' => [
                     'title' => [],
                     'media' => ['ids' => [1, 2, 3]], ],
+                'author' => 1,
+                'authored' => $now->format(\DateTimeImmutable::ISO8601),
+                'changer' => 3,
+                'changed' => $now->format(\DateTimeImmutable::ISO8601),
+                'creator' => 2,
+                'created' => $now->format(\DateTimeImmutable::ISO8601),
                 'extension' => [],
+            ],
+            $this->structureResolver->resolve($this->structure->reveal(), 'en')
+        );
+    }
+
+    public function testResolveProperties(): void
+    {
+        $this->structure->getDocument()->willReturn($this->pageDocument->reveal());
+
+        $now = new \DateTimeImmutable();
+
+        $this->structure->getUuid()->willReturn('123-123-123');
+        $this->structure->getWebspaceKey()->willReturn('sulu_io');
+        $this->structure->getLanguageCode()->willReturn('en');
+
+        $this->pageDocument->getStructureType()->willReturn('default');
+        $this->pageDocument->getAuthored()->willReturn($now);
+        $this->pageDocument->getAuthor()->willReturn(1);
+        $this->pageDocument->getCreated()->willReturn($now);
+        $this->pageDocument->getCreator()->willReturn(2);
+        $this->pageDocument->getChanged()->willReturn($now);
+        $this->pageDocument->getChanger()->willReturn(3);
+        $this->pageDocument->getExtensionsData()->willReturn([
+            'seo' => [
+                'title' => 'seo-title',
+                'description' => 'seo-description',
+                'noIndex' => false,
+            ],
+            'excerpt' => [
+                'title' => 'excerpt-title',
+                'categories' => [1, 2, 3],
+                'tags' => [1, 2, 3],
+                'icon' => [1, 2, 3],
+                'images' => [1, 2, 3],
+            ],
+        ]);
+
+        $titleProperty = $this->prophesize(PropertyInterface::class);
+        $titleProperty->getName()->willReturn('title');
+        $titleProperty->getValue()->willReturn('test-123');
+
+        $this->structure->getProperty('title')->willReturn($titleProperty->reveal());
+
+        $contentView1 = $this->prophesize(ContentView::class);
+        $contentView1->getContent()->willReturn('test-123');
+        $contentView1->getView()->willReturn([]);
+
+        $this->contentResolver->resolve('test-123', $titleProperty->reveal(), 'en', ['webspaceKey' => 'sulu_io'])
+            ->willReturn($contentView1->reveal());
+
+        $result = $this->structureResolver->resolveProperties(
+            $this->structure->reveal(),
+            ['myTitle' => 'title', 'seoDescription' => 'seo.description', 'excerptTitle' => 'excerpt.title'],
+            'en'
+        );
+
+        $this->assertSame(
+            [
+                'id' => '123-123-123',
+                'type' => 'page',
+                'template' => 'default',
+                'content' => [
+                    'myTitle' => 'test-123',
+                    'seoDescription' => 'seo-description',
+                    'excerptTitle' => 'excerpt-title',
+                ],
+                'view' => [
+                    'myTitle' => [],
+                    'seoDescription' => [],
+                    'excerptTitle' => [],
+                ],
                 'author' => 1,
                 'authored' => $now->format(\DateTimeImmutable::ISO8601),
                 'changer' => 3,
@@ -207,7 +307,7 @@ class StructureResolverTest extends TestCase
                 'creator' => 2,
                 'created' => $now->format(\DateTimeImmutable::ISO8601),
             ],
-            $this->structureResolver->resolve($this->structure->reveal(), 'en')
+            $result
         );
     }
 }

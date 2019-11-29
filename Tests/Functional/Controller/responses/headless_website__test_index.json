@@ -12,11 +12,26 @@
         "url": [],
         "article": []
     },
-    "extension": [],
     "author": null,
     "authored": "@string@.isDateTime()",
     "changer": null,
     "changed": "@string@.isDateTime()",
     "creator": null,
-    "created": "@string@.isDateTime()"
+    "created": "@string@.isDateTime()",
+    "extension": {
+        "seo": {
+            "title": "",
+            "description": "seo-description",
+            "keywords": "",
+            "canonicalUrl": "",
+            "noIndex": false,
+            "noFollow": false,
+            "hideInSitemap": false
+        },
+        "excerpt": {
+            "title": "excerpt-title",
+            "more": "",
+            "description": ""
+        }
+    }
 }

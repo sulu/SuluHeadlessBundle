@@ -50,6 +50,7 @@ class PageSerializer
         $structure = $this->structureManager->getStructure($data['template']);
         $excerpt = $this->structureManager->getStructure('excerpt');
 
+        // TODO: this class should use the StructureResolver to resolve the properties of the structure
         foreach ($propertyParameters as $propertyParameter) {
             /** @var string $targetPropertyName */
             $targetPropertyName = $propertyParameter->getName();
