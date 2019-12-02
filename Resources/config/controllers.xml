@@ -12,5 +12,14 @@
             <argument type="service" id="jms_serializer.serializer"/>
             <argument type="service" id="sulu_headless.serializer.media"/>
         </service>
+
+        <service
+            id="sulu_headless.controller.search"
+            class="Sulu\Bundle\HeadlessBundle\Controller\SearchController"
+            public="true"
+        >
+            <argument type="service" id="massive_search.search_manager"/>
+            <argument type="service" id="jms_serializer.serializer"/>
+        </service>
     </services>
 </container>
