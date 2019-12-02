@@ -1,0 +1,40 @@
+{
+    "_embedded": {
+        "hits": [
+            {
+                "document": {
+                    "id": "@uuid@",
+                    "title": "MASSIVE ART is awesome",
+                    "description": "",
+                    "url": "/awesome-massive-art",
+                    "imageUrl": "",
+                    "locale": "de",
+                    "index": "page_sulu_io_published",
+                    "created": null,
+                    "creatorName": null,
+                    "creatorId": null,
+                    "changed": null,
+                    "changerName": null,
+                    "changerId": null,
+                    "properties": {
+                        "excerptTitle": "",
+                        "excerptMore": "",
+                        "excerptDescription": "",
+                        "excerptCategories": "||",
+                        "excerptTags": "||",
+                        "excerptIcon": "{\"ids\":[]}",
+                        "excerptImages": "{\"ids\":[]}",
+                        "title": "MASSIVE ART is awesome",
+                        "webspace_key": "sulu_io",
+                        "state": "published",
+                        "published": "@string@.isDateTime()",
+                        "authored": "@string@.isDateTime()",
+                        "_structure_type": "default"
+                    }
+                },
+                "score": "@double@",
+                "id": "@uuid@"
+            }
+        ]
+    }
+}

@@ -2,3 +2,8 @@ sulu_headless.api.navigation:
     path: /api/navigations/{context}
     defaults:
         _controller: sulu_headless.controller.navigation:getAction
+
+sulu_headless.api.search:
+    path: /api/search
+    defaults:
+        _controller: sulu_headless.controller.search:getAction
