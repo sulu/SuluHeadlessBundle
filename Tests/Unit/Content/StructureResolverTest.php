@@ -310,4 +310,88 @@ class StructureResolverTest extends TestCase
             $result
         );
     }
+
+    public function testResolvePropertiesIncludeExtension(): void
+    {
+        $this->structure->getDocument()->willReturn($this->pageDocument->reveal());
+
+        $now = new \DateTimeImmutable();
+
+        $this->structure->getUuid()->willReturn('123-123-123');
+        $this->structure->getWebspaceKey()->willReturn('sulu_io');
+        $this->structure->getLanguageCode()->willReturn('en');
+
+        $this->pageDocument->getStructureType()->willReturn('default');
+        $this->pageDocument->getAuthored()->willReturn($now);
+        $this->pageDocument->getAuthor()->willReturn(1);
+        $this->pageDocument->getCreated()->willReturn($now);
+        $this->pageDocument->getCreator()->willReturn(2);
+        $this->pageDocument->getChanged()->willReturn($now);
+        $this->pageDocument->getChanger()->willReturn(3);
+        $this->pageDocument->getExtensionsData()->willReturn([
+            'seo' => [
+                'title' => 'seo-title',
+                'description' => 'seo-description',
+                'noIndex' => false,
+            ],
+            'excerpt' => [
+                'title' => 'excerpt-title',
+                'categories' => [1, 2, 3],
+                'tags' => [1, 2, 3],
+                'icon' => [1, 2, 3],
+                'images' => [1, 2, 3],
+            ],
+        ]);
+
+        $titleProperty = $this->prophesize(PropertyInterface::class);
+        $titleProperty->getName()->willReturn('title');
+        $titleProperty->getValue()->willReturn('test-123');
+
+        $this->structure->getProperty('title')->willReturn($titleProperty->reveal());
+
+        $contentView1 = $this->prophesize(ContentView::class);
+        $contentView1->getContent()->willReturn('test-123');
+        $contentView1->getView()->willReturn([]);
+
+        $this->contentResolver->resolve('test-123', $titleProperty->reveal(), 'en', ['webspaceKey' => 'sulu_io'])
+            ->willReturn($contentView1->reveal());
+
+        $result = $this->structureResolver->resolveProperties(
+            $this->structure->reveal(),
+            ['myTitle' => 'title'],
+            'en',
+            true
+        );
+
+        $this->assertSame(
+            [
+                'id' => '123-123-123',
+                'type' => 'page',
+                'template' => 'default',
+                'content' => [
+                    'myTitle' => 'test-123',
+                ],
+                'view' => [
+                    'myTitle' => [],
+                ],
+                'author' => 1,
+                'authored' => $now->format(\DateTimeImmutable::ISO8601),
+                'changer' => 3,
+                'changed' => $now->format(\DateTimeImmutable::ISO8601),
+                'creator' => 2,
+                'created' => $now->format(\DateTimeImmutable::ISO8601),
+                'extension' => [
+                    'seo' => [
+                        'title' => 'seo-title',
+                        'description' => 'seo-description',
+                        'noIndex' => false,
+                    ],
+                    'excerpt' => [
+                        'title' => 'excerpt-title',
+                    ],
+                ],
+            ],
+            $result
+        );
+    }
 }

@@ -56,10 +56,18 @@ class StructureResolver implements StructureResolverInterface
     /**
      * @param StructureBridge $structure
      */
-    public function resolveProperties(StructureInterface $structure, array $propertyMap, string $locale): array
-    {
+    public function resolveProperties(
+        StructureInterface $structure,
+        array $propertyMap,
+        string $locale,
+        bool $includeExtension = false
+    ): array {
         $data = $this->getStructureData($structure);
         $extensionData = $this->getExtensionData($structure);
+
+        if ($includeExtension) {
+            $data['extension'] = $extensionData;
+        }
 
         foreach ($propertyMap as $targetProperty => $sourceProperty) {
             if (!\is_string($targetProperty)) {
