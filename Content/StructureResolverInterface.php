@@ -27,5 +27,10 @@ interface StructureResolverInterface
      *
      * @return mixed[]
      */
-    public function resolveProperties(StructureInterface $structure, array $propertyMap, string $locale): array;
+    public function resolveProperties(
+        StructureInterface $structure,
+        array $propertyMap,
+        string $locale,
+        bool $includeExtension = false
+    ): array;
 }
