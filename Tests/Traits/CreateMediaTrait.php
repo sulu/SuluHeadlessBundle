@@ -33,8 +33,9 @@ trait CreateMediaTrait
         $manager = static::$container->get('doctrine.orm.entity_manager');
 
         $collection = new Collection();
-        $collectionType = $manager->getRepository(CollectionType::class)->find(1);
 
+        /** @var CollectionType|null $collectionType */
+        $collectionType = $manager->getRepository(CollectionType::class)->find(1);
         if (!$collectionType) {
             throw new \RuntimeException('CollectionType "1" not found. Maybe sulu fixtures missing?');
         }

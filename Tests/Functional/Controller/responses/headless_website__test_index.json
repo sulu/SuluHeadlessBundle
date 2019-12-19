@@ -31,7 +31,12 @@
         "excerpt": {
             "title": "excerpt-title",
             "more": "",
-            "description": ""
+            "description": "",
+            "categories":  [],
+            "tags":  [],
+            "images":  [],
+            "icon":  [],
+            "audience_targeting_groups":  []
         }
     }
 }

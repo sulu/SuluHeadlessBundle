@@ -15,7 +15,9 @@ namespace Sulu\Bundle\HeadlessBundle\Content\Serializer;
 
 use JMS\Serializer\SerializationContext;
 use Sulu\Bundle\ContactBundle\Api\Contact;
+use Sulu\Bundle\ContactBundle\Entity\ContactTitle;
 use Sulu\Bundle\ContactBundle\Entity\ContactTitleRepository;
+use Sulu\Bundle\ContactBundle\Entity\Position;
 use Sulu\Bundle\ContactBundle\Entity\PositionRepository;
 use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
 use Sulu\Component\Serializer\ArraySerializerInterface;
@@ -76,11 +78,19 @@ class ContactSerializer
         }
 
         if (isset($contactData['title'])) {
-            $contactData['title'] = $this->contactTitleRepository->find($contactData['title'])->getTitle();
+            /** @var ContactTitle|null $titleEntity */
+            $titleEntity = $this->contactTitleRepository->find($contactData['title']);
+            if ($titleEntity) {
+                $contactData['title'] = $titleEntity->getTitle();
+            }
         }
 
         if (isset($contactData['position'])) {
-            $contactData['position'] = $this->positionRepository->find($contactData['position'])->getPosition();
+            /** @var Position|null $contactPosition */
+            $contactPosition = $this->positionRepository->find($contactData['position']);
+            if ($contactPosition) {
+                $contactData['position'] = $contactPosition->getPosition();
+            }
         }
 
         if (null !== $contact->getAvatar()) {

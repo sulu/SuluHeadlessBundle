@@ -16,6 +16,7 @@ namespace Sulu\Bundle\HeadlessBundle\Content;
 use Sulu\Bundle\PageBundle\Document\BasePageDocument;
 use Sulu\Component\Content\Compat\Structure\StructureBridge;
 use Sulu\Component\Content\Compat\StructureInterface;
+use Sulu\Component\Content\Compat\StructureManagerInterface;
 use Sulu\Component\Content\Document\Extension\ExtensionContainer;
 
 class StructureResolver implements StructureResolverInterface
@@ -25,9 +26,15 @@ class StructureResolver implements StructureResolverInterface
      */
     private $contentResolver;
 
-    public function __construct(ContentResolverInterface $contentResolver)
+    /**
+     * @var StructureManagerInterface
+     */
+    private $structureManager;
+
+    public function __construct(ContentResolverInterface $contentResolver, StructureManagerInterface $structureManager)
     {
         $this->contentResolver = $contentResolver;
+        $this->structureManager = $structureManager;
     }
 
     /**
@@ -36,7 +43,11 @@ class StructureResolver implements StructureResolverInterface
     public function resolve(StructureInterface $structure, string $locale): array
     {
         $data = $this->getStructureData($structure);
-        $data['extension'] = $this->getExtensionData($structure);
+        $data['extension'] = $this->resolveExtensionData(
+            $this->getExtensionData($structure),
+            $locale,
+            ['webspaceKey' => $structure->getWebspaceKey()]
+        );
 
         foreach ($structure->getProperties(true) as $property) {
             $contentView = $this->contentResolver->resolve(
@@ -63,10 +74,13 @@ class StructureResolver implements StructureResolverInterface
         bool $includeExtension = false
     ): array {
         $data = $this->getStructureData($structure);
-        $extensionData = $this->getExtensionData($structure);
+        $unresolvedExtensionData = $this->getExtensionData($structure);
+
+        $attributes = ['webspaceKey' => $structure->getWebspaceKey()];
+        $excerptStructure = $this->structureManager->getStructure('excerpt');
 
         if ($includeExtension) {
-            $data['extension'] = $extensionData;
+            $data['extension'] = $this->resolveExtensionData($unresolvedExtensionData, $locale, $attributes);
         }
 
         foreach ($propertyMap as $targetProperty => $sourceProperty) {
@@ -76,16 +90,26 @@ class StructureResolver implements StructureResolverInterface
 
             // the '.' is used to separate the extension name from the property name.
             if (false !== strpos($sourceProperty, '.')) {
-                list($extensionName, $propertyName) = explode('.', $sourceProperty);
-                $value = $extensionData[$extensionName][$propertyName];
-                $contentView = new ContentView($value);
+                [$extensionName, $propertyName] = explode('.', $sourceProperty);
+
+                $contentView = new ContentView($unresolvedExtensionData[$extensionName][$propertyName] ?? null);
+                if ('excerpt' === $extensionName) {
+                    $contentView = $this->resolveProperty(
+                        $excerptStructure,
+                        $propertyName,
+                        $locale,
+                        $attributes,
+                        $contentView->getContent()
+                    );
+                }
             } else {
                 $property = $structure->getProperty($sourceProperty);
-                $contentView = $this->contentResolver->resolve(
-                    $property->getValue(),
-                    $property,
+                $contentView = $this->resolveProperty(
+                    $structure,
+                    $sourceProperty,
                     $locale,
-                    ['webspaceKey' => $structure->getWebspaceKey()]
+                    $attributes,
+                    $property->getValue()
                 );
             }
 
@@ -184,14 +208,56 @@ class StructureResolver implements StructureResolverInterface
             $extensionData = $extensionData->toArray();
         }
 
-        // unset keys that contain values that need to be resolved before they can be used in the frontend
-        // TODO: find a strategy for resolving the values of the extension data using the headless-bundle resolvers
-        unset($extensionData['excerpt']['categories']);
-        unset($extensionData['excerpt']['tags']);
-        unset($extensionData['excerpt']['icon']);
-        unset($extensionData['excerpt']['images']);
-        unset($extensionData['excerpt']['audience_targeting_groups']);
-
         return $extensionData;
+    }
+
+    /**
+     * @param mixed[] $data
+     * @param mixed[] $attributes
+     *
+     * @return mixed[]
+     */
+    private function resolveExtensionData(array $data, string $locale, array $attributes): array
+    {
+        $excerptStructure = $this->structureManager->getStructure('excerpt');
+
+        $unresolvedExcerptData = $data['excerpt'] ?? [];
+
+        $resolvedExcerptData = [];
+        foreach ($excerptStructure->getProperties(true) as $property) {
+            $resolvedExcerptData[$property->getName()] = $this->resolveProperty(
+                $excerptStructure,
+                $property->getName(),
+                $locale,
+                $attributes,
+                $unresolvedExcerptData[$property->getName()] ?? null
+            )->getContent();
+        }
+
+        $data['excerpt'] = $resolvedExcerptData;
+
+        return $data;
+    }
+
+    /**
+     * @param mixed $value
+     * @param mixed[] $attributes
+     */
+    private function resolveProperty(
+        StructureInterface $structure,
+        string $name,
+        string $locale,
+        array $attributes,
+        $value
+    ): ContentView {
+        $property = $structure->getProperty($name);
+        $property->setValue($value);
+
+        return $this->contentResolver->resolve(
+            $value,
+            $property,
+            $locale,
+            $attributes
+        );
     }
 }
