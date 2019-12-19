@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content;
 
 use PHPUnit\Framework\TestCase;
+use Prophecy\Argument;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\HeadlessBundle\Content\ContentResolverInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
@@ -23,6 +24,7 @@ use Sulu\Bundle\PageBundle\Document\HomeDocument;
 use Sulu\Bundle\PageBundle\Document\PageDocument;
 use Sulu\Component\Content\Compat\PropertyInterface;
 use Sulu\Component\Content\Compat\Structure\StructureBridge;
+use Sulu\Component\Content\Compat\StructureManagerInterface;
 
 class StructureResolverTest extends TestCase
 {
@@ -30,6 +32,11 @@ class StructureResolverTest extends TestCase
      * @var StructureBridge|ObjectProphecy
      */
     private $structure;
+
+    /**
+     * @var StructureBridge|ObjectProphecy
+     */
+    private $excerpt;
 
     /**
      * @var BasePageDocument|ObjectProphecy
@@ -47,6 +54,11 @@ class StructureResolverTest extends TestCase
     private $contentResolver;
 
     /**
+     * @var StructureManagerInterface|ObjectProphecy
+     */
+    private $structureManager;
+
+    /**
      * @var StructureResolver
      */
     private $structureResolver;
@@ -58,8 +70,35 @@ class StructureResolverTest extends TestCase
         $this->homepageDocument = $this->prophesize(HomeDocument::class);
 
         $this->contentResolver = $this->prophesize(ContentResolverInterface::class);
+        $this->structureManager = $this->prophesize(StructureManagerInterface::class);
 
-        $this->structureResolver = new StructureResolver($this->contentResolver->reveal());
+        $this->excerpt = $this->prophesizeExcerpt();
+        $this->structureManager->getStructure('excerpt')->willReturn($this->excerpt->reveal());
+
+        $this->structureResolver = new StructureResolver(
+            $this->contentResolver->reveal(),
+            $this->structureManager->reveal()
+        );
+    }
+
+    private function prophesizeExcerpt(): ObjectProphecy
+    {
+        $excerpt = $this->prophesize(StructureBridge::class);
+
+        $titleProperty = $this->prophesize(PropertyInterface::class);
+        $titleProperty->getName()->willReturn('title');
+        $titleProperty->setValue(Argument::any())->willReturn();
+
+        $excerpt->getProperties(true)->willReturn([$titleProperty->reveal()]);
+        $excerpt->getProperty('title')->willReturn($titleProperty->reveal());
+
+        $this->contentResolver->resolve(Argument::cetera())->will(
+            function ($arguments) {
+                return new ContentView($arguments[0]);
+            }
+        );
+
+        return $excerpt;
     }
 
     public function testResolvePage(): void
@@ -221,14 +260,19 @@ class StructureResolverTest extends TestCase
                 ],
                 'view' => [
                     'title' => [],
-                    'media' => ['ids' => [1, 2, 3]], ],
+                    'media' => ['ids' => [1, 2, 3]],
+                ],
                 'author' => 1,
                 'authored' => $now->format(\DateTimeImmutable::ISO8601),
                 'changer' => 3,
                 'changed' => $now->format(\DateTimeImmutable::ISO8601),
                 'creator' => 2,
                 'created' => $now->format(\DateTimeImmutable::ISO8601),
-                'extension' => [],
+                'extension' => [
+                    'excerpt' => [
+                        'title' => null,
+                    ],
+                ],
             ],
             $this->structureResolver->resolve($this->structure->reveal(), 'en')
         );
@@ -269,6 +313,7 @@ class StructureResolverTest extends TestCase
         $titleProperty = $this->prophesize(PropertyInterface::class);
         $titleProperty->getName()->willReturn('title');
         $titleProperty->getValue()->willReturn('test-123');
+        $titleProperty->setValue('test-123')->shouldBeCalled();
 
         $this->structure->getProperty('title')->willReturn($titleProperty->reveal());
 
@@ -346,6 +391,7 @@ class StructureResolverTest extends TestCase
         $titleProperty = $this->prophesize(PropertyInterface::class);
         $titleProperty->getName()->willReturn('title');
         $titleProperty->getValue()->willReturn('test-123');
+        $titleProperty->setValue('test-123')->shouldBeCalled();
 
         $this->structure->getProperty('title')->willReturn($titleProperty->reveal());
 
