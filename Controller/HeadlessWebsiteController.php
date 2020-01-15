@@ -79,7 +79,7 @@ class HeadlessWebsiteController extends AbstractController
             $parameters['previewParentTemplate'] = $viewTemplate;
             $parameters['previewContentReplacer'] = Preview::CONTENT_REPLACER;
 
-            return $this->render('SuluWebsiteBundle:Preview:preview.html.twig', $parameters);
+            return $this->render('@SuluWebsite/Preview/preview.html.twig', $parameters);
         }
 
         return $this->render($viewTemplate, $parameters);
