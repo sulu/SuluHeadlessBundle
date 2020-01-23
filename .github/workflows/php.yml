@@ -1,0 +1,57 @@
+name: PHP Composer
+
+on: [push]
+
+env:
+    DATABASE_URL: mysql://root@127.0.0.1:33306/su_headless_test?serverVersion=5.7
+
+jobs:
+
+    tests:
+
+        services:
+            mysql:
+                image: mysql:5.7
+                env:
+                    MYSQL_ALLOW_EMPTY_PASSWORD: true
+                ports:
+                    - 33306:3306
+                options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v1
+
+            - name: Validate composer.json and composer.lock
+              run: composer validate
+
+            - name: Get Composer Cache Directory
+              id: composer-cache
+              run: |
+                echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+            - uses: actions/cache@v1
+              with:
+                path: ${{ steps.composer-cache.outputs.dir }}
+                key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
+                restore-keys: |
+                  ${{ runner.os }}-composer-
+
+            - name: Install dependencies
+              run: composer install --prefer-dist --no-progress --no-suggest
+
+            - name: Run unit tests
+              run: composer phpunit -- Tests/Unit --coverage-php var/coverage.php --coverage-html coverage-report --log-junit var/junit.xml
+
+            - name: Check code coverage
+              run: php Tests/coverage-checker.php "line" "95" "Content"
+
+            - name: Prepare functional testcases
+              run: composer bootstrap-test-environment
+
+            - name: Run functional tests
+              run: composer phpunit -- Tests/Functional --log-junit var/junit.xml
+
+            - name: Linting code
+              run: composer lint

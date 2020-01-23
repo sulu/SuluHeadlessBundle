@@ -4,19 +4,6 @@ This bundle provides api controller to query pages/navigations and a basic setup
 
 ## Installation
 
-Add repository to `composer.json`:
-
-```json
-{
-    "repositories": [
-        {
-            "type": "git",
-            "url": "git@gitlab.sulu.io:bundles/headless-bundle.git"
-        }
-    ]
-}
-```
-
 Require package:
 
 ```bash

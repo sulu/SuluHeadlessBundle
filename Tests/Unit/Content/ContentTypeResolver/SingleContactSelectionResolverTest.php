@@ -48,7 +48,7 @@ class SingleContactSelectionResolverTest extends TestCase
 
         $this->singleContactSelectionResolver = new SingleContactSelectionResolver(
             $this->contactManager->reveal(),
-            $this->contactSerializer->reveal(),
+            $this->contactSerializer->reveal()
         );
     }
 

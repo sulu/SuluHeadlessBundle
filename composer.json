@@ -9,7 +9,6 @@
     },
     "require-dev": {
         "coduo/php-matcher": "^3.2",
-        "friendsofphp/php-cs-fixer": "^2.12",
         "jackalope/jackalope-doctrine-dbal": "^1.3.4",
         "jangregor/phpstan-prophecy": "^0.4.1",
         "php-ffmpeg/php-ffmpeg": "^0.13 || ^0.14",
@@ -34,7 +33,6 @@
         "lint": [
             "@lint-composer",
             "@phpstan",
-            "@php-cs",
             "@lint-yaml",
             "@lint-schema"
         ],
@@ -48,8 +46,6 @@
             "@php Tests/Application/bin/console cache:warmup --env dev",
             "@php vendor/bin/phpstan analyse"
         ],
-        "php-cs": "@php vendor/bin/php-cs-fixer fix --verbose --diff --dry-run",
-        "php-cs-fix": "@php vendor/bin/php-cs-fixer fix",
         "bootstrap-test-environment": [
             "@php Tests/Application/bin/console doctrine:database:create --if-not-exists",
             "@php Tests/Application/bin/console doctrine:schema:update --force"

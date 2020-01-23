@@ -48,7 +48,7 @@ class MediaResolverTest extends TestCase
 
         $this->mediaResolver = new MediaResolver(
             $this->mediaDataProvider->reveal(),
-            $this->mediaSerializer->reveal(),
+            $this->mediaSerializer->reveal()
         );
     }
 

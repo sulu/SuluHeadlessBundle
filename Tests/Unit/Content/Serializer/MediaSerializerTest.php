@@ -53,7 +53,7 @@ class MediaSerializerTest extends TestCase
         $this->mediaSerializer = new MediaSerializer(
             $this->arraySerializer->reveal(),
             $this->imageConverter->reveal(),
-            $this->formatCache->reveal(),
+            $this->formatCache->reveal()
         );
     }
 
