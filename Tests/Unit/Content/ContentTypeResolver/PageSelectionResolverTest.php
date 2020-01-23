@@ -47,7 +47,7 @@ class PageSelectionResolverTest extends TestCase
 
         $this->pageSelectionResolver = new PageSelectionResolver(
             $this->pageSerializer->reveal(),
-            $this->pageSelectionContainerFactory->reveal(),
+            $this->pageSelectionContainerFactory->reveal()
         );
     }
 

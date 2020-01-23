@@ -3,7 +3,7 @@ name: PHP Composer
 on: [push]
 
 env:
-    DATABASE_URL: mysql://root@127.0.0.1:33306/su_headless_test
+    DATABASE_URL: mysql://root@127.0.0.1:33306/su_headless_test?serverVersion=5.7
 
 jobs:
 

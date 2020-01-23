@@ -47,7 +47,7 @@ class PageResolverTest extends TestCase
 
         $this->pageResolver = new PageResolver(
             $this->pageDataProvider->reveal(),
-            $this->pageSerializer->reveal(),
+            $this->pageSerializer->reveal()
         );
     }
 

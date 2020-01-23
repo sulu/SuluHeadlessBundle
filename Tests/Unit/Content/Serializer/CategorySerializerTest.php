@@ -47,7 +47,7 @@ class CategorySerializerTest extends TestCase
 
         $this->categorySerializer = new CategorySerializer(
             $this->arraySerializer->reveal(),
-            $this->mediaSerializer->reveal(),
+            $this->mediaSerializer->reveal()
         );
     }
 
