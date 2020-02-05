@@ -13,7 +13,6 @@ parameters:
     level: max
     excludes_analyse:
         - %currentWorkingDirectory%/DependencyInjection/Configuration.php
-        - %currentWorkingDirectory%/Tests/coverage-checker.php
         - %currentWorkingDirectory%/Tests/Application/var/*
         - %currentWorkingDirectory%/vendor/*
     symfony:
