@@ -1,6 +1,6 @@
 name: PHP Composer
 
-on: [push]
+on: pull_request
 
 env:
     DATABASE_URL: mysql://root@127.0.0.1:33306/su_headless_test?serverVersion=5.7
@@ -45,7 +45,7 @@ jobs:
               run: composer phpunit -- Tests/Unit --coverage-php var/coverage.php --coverage-html coverage-report --log-junit var/junit.xml
 
             - name: Check code coverage
-              run: php Tests/coverage-checker.php "line" "95" "Content"
+              run: php vendor/bin/code-coverage-checker "var/coverage.php" "line" "95" "Content"
 
             - name: Prepare functional testcases
               run: composer bootstrap-test-environment
