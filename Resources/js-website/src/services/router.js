@@ -44,11 +44,11 @@ class Router {
         }
 
         // If no matching static-route is registered, try to load the view data from the server
-        viewDataStore.loadData(location.pathname).then(() => {
+        return viewDataStore.loadData(location.pathname).then(() => {
             this.location = location;
         }).catch((error) => {
             if (this.viewDataErrorHandler) {
-                this.viewDataErrorHandler(error);
+                return this.viewDataErrorHandler(error);
             } else {
                 loglevel.error(
                     'Error during location change. Did not find view-data for pathname "' + location.pathname + '".',

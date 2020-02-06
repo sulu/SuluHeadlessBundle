@@ -1,66 +1,104 @@
 import request from '../utils/request';
 
-const defaultOptions = {
-    headers: {
-        'Content-Type': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest', // Copied from sulu/sulu
-    },
-};
-
 class Requester {
-    handleResponse(response) {
+    requestErrorHandler = null;
+    defaultOptions = {
+        // Copied from sulu/sulu. Will be merged with the default options of the utils/request helper.
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+    };
+
+    interceptRequestResponse = (response) => {
         if (!response.ok) {
             return Promise.reject(response);
         }
 
-        if (response.status !== 204) {
-            return response.json();
+        if (response.status === 204) {
+            return Promise.resolve();
         }
 
-        return Promise.resolve();
-    }
+        return response.json();
+    };
+
+    interceptRequestError = (error) => {
+        if (this.requestErrorHandler) {
+            return this.requestErrorHandler(error);
+        } else {
+            throw error;
+        }
+    };
+
+    setRequestErrorHandler = (requestErrorHandler) => {
+        this.requestErrorHandler = requestErrorHandler;
+    };
+
+    setDefaultOptions = (defaultOptions) => {
+        this.defaultOptions = defaultOptions;
+    };
 
     get(url, options) {
-        return request(url, {
-            ...defaultOptions,
+        const requestOptions = {
+            ...this.defaultOptions,
             ...options,
             method: 'GET',
-        }).then(this.handleResponse);
+        };
+
+        return request(url, requestOptions)
+            .then(this.interceptRequestResponse)
+            .catch(this.interceptRequestError);
     }
 
     post(url, data, options) {
-        return request(url, {
-            ...defaultOptions,
+        const requestOptions = {
+            ...this.defaultOptions,
             ...options,
             method: 'POST',
             body: JSON.stringify(data),
-        }).then(this.handleResponse);
+        };
+
+        return request(url, requestOptions)
+            .then(this.interceptRequestResponse)
+            .catch(this.interceptRequestError);
     }
 
     put(url, data, options) {
-        return request(url, {
-            ...defaultOptions,
+        const requestOptions = {
+            ...this.defaultOptions,
             ...options,
             method: 'PUT',
             body: JSON.stringify(data),
-        }).then(this.handleResponse);
+        };
+
+        return request(url, requestOptions)
+            .then(this.interceptRequestResponse)
+            .catch(this.interceptRequestError);
     }
 
     patch(url, data, options) {
-        return request(url, {
-            ...defaultOptions,
+        const requestOptions = {
+            ...this.defaultOptions,
             ...options,
             method: 'PATCH',
             body: JSON.stringify(data),
-        }).then(this.handleResponse);
+        };
+
+        return request(url, requestOptions)
+            .then(this.interceptRequestResponse)
+            .catch(this.interceptRequestError);
     }
 
     delete(url, options) {
-        return request(url, {
-            ...defaultOptions,
+        const requestOptions = {
+            ...this.defaultOptions,
             ...options,
             method: 'DELETE',
-        }).then(this.handleResponse);
+        };
+
+        return request(url, requestOptions)
+            .then(this.interceptRequestResponse)
+            .catch(this.interceptRequestError);
     }
 }
 
