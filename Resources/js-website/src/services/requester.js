@@ -3,9 +3,10 @@ import request from '../utils/request';
 class Requester {
     requestErrorHandler = null;
     defaultOptions = {
+        // Copied from sulu/sulu. Will be merged with the default options of the utils/request helper.
         headers: {
             'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest', // Copied from sulu/sulu
+            'X-Requested-With': 'XMLHttpRequest',
         },
     };
 
