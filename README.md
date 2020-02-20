@@ -41,20 +41,22 @@ sulu_headless:
 
 ## Usage
 
-That you can provide data of your pages using the headless api you need to use the following controller in your pages templates:
+To automatically provide the data of a page in the JSON format, you need to set the following controller in the template of your page:
 
-### config/templates/pages/
+### config/templates/pages/your-page.xml
 
 ```xml
-<view>pages/headless</view>
+<view>headless</view>
 <controller>Sulu\Bundle\HeadlessBundle\Controller\HeadlessWebsiteController::indexAction</controller>
 ```
 
-### templates/pages/headless.html.twig
+### templates/headless.html.twig
 
-If you use the provided setup you should have atleast the following on your `headless.html.twig` template:
+If you want to use the frontend setup included in this bundle, you should include the following lines in your `headless.html.twig` template to setup and start the react application:
 
 ```twig
+{# ... #}
+
 {% block content %}
     <div id="sulu-headless-container"></div>
 
