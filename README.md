@@ -39,6 +39,36 @@ sulu_headless:
     resource: "@SuluHeadlessBundle/Resources/config/routing_website.yml"
 ```
 
+## Usage
+
+That you can provide data of your pages using the headless api you need to use the following controller in your pages templates:
+
+### config/templates/pages/
+
+```xml
+<view>pages/headless</view>
+<controller>Sulu\Bundle\HeadlessBundle\Controller\HeadlessWebsiteController::indexAction</controller>
+```
+
+### templates/pages/headless.html.twig
+
+If you use the provided setup you should have atleast the following on your `headless.html.twig` template:
+
+```twig
+{% block content %}
+    <div id="sulu-headless-container"></div>
+
+    <script>window.SULU_HEADLESS_API_ENDPOINT = '{{ sulu_content_path('/api') }}';</script>
+    <script>window.SULU_HEADLESS_VIEW_DATA = {{ jsonData|raw }};</script>
+
+    <script src="/build/build/headless/js/index.js"></script
+{% endblock %}
+```
+
+## How it works
+
+![Render Process](https://user-images.githubusercontent.com/1698337/73056284-f7175100-3e8e-11ea-9e67-9371d8c65099.jpg)
+
 ## Frontend Application Setup
 
 Create a new javascript project by adding the following files to a `assets/headless` folder:
