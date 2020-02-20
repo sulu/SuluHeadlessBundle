@@ -26,6 +26,38 @@ sulu_headless:
     resource: "@SuluHeadlessBundle/Resources/config/routing_website.yml"
 ```
 
+## Usage
+
+To automatically provide the data of a page in the JSON format, you need to set the following controller in the template of your page:
+
+### config/templates/pages/your-page.xml
+
+```xml
+<view>headless</view>
+<controller>Sulu\Bundle\HeadlessBundle\Controller\HeadlessWebsiteController::indexAction</controller>
+```
+
+### templates/headless.html.twig
+
+If you want to use the frontend setup included in this bundle, you should include the following lines in your `headless.html.twig` template to setup and start the react application:
+
+```twig
+{# ... #}
+
+{% block content %}
+    <div id="sulu-headless-container"></div>
+
+    <script>window.SULU_HEADLESS_API_ENDPOINT = '{{ sulu_content_path('/api') }}';</script>
+    <script>window.SULU_HEADLESS_VIEW_DATA = {{ jsonData|raw }};</script>
+
+    <script src="/build/build/headless/js/index.js"></script
+{% endblock %}
+```
+
+## How it works
+
+![Render Process](https://user-images.githubusercontent.com/1698337/73056284-f7175100-3e8e-11ea-9e67-9371d8c65099.jpg)
+
 ## Frontend Application Setup
 
 Create a new javascript project by adding the following files to a `assets/headless` folder:
