@@ -41,6 +41,11 @@ class SingleMediaSelectionResolver implements ContentTypeResolverInterface
 
         $content = $this->mediaSelectionResolver->resolve(['ids' => [$data['id']]], $property, $locale, $attributes);
 
-        return new ContentView($content->getContent()[0] ?? null, $content->getView());
+        $media = $content->getContent()[0] ?? null;
+        if (!empty($media) && !empty($data['displayOption'])) {
+            $media['displayOption'] = $data['displayOption'];
+        }
+
+        return new ContentView($media, $content->getView());
     }
 }
