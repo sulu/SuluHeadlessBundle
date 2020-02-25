@@ -20,6 +20,7 @@
         >
             <argument type="service" id="sulu_headless.content_resolver"/>
             <argument type="service" id="sulu.content.structure_manager"/>
+            <argument type="service" id="sulu_document_manager.document_inspector"/>
         </service>
         <service id="Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface" alias="sulu_headless.structure_resolver"/>
 
