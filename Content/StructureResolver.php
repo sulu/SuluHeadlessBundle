@@ -13,10 +13,12 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Content;
 
+use Sulu\Bundle\DocumentManagerBundle\Bridge\DocumentInspector;
 use Sulu\Bundle\PageBundle\Document\BasePageDocument;
 use Sulu\Component\Content\Compat\Structure\StructureBridge;
 use Sulu\Component\Content\Compat\StructureInterface;
 use Sulu\Component\Content\Compat\StructureManagerInterface;
+use Sulu\Component\Content\Document\Behavior\StructureBehavior;
 use Sulu\Component\Content\Document\Extension\ExtensionContainer;
 
 class StructureResolver implements StructureResolverInterface
@@ -31,10 +33,19 @@ class StructureResolver implements StructureResolverInterface
      */
     private $structureManager;
 
-    public function __construct(ContentResolverInterface $contentResolver, StructureManagerInterface $structureManager)
-    {
+    /**
+     * @var DocumentInspector
+     */
+    private $documentInspector;
+
+    public function __construct(
+        ContentResolverInterface $contentResolver,
+        StructureManagerInterface $structureManager,
+        DocumentInspector $documentInspector
+    ) {
         $this->contentResolver = $contentResolver;
         $this->structureManager = $structureManager;
+        $this->documentInspector = $documentInspector;
     }
 
     /**
@@ -167,10 +178,16 @@ class StructureResolver implements StructureResolverInterface
             $created = $document->getCreated();
         }
 
-        $type = 'page';
+        $type = 'unknown';
         if (method_exists($structure, 'getContent') && method_exists($structure->getContent(), 'getTemplateType')) {
-            // used for content-bundle to determine current template type
+            // determine type for structure that is implemented based on the SuluContentBundle
             $type = $structure->getContent()->getTemplateType();
+        } elseif ($document instanceof StructureBehavior) {
+            // determine type for structure that is implemented in the SuluPageBundle or the SuluArticleBundle
+            $type = $this->documentInspector->getMetadata($document)->getAlias();
+            if ('home' === $type) {
+                $type = 'page';
+            }
         }
 
         return [

@@ -16,6 +16,7 @@ namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\Prophecy\ObjectProphecy;
+use Sulu\Bundle\DocumentManagerBundle\Bridge\DocumentInspector;
 use Sulu\Bundle\HeadlessBundle\Content\ContentResolverInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolver;
@@ -25,6 +26,7 @@ use Sulu\Bundle\PageBundle\Document\PageDocument;
 use Sulu\Component\Content\Compat\PropertyInterface;
 use Sulu\Component\Content\Compat\Structure\StructureBridge;
 use Sulu\Component\Content\Compat\StructureManagerInterface;
+use Sulu\Component\DocumentManager\Metadata;
 
 class StructureResolverTest extends TestCase
 {
@@ -49,6 +51,16 @@ class StructureResolverTest extends TestCase
     private $homepageDocument;
 
     /**
+     * @var Metadata|ObjectProphecy
+     */
+    private $homepageMetadata;
+
+    /**
+     * @var Metadata|ObjectProphecy
+     */
+    private $pageMetadata;
+
+    /**
      * @var ContentResolverInterface|ObjectProphecy
      */
     private $contentResolver;
@@ -57,6 +69,11 @@ class StructureResolverTest extends TestCase
      * @var StructureManagerInterface|ObjectProphecy
      */
     private $structureManager;
+
+    /**
+     * @var DocumentInspector|ObjectProphecy
+     */
+    private $documentInspector;
 
     /**
      * @var StructureResolver
@@ -71,13 +88,25 @@ class StructureResolverTest extends TestCase
 
         $this->contentResolver = $this->prophesize(ContentResolverInterface::class);
         $this->structureManager = $this->prophesize(StructureManagerInterface::class);
+        $this->documentInspector = $this->prophesize(DocumentInspector::class);
 
         $this->excerpt = $this->prophesizeExcerpt();
         $this->structureManager->getStructure('excerpt')->willReturn($this->excerpt->reveal());
 
+        $this->homepageMetadata = $this->prophesize(Metadata::class);
+        $this->homepageMetadata->getAlias()->willReturn('home');
+        $this->documentInspector->getMetadata($this->homepageDocument->reveal())
+            ->willReturn($this->homepageMetadata->reveal());
+
+        $this->pageMetadata = $this->prophesize(Metadata::class);
+        $this->pageMetadata->getAlias()->willReturn('page');
+        $this->documentInspector->getMetadata($this->pageDocument->reveal())
+            ->willReturn($this->pageMetadata->reveal());
+
         $this->structureResolver = new StructureResolver(
             $this->contentResolver->reveal(),
-            $this->structureManager->reveal()
+            $this->structureManager->reveal(),
+            $this->documentInspector->reveal()
         );
     }
 
