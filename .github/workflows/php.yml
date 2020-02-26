@@ -1,6 +1,10 @@
 name: PHP
 
-on: pull_request
+on:
+    pull_request:
+    push:
+        branches:
+            - master
 
 env:
     DATABASE_URL: mysql://root@127.0.0.1:33306/su_headless_test?serverVersion=5.7
@@ -8,6 +12,8 @@ env:
 jobs:
 
     tests:
+        name: Test Application
+        runs-on: ubuntu-latest
 
         services:
             mysql:
@@ -18,10 +24,9 @@ jobs:
                     - 33306:3306
                 options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
-        runs-on: ubuntu-latest
-
         steps:
-            - uses: actions/checkout@v1
+            - name: Checkout project
+              uses: actions/checkout@v1
 
             - name: Validate composer.json and composer.lock
               run: composer validate
@@ -55,3 +60,36 @@ jobs:
 
             - name: Linting code
               run: composer lint
+
+    php-cs-fixer:
+        name: Run php-cs-fixer
+        runs-on: ubuntu-18.04
+
+        steps:
+            - name: Checkout project
+              uses: actions/checkout@v1
+
+            - name: Create downloads directory
+              run: mkdir downloads
+
+            - name: Get downloads path
+              id: php-cs-fixer-dir
+              run: echo "::set-output name=dir::downloads"
+
+            - name: Get php-cs-fixer path
+              id: php-cs-fixer-path
+              run: echo "::set-output name=path::${{ steps.php-cs-fixer-dir.outputs.dir }}/php-cs-fixer.phar"
+
+            - name: Cache php-cs-fixer
+              id: php-cs-fixer-cache
+              uses: actions/cache@v1
+              with:
+                  path: ${{ steps.php-cs-fixer-dir.outputs.dir }}
+                  key: php-cs-fixer
+
+            - name: Download php-cs-fixer
+              if: steps.php-cs-fixer-cache.outputs.cache-hit != 'true'
+              run: curl "https://cs.symfony.com/download/php-cs-fixer-v2.phar" --output ${{ steps.php-cs-fixer-path.outputs.path }} && chmod +x ${{ steps.php-cs-fixer-path.outputs.path }}
+
+            - name: Run php-cs-fixer
+              run: ./${{ steps.php-cs-fixer-path.outputs.path }} fix --dry-run --diff
