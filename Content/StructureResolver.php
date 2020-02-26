@@ -180,9 +180,10 @@ class StructureResolver implements StructureResolverInterface
 
         $type = 'unknown';
         if (method_exists($structure, 'getContent') && method_exists($structure->getContent(), 'getTemplateType')) {
-            // used for content-bundle to determine current template type
+            // determine type for structure that is implemented based on the SuluContentBundle
             $type = $structure->getContent()->getTemplateType();
         } elseif ($document instanceof StructureBehavior) {
+            // determine type for structure that is implemented in the SuluPageBundle or the SuluArticleBundle
             $type = $this->documentInspector->getMetadata($document)->getAlias();
             if ('home' === $type) {
                 $type = 'page';
