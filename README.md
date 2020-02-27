@@ -196,18 +196,19 @@ To use the provided single page application setup, you need to include the follo
 initialize and start the application:
 
 ```twig
-<body>
 {% block content %}
+    {# ... #}
+
+    {# define container element for rendering single page application #}
     <div id="sulu-headless-container"></div>
     
     {# initialize application with json data of current page to prevent second request on first load #}
     <script>window.SULU_HEADLESS_VIEW_DATA = {{ jsonData|raw }};</script>
     <script>window.SULU_HEADLESS_API_ENDPOINT = '{{ sulu_content_path('/api') }}';</script>
     
-    {# start the single page application #}
+    {# start single page application by including built javascript code #}
     <script src="/build/headless/js/index.js"></script>
 {% endblock %}
-</body>
 ```
 
 Additionally, you need to add the following files to your project to setup the single page application:
