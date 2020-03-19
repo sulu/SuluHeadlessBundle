@@ -44,10 +44,21 @@ class HeadlessWebsiteController extends AbstractController
         $json = $this->serializeData($data);
 
         if ('json' !== $request->getRequestFormat()) {
-            return $this->renderTemplateResponse($structure, $requestFormat, $preview, [
+            $response = $this->renderTemplateResponse($structure, $requestFormat, $preview, [
                 'jsonData' => $json,
                 'data' => $data,
             ]);
+
+            // we need to set the content type ourselves here
+            // else symfony will use the accept header of the client and the page could be cached with false content-type
+            // see following symfony issue: https://github.com/symfony/symfony/issues/35694
+            $mimeType = $request->getMimeType($requestFormat);
+
+            if ($mimeType) {
+                $response->headers->set('Content-Type', $mimeType);
+            }
+
+            return $response;
         }
 
         return new Response(

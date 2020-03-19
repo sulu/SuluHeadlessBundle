@@ -14,12 +14,14 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Tests\Functional\Controller;
 
 use Sulu\Bundle\HeadlessBundle\Tests\Functional\BaseTestCase;
+use Sulu\Bundle\HeadlessBundle\Tests\Traits\AssertResponseContentTypeTrait;
 use Sulu\Bundle\HeadlessBundle\Tests\Traits\CreatePageTrait;
 use Symfony\Component\HttpFoundation\Response;
 
 class HeadlessWebsiteControllerTest extends BaseTestCase
 {
     use CreatePageTrait;
+    use AssertResponseContentTypeTrait;
 
     public static function setUpBeforeClass(): void
     {
@@ -49,6 +51,8 @@ class HeadlessWebsiteControllerTest extends BaseTestCase
             $response,
             Response::HTTP_OK
         );
+
+        $this->assertResponseContentType('application/json', $response);
     }
 
     public function testIndexHtmlAction(): void
@@ -79,5 +83,20 @@ class HeadlessWebsiteControllerTest extends BaseTestCase
             $response,
             Response::HTTP_OK
         );
+
+        $this->assertResponseContentType('text/html', $response);
+    }
+
+    public function testClientAcceptHeaderNotUsed(): void
+    {
+        $websiteClient = $this->createWebsiteClient();
+        $websiteClient->request('GET', '/test', [], [], [
+            'HTTP_ACCEPT' => 'text/plain',
+        ]);
+
+        $response = $websiteClient->getResponse();
+        $this->assertInstanceOf(Response::class, $response);
+
+        $this->assertResponseContentType('text/html', $response);
     }
 }
