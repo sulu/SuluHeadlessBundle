@@ -102,7 +102,7 @@
             class="Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\SmartContentResolver"
             lazy="true"
         >
-            <argument type="collection"/>
+            <argument type="tagged" tag="sulu_headless.data_provider_resolver" default-index-method="getDataProvider" index-by="provider"/>
             <argument type="service" id="sulu_tag.tag_manager"/>
             <argument type="service" id="request_stack"/>
             <argument type="service" id="sulu_tag.tag_request_handler"/>

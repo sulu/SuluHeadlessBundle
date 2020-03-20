@@ -24,6 +24,7 @@ use Sulu\Component\SmartContent\DataProviderAliasInterface;
 use Sulu\Component\SmartContent\Exception\PageOutOfBoundsException;
 use Sulu\Component\Tag\Request\TagRequestHandlerInterface;
 use Sulu\Exception\FeatureNotImplementedException;
+use Symfony\Component\DependencyInjection\Argument\RewindableGenerator;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class SmartContentResolver implements ContentTypeResolverInterface
@@ -63,18 +64,15 @@ class SmartContentResolver implements ContentTypeResolverInterface
      */
     private $targetGroupStore;
 
-    /**
-     * @param DataProviderResolverInterface[] $resolvers
-     */
     public function __construct(
-        array $resolvers,
+        RewindableGenerator $resolvers,
         TagManagerInterface $tagManager,
         RequestStack $requestStack,
         TagRequestHandlerInterface $tagRequestHandler,
         CategoryRequestHandlerInterface $categoryRequestHandler,
         ?TargetGroupStoreInterface $targetGroupStore = null
     ) {
-        $this->resolvers = $resolvers;
+        $this->resolvers = iterator_to_array($resolvers);
         $this->tagManager = $tagManager;
         $this->requestStack = $requestStack;
         $this->tagRequestHandler = $tagRequestHandler;

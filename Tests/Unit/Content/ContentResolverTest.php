@@ -21,6 +21,7 @@ use Sulu\Bundle\HeadlessBundle\Content\ContentResolverInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\ContentTypeResolverInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Component\Content\Compat\PropertyInterface;
+use Symfony\Component\DependencyInjection\Argument\RewindableGenerator;
 
 class ContentResolverTest extends TestCase
 {
@@ -39,9 +40,12 @@ class ContentResolverTest extends TestCase
         $this->mediaSelectionResolver = $this->prophesize(ContentTypeResolverInterface::class);
 
         $this->contentResolver = new ContentResolver(
-            [
-                'media_selection' => $this->mediaSelectionResolver->reveal(),
-            ]
+            new RewindableGenerator(
+                function () {
+                    yield 'media_selection' => $this->mediaSelectionResolver->reveal();
+                },
+                1
+            )
         );
     }
 

@@ -29,6 +29,7 @@ use Sulu\Component\Content\Compat\StructureInterface;
 use Sulu\Component\SmartContent\Configuration\ProviderConfigurationInterface;
 use Sulu\Component\Tag\Request\TagRequestHandlerInterface;
 use Sulu\Exception\FeatureNotImplementedException;
+use Symfony\Component\DependencyInjection\Argument\RewindableGenerator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -79,7 +80,12 @@ class SmartContentResolverTest extends TestCase
         $this->targetGroupStore = $this->prophesize(TargetGroupStoreInterface::class);
 
         $this->smartContentResolver = new SmartContentResolver(
-            ['media' => $this->mediaProviderResolver->reveal()],
+            new RewindableGenerator(
+                function () {
+                    yield 'media' => $this->mediaProviderResolver->reveal();
+                },
+                1
+            ),
             $this->tagManager->reveal(),
             $this->requestStack->reveal(),
             $this->tagRequestHandler->reveal(),
