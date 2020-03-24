@@ -63,11 +63,8 @@ class SmartContentResolver implements ContentTypeResolverInterface
      */
     private $targetGroupStore;
 
-    /**
-     * @param iterable<DataProviderResolverInterface> $resolvers
-     */
     public function __construct(
-        iterable $resolvers,
+        \Traversable $resolvers,
         TagManagerInterface $tagManager,
         RequestStack $requestStack,
         TagRequestHandlerInterface $tagRequestHandler,

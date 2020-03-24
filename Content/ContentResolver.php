@@ -23,10 +23,7 @@ class ContentResolver implements ContentResolverInterface
      */
     private $resolvers;
 
-    /**
-     * @param iterable<ContentTypeResolverInterface> $resolvers
-     */
-    public function __construct(iterable $resolvers)
+    public function __construct(\Traversable $resolvers)
     {
         $this->resolvers = iterator_to_array($resolvers);
     }
