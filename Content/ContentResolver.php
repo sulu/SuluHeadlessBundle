@@ -15,7 +15,6 @@ namespace Sulu\Bundle\HeadlessBundle\Content;
 
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\ContentTypeResolverInterface;
 use Sulu\Component\Content\Compat\PropertyInterface;
-use Symfony\Component\DependencyInjection\Argument\RewindableGenerator;
 
 class ContentResolver implements ContentResolverInterface
 {
@@ -24,7 +23,10 @@ class ContentResolver implements ContentResolverInterface
      */
     private $resolvers;
 
-    public function __construct(RewindableGenerator $resolvers)
+    /**
+     * @param iterable<ContentTypeResolverInterface> $resolvers
+     */
+    public function __construct(iterable $resolvers)
     {
         $this->resolvers = iterator_to_array($resolvers);
     }

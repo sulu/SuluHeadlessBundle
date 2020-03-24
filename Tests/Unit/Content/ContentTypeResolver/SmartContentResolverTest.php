@@ -80,12 +80,7 @@ class SmartContentResolverTest extends TestCase
         $this->targetGroupStore = $this->prophesize(TargetGroupStoreInterface::class);
 
         $this->smartContentResolver = new SmartContentResolver(
-            new RewindableGenerator(
-                function () {
-                    yield 'media' => $this->mediaProviderResolver->reveal();
-                },
-                1
-            ),
+            new \ArrayIterator(['media' => $this->mediaProviderResolver->reveal()]),
             $this->tagManager->reveal(),
             $this->requestStack->reveal(),
             $this->tagRequestHandler->reveal(),

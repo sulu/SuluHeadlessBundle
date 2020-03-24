@@ -40,12 +40,7 @@ class ContentResolverTest extends TestCase
         $this->mediaSelectionResolver = $this->prophesize(ContentTypeResolverInterface::class);
 
         $this->contentResolver = new ContentResolver(
-            new RewindableGenerator(
-                function () {
-                    yield 'media_selection' => $this->mediaSelectionResolver->reveal();
-                },
-                1
-            )
+            new \ArrayIterator(['media_selection' => $this->mediaSelectionResolver->reveal()])
         );
     }
 
