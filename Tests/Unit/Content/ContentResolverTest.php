@@ -21,7 +21,6 @@ use Sulu\Bundle\HeadlessBundle\Content\ContentResolverInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\ContentTypeResolverInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Component\Content\Compat\PropertyInterface;
-use Symfony\Component\DependencyInjection\Argument\RewindableGenerator;
 
 class ContentResolverTest extends TestCase
 {
