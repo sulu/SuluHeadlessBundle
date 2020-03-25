@@ -79,7 +79,7 @@ class SmartContentResolverTest extends TestCase
         $this->targetGroupStore = $this->prophesize(TargetGroupStoreInterface::class);
 
         $this->smartContentResolver = new SmartContentResolver(
-            ['media' => $this->mediaProviderResolver->reveal()],
+            new \ArrayIterator(['media' => $this->mediaProviderResolver->reveal()]),
             $this->tagManager->reveal(),
             $this->requestStack->reveal(),
             $this->tagRequestHandler->reveal(),

@@ -63,18 +63,15 @@ class SmartContentResolver implements ContentTypeResolverInterface
      */
     private $targetGroupStore;
 
-    /**
-     * @param DataProviderResolverInterface[] $resolvers
-     */
     public function __construct(
-        array $resolvers,
+        \Traversable $resolvers,
         TagManagerInterface $tagManager,
         RequestStack $requestStack,
         TagRequestHandlerInterface $tagRequestHandler,
         CategoryRequestHandlerInterface $categoryRequestHandler,
         ?TargetGroupStoreInterface $targetGroupStore = null
     ) {
-        $this->resolvers = $resolvers;
+        $this->resolvers = iterator_to_array($resolvers);
         $this->tagManager = $tagManager;
         $this->requestStack = $requestStack;
         $this->tagRequestHandler = $tagRequestHandler;

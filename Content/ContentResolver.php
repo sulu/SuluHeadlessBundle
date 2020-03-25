@@ -23,12 +23,9 @@ class ContentResolver implements ContentResolverInterface
      */
     private $resolvers;
 
-    /**
-     * @param ContentTypeResolverInterface[] $resolvers
-     */
-    public function __construct(array $resolvers)
+    public function __construct(\Traversable $resolvers)
     {
-        $this->resolvers = $resolvers;
+        $this->resolvers = iterator_to_array($resolvers);
     }
 
     public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView
