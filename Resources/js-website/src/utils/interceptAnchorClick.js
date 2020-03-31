@@ -53,5 +53,5 @@ export default (clickEvent) => {
     }
 
     clickEvent.preventDefault();
-    router.assign(clickedAnchor.pathname, clickedAnchor.search);
+    router.assign(clickedAnchor.pathname, clickedAnchor.search, clickedAnchor.hash);
 };
