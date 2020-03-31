@@ -74,15 +74,15 @@ class Router {
         this.handleLocationChange(this.location, 'reload');
     };
 
-    assign = (pathname, search) => {
+    assign = (pathname, search, hash) => {
         this.history.push({
-            pathname, search,
+            pathname, search, hash
         });
     };
 
-    replace = (pathname, search) => {
+    replace = (pathname, search, hash) => {
         this.history.replace({
-            pathname, search,
+            pathname, search, hash
         });
     };
 }
