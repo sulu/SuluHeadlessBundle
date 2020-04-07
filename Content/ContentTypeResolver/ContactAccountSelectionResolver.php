@@ -18,7 +18,7 @@ use Sulu\Bundle\ContactBundle\Contact\AccountManager;
 use Sulu\Bundle\ContactBundle\Contact\ContactManager;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\AccountSerializerInterface;
-use Sulu\Bundle\HeadlessBundle\Content\Serializer\ContactSerializer;
+use Sulu\Bundle\HeadlessBundle\Content\Serializer\ContactSerializerInterface;
 use Sulu\Component\Content\Compat\PropertyInterface;
 
 class ContactAccountSelectionResolver implements ContentTypeResolverInterface
@@ -39,7 +39,7 @@ class ContactAccountSelectionResolver implements ContentTypeResolverInterface
     private $accountManager;
 
     /**
-     * @var ContactSerializer
+     * @var ContactSerializerInterface
      */
     private $contactSerializer;
 
@@ -51,7 +51,7 @@ class ContactAccountSelectionResolver implements ContentTypeResolverInterface
     public function __construct(
         ContactManager $contactManager,
         AccountManager $accountManager,
-        ContactSerializer $contactSerializer,
+        ContactSerializerInterface $contactSerializer,
         AccountSerializerInterface $accountSerializer
     ) {
         $this->contactManager = $contactManager;

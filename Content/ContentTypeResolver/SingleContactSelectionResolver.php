@@ -16,7 +16,7 @@ namespace Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver;
 use JMS\Serializer\SerializationContext;
 use Sulu\Bundle\ContactBundle\Contact\ContactManager;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
-use Sulu\Bundle\HeadlessBundle\Content\Serializer\ContactSerializer;
+use Sulu\Bundle\HeadlessBundle\Content\Serializer\ContactSerializerInterface;
 use Sulu\Component\Content\Compat\PropertyInterface;
 
 class SingleContactSelectionResolver implements ContentTypeResolverInterface
@@ -32,13 +32,13 @@ class SingleContactSelectionResolver implements ContentTypeResolverInterface
     private $contactManager;
 
     /**
-     * @var ContactSerializer
+     * @var ContactSerializerInterface
      */
     private $contactSerializer;
 
     public function __construct(
         ContactManager $contactManager,
-        ContactSerializer $contactSerializer
+        ContactSerializerInterface $contactSerializer
     ) {
         $this->contactManager = $contactManager;
         $this->contactSerializer = $contactSerializer;

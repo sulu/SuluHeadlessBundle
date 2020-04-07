@@ -23,6 +23,7 @@ use Sulu\Bundle\ContactBundle\Entity\ContactTitleRepository;
 use Sulu\Bundle\ContactBundle\Entity\Position;
 use Sulu\Bundle\ContactBundle\Entity\PositionRepository;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\ContactSerializer;
+use Sulu\Bundle\HeadlessBundle\Content\Serializer\ContactSerializerInterface;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializer;
 use Sulu\Bundle\MediaBundle\Api\Media;
 use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
@@ -31,7 +32,7 @@ use Sulu\Component\Serializer\ArraySerializerInterface;
 class ContactSerializerTest extends TestCase
 {
     /**
-     * @var ContactSerializer
+     * @var ContactSerializerInterface
      */
     private $contactSerializer;
 

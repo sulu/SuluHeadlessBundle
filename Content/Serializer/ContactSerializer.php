@@ -22,7 +22,7 @@ use Sulu\Bundle\ContactBundle\Entity\PositionRepository;
 use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
 use Sulu\Component\Serializer\ArraySerializerInterface;
 
-class ContactSerializer
+class ContactSerializer implements ContactSerializerInterface
 {
     /**
      * @var ArraySerializerInterface
