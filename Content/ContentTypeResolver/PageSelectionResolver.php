@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver;
 
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
-use Sulu\Bundle\HeadlessBundle\Content\Serializer\PageSerializer;
+use Sulu\Bundle\HeadlessBundle\Content\Serializer\PageSerializerInterface;
 use Sulu\Component\Content\Compat\PropertyInterface;
 use Sulu\Component\Content\Compat\PropertyParameter;
 
@@ -26,7 +26,7 @@ class PageSelectionResolver implements ContentTypeResolverInterface
     }
 
     /**
-     * @var PageSerializer
+     * @var PageSerializerInterface
      */
     private $pageSerializer;
 
@@ -36,7 +36,7 @@ class PageSelectionResolver implements ContentTypeResolverInterface
     private $pageSelectionContainerFactory;
 
     public function __construct(
-        PageSerializer $pageSerializer,
+        PageSerializerInterface $pageSerializer,
         PageSelectionContainerFactory $pageSelectionContainerFactory
     ) {
         $this->pageSerializer = $pageSerializer;

@@ -16,7 +16,7 @@ namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\DataProviderResolver;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver\PageResolver;
-use Sulu\Bundle\HeadlessBundle\Content\Serializer\PageSerializer;
+use Sulu\Bundle\HeadlessBundle\Content\Serializer\PageSerializerInterface;
 use Sulu\Component\Content\Compat\PropertyParameter;
 use Sulu\Component\Content\SmartContent\PageDataProvider;
 use Sulu\Component\SmartContent\ArrayAccessItem;
@@ -31,7 +31,7 @@ class PageResolverTest extends TestCase
     private $pageDataProvider;
 
     /**
-     * @var PageSerializer|ObjectProphecy
+     * @var PageSerializerInterface|ObjectProphecy
      */
     private $pageSerializer;
 
@@ -43,7 +43,7 @@ class PageResolverTest extends TestCase
     protected function setUp(): void
     {
         $this->pageDataProvider = $this->prophesize(PageDataProvider::class);
-        $this->pageSerializer = $this->prophesize(PageSerializer::class);
+        $this->pageSerializer = $this->prophesize(PageSerializerInterface::class);
 
         $this->pageResolver = new PageResolver(
             $this->pageDataProvider->reveal(),

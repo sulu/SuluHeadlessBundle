@@ -19,7 +19,7 @@ use Sulu\Component\Content\Compat\PropertyParameter;
 use Sulu\Component\Content\Compat\StructureInterface;
 use Sulu\Component\Content\Compat\StructureManagerInterface;
 
-class PageSerializer
+class PageSerializer implements PageSerializerInterface
 {
     /**
      * @var StructureManagerInterface
