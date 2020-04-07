@@ -17,7 +17,7 @@ use JMS\Serializer\SerializationContext;
 use Sulu\Bundle\CategoryBundle\Api\Category;
 use Sulu\Component\Serializer\ArraySerializerInterface;
 
-class CategorySerializer
+class CategorySerializer implements CategorySerializerInterface
 {
     /**
      * @var ArraySerializerInterface

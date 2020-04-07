@@ -21,7 +21,7 @@ use Sulu\Bundle\CategoryBundle\Api\Category;
 use Sulu\Bundle\CategoryBundle\Category\CategoryManagerInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\CategorySelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
-use Sulu\Bundle\HeadlessBundle\Content\Serializer\CategorySerializer;
+use Sulu\Bundle\HeadlessBundle\Content\Serializer\CategorySerializerInterface;
 use Sulu\Bundle\MediaBundle\Api\Media;
 use Sulu\Component\Content\Compat\PropertyInterface;
 
@@ -33,7 +33,7 @@ class CategorySelectionResolverTest extends TestCase
     private $categoryManager;
 
     /**
-     * @var CategorySerializer|ObjectProphecy
+     * @var CategorySerializerInterface|ObjectProphecy
      */
     private $categorySerializer;
 
@@ -45,7 +45,7 @@ class CategorySelectionResolverTest extends TestCase
     protected function setUp(): void
     {
         $this->categoryManager = $this->prophesize(CategoryManagerInterface::class);
-        $this->categorySerializer = $this->prophesize(CategorySerializer::class);
+        $this->categorySerializer = $this->prophesize(CategorySerializerInterface::class);
 
         $this->categorySelectionResolver = new CategorySelectionResolver(
             $this->categoryManager->reveal(),

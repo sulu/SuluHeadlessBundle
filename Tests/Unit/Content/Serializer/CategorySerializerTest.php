@@ -18,6 +18,7 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\CategoryBundle\Api\Category;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\CategorySerializer;
+use Sulu\Bundle\HeadlessBundle\Content\Serializer\CategorySerializerInterface;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializer;
 use Sulu\Bundle\MediaBundle\Api\Media;
 use Sulu\Component\Serializer\ArraySerializerInterface;
@@ -35,7 +36,7 @@ class CategorySerializerTest extends TestCase
     private $mediaSerializer;
 
     /**
-     * @var CategorySerializer
+     * @var CategorySerializerInterface
      */
     private $categorySerializer;
 
