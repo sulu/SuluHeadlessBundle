@@ -13,9 +13,14 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Content\Serializer;
 
+use Sulu\Component\Content\Compat\PropertyParameter;
+
 interface PageSerializerInterface
 {
     /**
+     * @param mixed[] $data
+     * @param PropertyParameter[] $propertyParameters
+     *
      * @return mixed[]
      */
     public function serialize(array $data, array $propertyParameters): array;
