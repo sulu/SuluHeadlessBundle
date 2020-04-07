@@ -19,6 +19,7 @@ use Prophecy\Argument;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\ContactBundle\Api\Account;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\AccountSerializer;
+use Sulu\Bundle\HeadlessBundle\Content\Serializer\AccountSerializerInterface;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializer;
 use Sulu\Bundle\MediaBundle\Api\Media;
 use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
@@ -42,7 +43,7 @@ class AccountSerializerTest extends TestCase
     private $mediaManager;
 
     /**
-     * @var AccountSerializer
+     * @var AccountSerializerInterface
      */
     private $accountSerializer;
 
