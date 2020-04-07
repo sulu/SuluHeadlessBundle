@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver;
 
-use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializer;
+use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializerInterface;
 use Sulu\Bundle\MediaBundle\Api\Media;
 use Sulu\Component\Content\Compat\PropertyParameter;
 use Sulu\Component\Media\SmartContent\MediaDataProvider;
@@ -32,13 +32,13 @@ class MediaResolver implements DataProviderResolverInterface
     private $mediaDataProvider;
 
     /**
-     * @var MediaSerializer
+     * @var MediaSerializerInterface
      */
     private $mediaSerializer;
 
     public function __construct(
         MediaDataProvider $mediaDataProvider,
-        MediaSerializer $mediaSerializer
+        MediaSerializerInterface $mediaSerializer
     ) {
         $this->mediaDataProvider = $mediaDataProvider;
         $this->mediaSerializer = $mediaSerializer;

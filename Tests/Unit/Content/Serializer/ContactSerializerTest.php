@@ -24,7 +24,7 @@ use Sulu\Bundle\ContactBundle\Entity\Position;
 use Sulu\Bundle\ContactBundle\Entity\PositionRepository;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\ContactSerializer;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\ContactSerializerInterface;
-use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializer;
+use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializerInterface;
 use Sulu\Bundle\MediaBundle\Api\Media;
 use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
 use Sulu\Component\Serializer\ArraySerializerInterface;
@@ -47,7 +47,7 @@ class ContactSerializerTest extends TestCase
     private $mediaManager;
 
     /**
-     * @var MediaSerializer|ObjectProphecy
+     * @var MediaSerializerInterface|ObjectProphecy
      */
     private $mediaSerializer;
 
@@ -65,7 +65,7 @@ class ContactSerializerTest extends TestCase
     {
         $this->arraySerializer = $this->prophesize(ArraySerializerInterface::class);
         $this->mediaManager = $this->prophesize(MediaManagerInterface::class);
-        $this->mediaSerializer = $this->prophesize(MediaSerializer::class);
+        $this->mediaSerializer = $this->prophesize(MediaSerializerInterface::class);
         $this->contactTitleRepository = $this->prophesize(ContactTitleRepository::class);
         $this->positionRepository = $this->prophesize(PositionRepository::class);
 

@@ -15,7 +15,7 @@ namespace Sulu\Bundle\HeadlessBundle\Controller;
 
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
-use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializer;
+use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializerInterface;
 use Sulu\Bundle\WebsiteBundle\Navigation\NavigationMapperInterface;
 use Sulu\Component\Rest\ListBuilder\CollectionRepresentation;
 use Sulu\Component\Rest\RequestParametersTrait;
@@ -39,14 +39,14 @@ class NavigationController
     private $serializer;
 
     /**
-     * @var MediaSerializer
+     * @var MediaSerializerInterface
      */
     private $mediaSerializer;
 
     public function __construct(
         NavigationMapperInterface $navigationMapper,
         SerializerInterface $serializer,
-        MediaSerializer $mediaSerializer
+        MediaSerializerInterface $mediaSerializer
     ) {
         $this->navigationMapper = $navigationMapper;
         $this->serializer = $serializer;

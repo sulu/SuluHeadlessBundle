@@ -17,6 +17,7 @@ use JMS\Serializer\SerializationContext;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializer;
+use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializerInterface;
 use Sulu\Bundle\MediaBundle\Api\Media;
 use Sulu\Bundle\MediaBundle\Media\FormatCache\FormatCacheInterface;
 use Sulu\Bundle\MediaBundle\Media\ImageConverter\ImageConverterInterface;
@@ -40,7 +41,7 @@ class MediaSerializerTest extends TestCase
     private $formatCache;
 
     /**
-     * @var MediaSerializer
+     * @var MediaSerializerInterface
      */
     private $mediaSerializer;
 
