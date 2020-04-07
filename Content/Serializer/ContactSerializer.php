@@ -35,7 +35,7 @@ class ContactSerializer implements ContactSerializerInterface
     private $mediaManager;
 
     /**
-     * @var MediaSerializer
+     * @var MediaSerializerInterface
      */
     private $mediaSerializer;
 
@@ -52,7 +52,7 @@ class ContactSerializer implements ContactSerializerInterface
     public function __construct(
         ArraySerializerInterface $arraySerializer,
         MediaManagerInterface $mediaManager,
-        MediaSerializer $mediaSerializer,
+        MediaSerializerInterface $mediaSerializer,
         ContactTitleRepository $contactTitleRepository,
         PositionRepository $positionRepository
     ) {

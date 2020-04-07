@@ -26,7 +26,7 @@ class AccountSerializer implements AccountSerializerInterface
     private $arraySerializer;
 
     /**
-     * @var MediaSerializer
+     * @var MediaSerializerInterface
      */
     private $mediaSerializer;
 
@@ -37,7 +37,7 @@ class AccountSerializer implements AccountSerializerInterface
 
     public function __construct(
         ArraySerializerInterface $arraySerializer,
-        MediaSerializer $mediaSerializer,
+        MediaSerializerInterface $mediaSerializer,
         MediaManagerInterface $mediaManager
     ) {
         $this->arraySerializer = $arraySerializer;

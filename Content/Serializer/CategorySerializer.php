@@ -25,13 +25,13 @@ class CategorySerializer implements CategorySerializerInterface
     private $arraySerializer;
 
     /**
-     * @var MediaSerializer
+     * @var MediaSerializerInterface
      */
     private $mediaSerializer;
 
     public function __construct(
         ArraySerializerInterface $arraySerializer,
-        MediaSerializer $mediaSerializer
+        MediaSerializerInterface $mediaSerializer
     ) {
         $this->arraySerializer = $arraySerializer;
         $this->mediaSerializer = $mediaSerializer;
