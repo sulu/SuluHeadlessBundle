@@ -10,6 +10,8 @@
             <argument type="service" id="sulu.content.structure_manager"/>
             <argument type="service" id="sulu_headless.content_resolver"/>
         </service>
+        <service id="Sulu\Bundle\HeadlessBundle\Content\Serializer\PageSerializerInterface" alias="sulu_headless.serializer.page"/>
+
         <service
             id="sulu_headless.serializer.account"
             class="Sulu\Bundle\HeadlessBundle\Content\Serializer\AccountSerializer"
@@ -18,6 +20,7 @@
             <argument type="service" id="sulu_headless.serializer.media"/>
             <argument type="service" id="sulu_media.media_manager"/>
         </service>
+        <service id="Sulu\Bundle\HeadlessBundle\Content\Serializer\AccountSerializerInterface" alias="sulu_headless.serializer.account"/>
 
         <service
             id="sulu_headless.serializer.contact"
@@ -29,6 +32,7 @@
             <argument type="service" id="sulu_contact.contact_title_repository"/>
             <argument type="service" id="sulu_contact.position_repository"/>
         </service>
+        <service id="Sulu\Bundle\HeadlessBundle\Content\Serializer\ContactSerializerInterface" alias="sulu_headless.serializer.contact"/>
 
         <service
             id="sulu_headless.serializer.media"
@@ -38,6 +42,7 @@
             <argument type="service" id="sulu_media.image.converter"/>
             <argument type="service" id="sulu_media.format_cache"/>
         </service>
+        <service id="Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializerInterface" alias="sulu_headless.serializer.media"/>
 
         <service
             id="sulu_headless.serializer.category"
@@ -46,5 +51,6 @@
             <argument type="service" id="sulu_core.array_serializer"/>
             <argument type="service" id="sulu_headless.serializer.media"/>
         </service>
+        <service id="Sulu\Bundle\HeadlessBundle\Content\Serializer\CategorySerializerInterface" alias="sulu_headless.serializer.category"/>
     </services>
 </container>
