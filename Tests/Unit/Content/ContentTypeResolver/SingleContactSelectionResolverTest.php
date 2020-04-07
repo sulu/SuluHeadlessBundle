@@ -21,7 +21,7 @@ use Sulu\Bundle\ContactBundle\Api\Contact;
 use Sulu\Bundle\ContactBundle\Contact\ContactManager;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\SingleContactSelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
-use Sulu\Bundle\HeadlessBundle\Content\Serializer\ContactSerializer;
+use Sulu\Bundle\HeadlessBundle\Content\Serializer\ContactSerializerInterface;
 use Sulu\Component\Content\Compat\PropertyInterface;
 
 class SingleContactSelectionResolverTest extends TestCase
@@ -32,7 +32,7 @@ class SingleContactSelectionResolverTest extends TestCase
     private $contactManager;
 
     /**
-     * @var ContactSerializer|ObjectProphecy
+     * @var ContactSerializerInterface|ObjectProphecy
      */
     private $contactSerializer;
 
@@ -44,7 +44,7 @@ class SingleContactSelectionResolverTest extends TestCase
     protected function setUp(): void
     {
         $this->contactManager = $this->prophesize(ContactManager::class);
-        $this->contactSerializer = $this->prophesize(ContactSerializer::class);
+        $this->contactSerializer = $this->prophesize(ContactSerializerInterface::class);
 
         $this->singleContactSelectionResolver = new SingleContactSelectionResolver(
             $this->contactManager->reveal(),

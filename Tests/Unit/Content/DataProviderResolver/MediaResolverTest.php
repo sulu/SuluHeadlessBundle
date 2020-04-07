@@ -16,7 +16,7 @@ namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\DataProviderResolver;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver\MediaResolver;
-use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializer;
+use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializerInterface;
 use Sulu\Bundle\MediaBundle\Api\Media;
 use Sulu\Component\Content\Compat\PropertyParameter;
 use Sulu\Component\Media\SmartContent\MediaDataProvider;
@@ -32,7 +32,7 @@ class MediaResolverTest extends TestCase
     private $mediaDataProvider;
 
     /**
-     * @var MediaSerializer|ObjectProphecy
+     * @var MediaSerializerInterface|ObjectProphecy
      */
     private $mediaSerializer;
 
@@ -44,7 +44,7 @@ class MediaResolverTest extends TestCase
     protected function setUp(): void
     {
         $this->mediaDataProvider = $this->prophesize(MediaDataProvider::class);
-        $this->mediaSerializer = $this->prophesize(MediaSerializer::class);
+        $this->mediaSerializer = $this->prophesize(MediaSerializerInterface::class);
 
         $this->mediaResolver = new MediaResolver(
             $this->mediaDataProvider->reveal(),

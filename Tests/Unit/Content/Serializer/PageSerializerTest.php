@@ -18,6 +18,7 @@ use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\HeadlessBundle\Content\ContentResolverInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\PageSerializer;
+use Sulu\Bundle\HeadlessBundle\Content\Serializer\PageSerializerInterface;
 use Sulu\Component\Content\Compat\PropertyInterface;
 use Sulu\Component\Content\Compat\PropertyParameter;
 use Sulu\Component\Content\Compat\StructureInterface;
@@ -36,7 +37,7 @@ class PageSerializerTest extends TestCase
     private $contentResolver;
 
     /**
-     * @var PageSerializer
+     * @var PageSerializerInterface
      */
     private $pageSerializer;
 

@@ -17,7 +17,7 @@ use JMS\Serializer\SerializationContext;
 use Sulu\Bundle\CategoryBundle\Api\Category;
 use Sulu\Bundle\CategoryBundle\Category\CategoryManagerInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
-use Sulu\Bundle\HeadlessBundle\Content\Serializer\CategorySerializer;
+use Sulu\Bundle\HeadlessBundle\Content\Serializer\CategorySerializerInterface;
 use Sulu\Component\Content\Compat\PropertyInterface;
 
 class CategorySelectionResolver implements ContentTypeResolverInterface
@@ -33,13 +33,13 @@ class CategorySelectionResolver implements ContentTypeResolverInterface
     private $categoryManager;
 
     /**
-     * @var CategorySerializer
+     * @var CategorySerializerInterface
      */
     private $categorySerializer;
 
     public function __construct(
         CategoryManagerInterface $categoryManager,
-        CategorySerializer $categorySerializer
+        CategorySerializerInterface $categorySerializer
     ) {
         $this->categoryManager = $categoryManager;
         $this->categorySerializer = $categorySerializer;

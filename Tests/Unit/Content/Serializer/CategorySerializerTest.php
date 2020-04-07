@@ -18,7 +18,8 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\CategoryBundle\Api\Category;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\CategorySerializer;
-use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializer;
+use Sulu\Bundle\HeadlessBundle\Content\Serializer\CategorySerializerInterface;
+use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializerInterface;
 use Sulu\Bundle\MediaBundle\Api\Media;
 use Sulu\Component\Serializer\ArraySerializerInterface;
 
@@ -30,12 +31,12 @@ class CategorySerializerTest extends TestCase
     private $arraySerializer;
 
     /**
-     * @var MediaSerializer|ObjectProphecy
+     * @var MediaSerializerInterface|ObjectProphecy
      */
     private $mediaSerializer;
 
     /**
-     * @var CategorySerializer
+     * @var CategorySerializerInterface
      */
     private $categorySerializer;
 
@@ -43,7 +44,7 @@ class CategorySerializerTest extends TestCase
     {
         $this->arraySerializer = $this->prophesize(ArraySerializerInterface::class);
 
-        $this->mediaSerializer = $this->prophesize(MediaSerializer::class);
+        $this->mediaSerializer = $this->prophesize(MediaSerializerInterface::class);
 
         $this->categorySerializer = new CategorySerializer(
             $this->arraySerializer->reveal(),

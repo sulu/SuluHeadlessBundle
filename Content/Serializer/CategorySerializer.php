@@ -17,7 +17,7 @@ use JMS\Serializer\SerializationContext;
 use Sulu\Bundle\CategoryBundle\Api\Category;
 use Sulu\Component\Serializer\ArraySerializerInterface;
 
-class CategorySerializer
+class CategorySerializer implements CategorySerializerInterface
 {
     /**
      * @var ArraySerializerInterface
@@ -25,13 +25,13 @@ class CategorySerializer
     private $arraySerializer;
 
     /**
-     * @var MediaSerializer
+     * @var MediaSerializerInterface
      */
     private $mediaSerializer;
 
     public function __construct(
         ArraySerializerInterface $arraySerializer,
-        MediaSerializer $mediaSerializer
+        MediaSerializerInterface $mediaSerializer
     ) {
         $this->arraySerializer = $arraySerializer;
         $this->mediaSerializer = $mediaSerializer;

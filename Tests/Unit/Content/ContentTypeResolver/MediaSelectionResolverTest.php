@@ -17,7 +17,7 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\MediaSelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
-use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializer;
+use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializerInterface;
 use Sulu\Bundle\MediaBundle\Api\Media;
 use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
 use Sulu\Component\Content\Compat\PropertyInterface;
@@ -30,7 +30,7 @@ class MediaSelectionResolverTest extends TestCase
     private $mediaManager;
 
     /**
-     * @var MediaSerializer|ObjectProphecy
+     * @var MediaSerializerInterface|ObjectProphecy
      */
     private $mediaSerializer;
 
@@ -42,7 +42,7 @@ class MediaSelectionResolverTest extends TestCase
     protected function setUp(): void
     {
         $this->mediaManager = $this->prophesize(MediaManagerInterface::class);
-        $this->mediaSerializer = $this->prophesize(MediaSerializer::class);
+        $this->mediaSerializer = $this->prophesize(MediaSerializerInterface::class);
 
         $this->mediaResolver = new MediaSelectionResolver(
             $this->mediaManager->reveal(),

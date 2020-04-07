@@ -18,7 +18,7 @@ use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\PageSelectionContainerFactory;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\PageSelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
-use Sulu\Bundle\HeadlessBundle\Content\Serializer\PageSerializer;
+use Sulu\Bundle\HeadlessBundle\Content\Serializer\PageSerializerInterface;
 use Sulu\Bundle\PageBundle\Content\PageSelectionContainer;
 use Sulu\Component\Content\Compat\PropertyInterface;
 use Sulu\Component\Content\Compat\PropertyParameter;
@@ -26,7 +26,7 @@ use Sulu\Component\Content\Compat\PropertyParameter;
 class PageSelectionResolverTest extends TestCase
 {
     /**
-     * @var PageSerializer|ObjectProphecy
+     * @var PageSerializerInterface|ObjectProphecy
      */
     private $pageSerializer;
 
@@ -42,7 +42,7 @@ class PageSelectionResolverTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->pageSerializer = $this->prophesize(PageSerializer::class);
+        $this->pageSerializer = $this->prophesize(PageSerializerInterface::class);
         $this->pageSelectionContainerFactory = $this->prophesize(PageSelectionContainerFactory::class);
 
         $this->pageSelectionResolver = new PageSelectionResolver(

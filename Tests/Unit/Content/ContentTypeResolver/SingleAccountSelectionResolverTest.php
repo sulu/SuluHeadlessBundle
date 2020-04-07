@@ -21,7 +21,7 @@ use Sulu\Bundle\ContactBundle\Api\Account;
 use Sulu\Bundle\ContactBundle\Contact\AccountManager;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\SingleAccountSelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
-use Sulu\Bundle\HeadlessBundle\Content\Serializer\AccountSerializer;
+use Sulu\Bundle\HeadlessBundle\Content\Serializer\AccountSerializerInterface;
 use Sulu\Component\Content\Compat\PropertyInterface;
 
 class SingleAccountSelectionResolverTest extends TestCase
@@ -32,7 +32,7 @@ class SingleAccountSelectionResolverTest extends TestCase
     private $accountManager;
 
     /**
-     * @var AccountSerializer|ObjectProphecy
+     * @var AccountSerializerInterface|ObjectProphecy
      */
     private $accountSerializer;
 
@@ -44,7 +44,7 @@ class SingleAccountSelectionResolverTest extends TestCase
     protected function setUp(): void
     {
         $this->accountManager = $this->prophesize(AccountManager::class);
-        $this->accountSerializer = $this->prophesize(AccountSerializer::class);
+        $this->accountSerializer = $this->prophesize(AccountSerializerInterface::class);
 
         $this->singleAccountSelectionResolver = new SingleAccountSelectionResolver(
             $this->accountManager->reveal(),

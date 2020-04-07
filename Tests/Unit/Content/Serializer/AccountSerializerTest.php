@@ -19,7 +19,8 @@ use Prophecy\Argument;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\ContactBundle\Api\Account;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\AccountSerializer;
-use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializer;
+use Sulu\Bundle\HeadlessBundle\Content\Serializer\AccountSerializerInterface;
+use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializerInterface;
 use Sulu\Bundle\MediaBundle\Api\Media;
 use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
 use Sulu\Component\Serializer\ArraySerializerInterface;
@@ -32,7 +33,7 @@ class AccountSerializerTest extends TestCase
     private $arraySerializer;
 
     /**
-     * @var MediaSerializer|ObjectProphecy
+     * @var MediaSerializerInterface|ObjectProphecy
      */
     private $mediaSerializer;
 
@@ -42,14 +43,14 @@ class AccountSerializerTest extends TestCase
     private $mediaManager;
 
     /**
-     * @var AccountSerializer
+     * @var AccountSerializerInterface
      */
     private $accountSerializer;
 
     protected function setUp(): void
     {
         $this->arraySerializer = $this->prophesize(ArraySerializerInterface::class);
-        $this->mediaSerializer = $this->prophesize(MediaSerializer::class);
+        $this->mediaSerializer = $this->prophesize(MediaSerializerInterface::class);
         $this->mediaManager = $this->prophesize(MediaManagerInterface::class);
 
         $this->accountSerializer = new AccountSerializer(

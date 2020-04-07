@@ -16,7 +16,7 @@ namespace Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver;
 use JMS\Serializer\SerializationContext;
 use Sulu\Bundle\ContactBundle\Contact\AccountManager;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
-use Sulu\Bundle\HeadlessBundle\Content\Serializer\AccountSerializer;
+use Sulu\Bundle\HeadlessBundle\Content\Serializer\AccountSerializerInterface;
 use Sulu\Component\Content\Compat\PropertyInterface;
 
 class SingleAccountSelectionResolver implements ContentTypeResolverInterface
@@ -32,13 +32,13 @@ class SingleAccountSelectionResolver implements ContentTypeResolverInterface
     private $accountManager;
 
     /**
-     * @var AccountSerializer
+     * @var AccountSerializerInterface
      */
     private $accountSerializer;
 
     public function __construct(
         AccountManager $accountManager,
-        AccountSerializer $accountSerializer
+        AccountSerializerInterface $accountSerializer
     ) {
         $this->accountManager = $accountManager;
         $this->accountSerializer = $accountSerializer;

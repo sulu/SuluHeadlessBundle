@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver;
 
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
-use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializer;
+use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializerInterface;
 use Sulu\Bundle\MediaBundle\Api\Media;
 use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
 use Sulu\Component\Content\Compat\PropertyInterface;
@@ -32,13 +32,13 @@ class MediaSelectionResolver implements ContentTypeResolverInterface
     private $mediaManager;
 
     /**
-     * @var MediaSerializer
+     * @var MediaSerializerInterface
      */
     private $mediaSerializer;
 
     public function __construct(
         MediaManagerInterface $mediaManager,
-        MediaSerializer $mediaSerializer
+        MediaSerializerInterface $mediaSerializer
     ) {
         $this->mediaManager = $mediaManager;
         $this->mediaSerializer = $mediaSerializer;

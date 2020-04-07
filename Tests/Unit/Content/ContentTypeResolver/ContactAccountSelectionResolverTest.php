@@ -23,8 +23,8 @@ use Sulu\Bundle\ContactBundle\Contact\AccountManager;
 use Sulu\Bundle\ContactBundle\Contact\ContactManager;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\ContactAccountSelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
-use Sulu\Bundle\HeadlessBundle\Content\Serializer\AccountSerializer;
-use Sulu\Bundle\HeadlessBundle\Content\Serializer\ContactSerializer;
+use Sulu\Bundle\HeadlessBundle\Content\Serializer\AccountSerializerInterface;
+use Sulu\Bundle\HeadlessBundle\Content\Serializer\ContactSerializerInterface;
 use Sulu\Component\Content\Compat\PropertyInterface;
 
 class ContactAccountSelectionResolverTest extends TestCase
@@ -40,12 +40,12 @@ class ContactAccountSelectionResolverTest extends TestCase
     private $accountManager;
 
     /**
-     * @var ContactSerializer|ObjectProphecy
+     * @var ContactSerializerInterface|ObjectProphecy
      */
     private $contactSerializer;
 
     /**
-     * @var AccountSerializer|ObjectProphecy
+     * @var AccountSerializerInterface|ObjectProphecy
      */
     private $accountSerializer;
 
@@ -58,8 +58,8 @@ class ContactAccountSelectionResolverTest extends TestCase
     {
         $this->contactManager = $this->prophesize(ContactManager::class);
         $this->accountManager = $this->prophesize(AccountManager::class);
-        $this->contactSerializer = $this->prophesize(ContactSerializer::class);
-        $this->accountSerializer = $this->prophesize(AccountSerializer::class);
+        $this->contactSerializer = $this->prophesize(ContactSerializerInterface::class);
+        $this->accountSerializer = $this->prophesize(AccountSerializerInterface::class);
 
         $this->contactAccountResolver = new ContactAccountSelectionResolver(
             $this->contactManager->reveal(),

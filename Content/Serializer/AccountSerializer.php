@@ -18,7 +18,7 @@ use Sulu\Bundle\ContactBundle\Api\Account;
 use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
 use Sulu\Component\Serializer\ArraySerializerInterface;
 
-class AccountSerializer
+class AccountSerializer implements AccountSerializerInterface
 {
     /**
      * @var ArraySerializerInterface
@@ -26,7 +26,7 @@ class AccountSerializer
     private $arraySerializer;
 
     /**
-     * @var MediaSerializer
+     * @var MediaSerializerInterface
      */
     private $mediaSerializer;
 
@@ -37,7 +37,7 @@ class AccountSerializer
 
     public function __construct(
         ArraySerializerInterface $arraySerializer,
-        MediaSerializer $mediaSerializer,
+        MediaSerializerInterface $mediaSerializer,
         MediaManagerInterface $mediaManager
     ) {
         $this->arraySerializer = $arraySerializer;

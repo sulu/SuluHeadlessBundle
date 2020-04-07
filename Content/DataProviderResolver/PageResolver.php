@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver;
 
-use Sulu\Bundle\HeadlessBundle\Content\Serializer\PageSerializer;
+use Sulu\Bundle\HeadlessBundle\Content\Serializer\PageSerializerInterface;
 use Sulu\Component\Content\Compat\PropertyParameter;
 use Sulu\Component\Content\SmartContent\PageDataProvider;
 use Sulu\Component\SmartContent\ArrayAccessItem;
@@ -32,13 +32,13 @@ class PageResolver implements DataProviderResolverInterface
     private $pageDataProvider;
 
     /**
-     * @var PageSerializer
+     * @var PageSerializerInterface
      */
     private $pageSerializer;
 
     public function __construct(
         PageDataProvider $pageDataProvider,
-        PageSerializer $pageSerializer
+        PageSerializerInterface $pageSerializer
     ) {
         $this->pageDataProvider = $pageDataProvider;
         $this->pageSerializer = $pageSerializer;

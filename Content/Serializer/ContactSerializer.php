@@ -22,7 +22,7 @@ use Sulu\Bundle\ContactBundle\Entity\PositionRepository;
 use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
 use Sulu\Component\Serializer\ArraySerializerInterface;
 
-class ContactSerializer
+class ContactSerializer implements ContactSerializerInterface
 {
     /**
      * @var ArraySerializerInterface
@@ -35,7 +35,7 @@ class ContactSerializer
     private $mediaManager;
 
     /**
-     * @var MediaSerializer
+     * @var MediaSerializerInterface
      */
     private $mediaSerializer;
 
@@ -52,7 +52,7 @@ class ContactSerializer
     public function __construct(
         ArraySerializerInterface $arraySerializer,
         MediaManagerInterface $mediaManager,
-        MediaSerializer $mediaSerializer,
+        MediaSerializerInterface $mediaSerializer,
         ContactTitleRepository $contactTitleRepository,
         PositionRepository $positionRepository
     ) {

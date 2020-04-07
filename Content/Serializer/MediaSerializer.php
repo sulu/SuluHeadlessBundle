@@ -19,7 +19,7 @@ use Sulu\Bundle\MediaBundle\Media\FormatCache\FormatCacheInterface;
 use Sulu\Bundle\MediaBundle\Media\ImageConverter\ImageConverterInterface;
 use Sulu\Component\Serializer\ArraySerializerInterface;
 
-class MediaSerializer
+class MediaSerializer implements MediaSerializerInterface
 {
     /**
      * @var ArraySerializerInterface
