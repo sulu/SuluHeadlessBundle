@@ -25,7 +25,6 @@ use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\ContactAccountSelecti
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\AccountSerializerInterface;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\ContactSerializerInterface;
-use Sulu\Bundle\HeadlessBundle\Content\Serializer\ontactSerializer;
 use Sulu\Component\Content\Compat\PropertyInterface;
 
 class ContactAccountSelectionResolverTest extends TestCase
