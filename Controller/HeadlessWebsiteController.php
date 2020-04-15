@@ -44,7 +44,7 @@ class HeadlessWebsiteController extends AbstractController
         $json = $this->serializeData($data);
 
         if ('json' !== $request->getRequestFormat()) {
-            return $this->renderTemplateResponse($structure, $requestFormat, $preview, [
+            return $this->renderTemplateResponse($structure, $requestFormat, $preview, $partial, [
                 'jsonData' => $json,
                 'data' => $data,
             ]);
@@ -67,6 +67,7 @@ class HeadlessWebsiteController extends AbstractController
         StructureInterface $structure,
         string $requestFormat,
         bool $preview,
+        bool $partial,
         array $parameters
     ): Response {
         $viewTemplate = $structure->getView() . '.' . $requestFormat . '.twig';
@@ -75,14 +76,64 @@ class HeadlessWebsiteController extends AbstractController
             throw new HttpException(406, sprintf('Page does not exist in "%s" format.', $requestFormat));
         }
 
-        if ($preview) {
-            $parameters['previewParentTemplate'] = $viewTemplate;
-            $parameters['previewContentReplacer'] = Preview::CONTENT_REPLACER;
-
-            return $this->render('@SuluWebsite/Preview/preview.html.twig', $parameters);
+        // if partial render only content block else full page
+        if ($partial) {
+            $content = $this->renderBlock(
+                $viewTemplate,
+                'content',
+                $parameters
+            );
+        } elseif ($preview) {
+            $content = $this->renderPreview(
+                $viewTemplate,
+                $parameters
+            );
+        } else {
+            $content = $this->renderView(
+                $viewTemplate,
+                $parameters
+            );
         }
 
-        return $this->render($viewTemplate, $parameters);
+        return new Response($content);
+    }
+
+    /**
+     * @param mixed[] $parameters
+     */
+    protected function renderBlock(string $template, string $block, array $parameters = []): string
+    {
+        $twig = $this->get('twig');
+        $parameters = $twig->mergeGlobals($parameters);
+
+        $template = $twig->load($template);
+
+        $level = ob_get_level();
+        ob_start();
+
+        try {
+            $rendered = $template->renderBlock($block, $parameters);
+            ob_end_clean();
+
+            return $rendered;
+        } catch (\Exception $e) {
+            while (ob_get_level() > $level) {
+                ob_end_clean();
+            }
+
+            throw $e;
+        }
+    }
+
+    /**
+     * @param mixed[] $parameters
+     */
+    protected function renderPreview(string $view, array $parameters = []): string
+    {
+        $parameters['previewParentTemplate'] = $view;
+        $parameters['previewContentReplacer'] = Preview::CONTENT_REPLACER;
+
+        return parent::renderView('@SuluWebsite/Preview/preview.html.twig', $parameters);
     }
 
     /**
