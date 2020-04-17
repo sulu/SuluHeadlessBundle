@@ -2,7 +2,7 @@
 
 <p align="center">
     <a href="https://sulu.io/" target="_blank">
-        <img width="30%" src="https://sulu.io/uploads/media/800x/00/230-Official%20Bundle%20Seal.svg?v=2-6&inline=1" alt="Official Sulu Bundle Seal">
+        <img width="30%" src="https://sulu.io/uploads/media/800x/00/230-Official%20Bundle%20Seal.svg?v=2-6&inline=1" alt="Official Sulu Bundle Badge">
     </a>
 </p>
 
@@ -28,6 +28,10 @@ content of a **Sulu page as plain JSON content**. Furthermore, the bundle provid
 an optional **single page application setup** that is built upon React and MobX and utilizes the functionality of 
 the bundle.
 
+
+The SuluHeadlessBundle is compatible with Sulu **starting from version 2.0**. Have a look at the `require` section in 
+the [composer.json](https://github.com/sulu/SuluHeadlessBundle/blob/master/composer.json) to find an 
+**up-to-date list of the requirements** of the bundle.
 Please be aware that this bundle is **still under development** and might not cover every use-case yet.
 Depending on the feedback of the community, future versions of the bundle might contain breaking changes.
 
