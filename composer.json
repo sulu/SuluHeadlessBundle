@@ -2,7 +2,7 @@
     "name": "sulu/headless-bundle",
     "license": "MIT",
     "type": "sulu-bundle",
-    "description": "Bundle that provides controllers and services for using Sulu as headless content management system.",
+    "description": "Bundle that provides controllers and services for using Sulu as headless content management system",
     "require": {
         "php": "^7.2",
         "sulu/sulu": "^2.0.1"
