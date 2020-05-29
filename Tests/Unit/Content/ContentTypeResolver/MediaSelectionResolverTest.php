@@ -113,8 +113,23 @@ class MediaSelectionResolverTest extends TestCase
 
         $result = $this->mediaResolver->resolve(null, $property->reveal(), $locale);
 
+        $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame([], $result->getContent());
-
         $this->assertSame([], $result->getView());
+    }
+
+    public function testResolveDataWithoutIds(): void
+    {
+        $locale = 'en';
+        $property = $this->prophesize(PropertyInterface::class);
+
+        $this->mediaManager->getByIds([], 'en')->willReturn([]);
+
+        $dataWithoutIdsKey = ['unrelatedKey' => 'unrelatedValue'];
+        $result = $this->mediaResolver->resolve($dataWithoutIdsKey, $property->reveal(), $locale);
+
+        $this->assertInstanceOf(ContentView::class, $result);
+        $this->assertSame([], $result->getContent());
+        $this->assertSame($dataWithoutIdsKey, $result->getView());
     }
 }

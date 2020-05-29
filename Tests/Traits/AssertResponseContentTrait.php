@@ -43,7 +43,7 @@ trait AssertResponseContentTrait
 
     private function getCalledClassFolder(): string
     {
-        $calledClass = \get_called_class();
+        $calledClass = static::class;
         /** @var string $fileName */
         $fileName = (new \ReflectionClass($calledClass))->getFileName();
 
