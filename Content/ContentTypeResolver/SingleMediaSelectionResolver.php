@@ -36,11 +36,12 @@ class SingleMediaSelectionResolver implements ContentTypeResolverInterface
     public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView
     {
         if (null === $data) {
-            return new ContentView([]);
+            return new ContentView(null);
         }
 
-        $content = $this->mediaSelectionResolver->resolve(['ids' => [$data['id']]], $property, $locale, $attributes);
+        $ids = \array_key_exists('id', $data) ? [$data['id']] : [];
+        $content = $this->mediaSelectionResolver->resolve(['ids' => $ids], $property, $locale, $attributes);
 
-        return new ContentView($content->getContent()[0] ?? null, $content->getView());
+        return new ContentView($content->getContent()[0] ?? null, $data);
     }
 }

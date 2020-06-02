@@ -57,7 +57,7 @@ class SingleMediaSelectionResolverTest extends TestCase
                         'formatUri' => '/media/1/{format}/media-1.jpg?v=1-0',
                     ],
                 ],
-                [1]
+                ['ids' => [1]]
             )
         );
 
@@ -73,7 +73,7 @@ class SingleMediaSelectionResolverTest extends TestCase
         );
         $this->assertSame(
             [
-                1,
+                'id' => 1,
             ],
             $result->getView()
         );
@@ -86,8 +86,25 @@ class SingleMediaSelectionResolverTest extends TestCase
 
         $result = $this->singleMediaSelectionResolver->resolve(null, $property->reveal(), $locale);
 
-        $this->assertSame([], $result->getContent());
-
+        $this->assertInstanceOf(ContentView::class, $result);
+        $this->assertNull($result->getContent());
         $this->assertSame([], $result->getView());
+    }
+
+    public function testResolveDataWithoutId(): void
+    {
+        $locale = 'en';
+        $property = $this->prophesize(PropertyInterface::class);
+
+        $this->mediaSelectionResolver->resolve(['ids' => []], $property, 'en', [])->willReturn(
+            new ContentView([], ['ids' => []])
+        );
+
+        $dataWithoutIdKey = ['unrelatedKey' => 'unrelatedValue'];
+        $result = $this->singleMediaSelectionResolver->resolve($dataWithoutIdKey, $property->reveal(), $locale);
+
+        $this->assertInstanceOf(ContentView::class, $result);
+        $this->assertNull($result->getContent());
+        $this->assertSame($dataWithoutIdKey, $result->getView());
     }
 }
