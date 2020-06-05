@@ -24,6 +24,17 @@
             <tag name="sulu_headless.content_type_resolver"/>
         </service>
 
+
+
+        <service
+            id="sulu_headless.content_resolver.snippet_selection"
+            class="Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\SnippetSelectionResolver"
+            lazy="true"
+        >
+            <argument type="service" id="sulu_snippet.resolver"/>
+            <tag name="sulu_headless.content_type_resolver"/>
+        </service>
+
         <service
             id="sulu_headless.content_resolver.single_contact_selection"
             class="Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\SingleContactSelectionResolver"
