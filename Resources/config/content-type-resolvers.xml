@@ -31,7 +31,8 @@
             class="Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\SnippetSelectionResolver"
             lazy="true"
         >
-            <argument type="service" id="sulu_snippet.resolver"/>
+            <argument type="service" id="sulu.content.mapper"/>
+            <argument type="service" id="sulu_headless.structure_resolver"/>
             <tag name="sulu_headless.content_type_resolver"/>
         </service>
 
