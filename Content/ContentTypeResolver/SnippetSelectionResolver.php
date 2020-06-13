@@ -6,6 +6,7 @@ namespace Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver;
 
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolver;
+use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
 use Sulu\Component\Content\Compat\PropertyInterface;
 use Sulu\Component\Content\Mapper\ContentMapperInterface;
 
@@ -34,7 +35,7 @@ class SnippetSelectionResolver implements ContentTypeResolverInterface
      */
     public function __construct(
         ContentMapperInterface $contentMapper,
-        StructureResolver $structureResolver)
+        StructureResolverInterface $structureResolver)
     {
         $this->contentMapper = $contentMapper;
         $this->structureResolver = $structureResolver;
