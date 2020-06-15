@@ -23,8 +23,7 @@ class Configuration implements ConfigurationInterface
      */
     public function getConfigTreeBuilder()
     {
-        $treeBuilder = new TreeBuilder();
-        $treeBuilder->root('sulu_headless');
+        $treeBuilder = new TreeBuilder('sulu_headless');
 
         return $treeBuilder;
     }
