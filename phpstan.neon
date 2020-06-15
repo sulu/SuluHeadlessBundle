@@ -16,7 +16,7 @@ parameters:
         - %currentWorkingDirectory%/Tests/Application/var/*
         - %currentWorkingDirectory%/vendor/*
     symfony:
-        container_xml_path: %rootDir%/../../../Tests/Application/var/cache/admin/dev/adminAdminDevDebugProjectContainer.xml
+        container_xml_path: %rootDir%/../../../Tests/Application/var/cache/admin/dev/Sulu_Bundle_HeadlessBundle_Tests_Application_KernelDevDebugContainer.xml
         console_application_loader: Tests/phpstan/console-application.php
     doctrine:
         objectManagerLoader: Tests/phpstan/object-manager.php
