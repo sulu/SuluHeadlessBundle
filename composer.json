@@ -5,7 +5,7 @@
     "description": "Bundle that provides controllers and services for using Sulu as headless content management system",
     "require": {
         "php": "^7.2",
-        "sulu/sulu": "^2.0.1 || ^2.1"
+        "sulu/sulu": "^2.0.1"
     },
     "require-dev": {
         "coduo/php-matcher": "^3.2",
@@ -25,6 +25,7 @@
         "zendframework/zend-stdlib": "~2.3",
         "zendframework/zendsearch": "@dev"
     },
+    "minimum-stability": "dev",
     "autoload": {
         "psr-4": {
             "Sulu\\Bundle\\HeadlessBundle\\": ""
