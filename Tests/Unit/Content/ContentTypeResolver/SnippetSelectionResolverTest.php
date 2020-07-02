@@ -2,6 +2,14 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of Sulu.
+ *
+ * (c) Sulu GmbH
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
 
 namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
 
@@ -14,9 +22,8 @@ use Sulu\Component\Content\Compat\PropertyInterface;
 use Sulu\Component\Content\Compat\Structure\StructureBridge;
 use Sulu\Component\Content\Mapper\ContentMapperInterface;
 
-class SnippetSelectionResolverTest extends TestCase {
-
-
+class SnippetSelectionResolverTest extends TestCase
+{
     /**
      * @var ObjectProphecy
      */
@@ -32,20 +39,21 @@ class SnippetSelectionResolverTest extends TestCase {
      */
     private $snippetSelectionResolver;
 
-    protected function setUp(): void {
+    protected function setUp(): void
+    {
         $this->contentMapper = $this->prophesize(ContentMapperInterface::class);
         $this->contentResolver = $this->prophesize(StructureResolverInterface::class);
 
         $this->snippetSelectionResolver = new SnippetSelectionResolver($this->contentMapper->reveal(), $this->contentResolver->reveal());
     }
 
-    public function testGetContentType(): void {
-
+    public function testGetContentType(): void
+    {
         self::assertSame('snippet_selection', $this->snippetSelectionResolver::getContentType());
-
     }
 
-    public function testResolveWithOutIds(): void {
+    public function testResolveWithOutIds(): void
+    {
         $property = $this->prophesize(PropertyInterface::class);
 
         $structure = $this->prophesize(StructureBridge::class);
@@ -53,16 +61,11 @@ class SnippetSelectionResolverTest extends TestCase {
 
         $property->getStructure()->willReturn($structure->reveal());
 
-        $result = $this->snippetSelectionResolver->resolve(null,$property->reveal(),'en',[]);
-        self::assertEquals(new ContentView([]),$result);
+        $result = $this->snippetSelectionResolver->resolve(null, $property->reveal(), 'en', []);
+        self::assertSame(new ContentView([]), $result);
 
-        $result = $this->snippetSelectionResolver->resolve([],$property->reveal(),'en',[]);
+        $result = $this->snippetSelectionResolver->resolve([], $property->reveal(), 'en', []);
 
-        self::assertEquals(new ContentView([]),$result);
+        self::assertSame(new ContentView([]), $result);
     }
-
-
-
-
-
 }
