@@ -25,6 +25,7 @@ class ContentResolver implements ContentResolverInterface
 
     /**
      * ContentResolver constructor.
+     *
      * @param \Traversable<ContentTypeResolverInterface> $resolvers
      */
     public function __construct(\Traversable $resolvers)
