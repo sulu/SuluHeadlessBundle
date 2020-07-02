@@ -94,6 +94,9 @@ class NavigationControllerTest extends BaseTestCase
         ]);
     }
 
+    /**
+     * @return \Generator<mixed[]>
+     */
     public function provideAttributes(): \Generator
     {
         yield [

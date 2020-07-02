@@ -109,6 +109,9 @@ class StructureResolverTest extends TestCase
         );
     }
 
+    /**
+     * @return ObjectProphecy<StructureBridge>
+     */
     private function prophesizeExcerpt(): ObjectProphecy
     {
         $excerpt = $this->prophesize(StructureBridge::class);

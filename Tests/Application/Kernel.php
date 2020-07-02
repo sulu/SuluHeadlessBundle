@@ -20,6 +20,9 @@ use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 
 class Kernel extends SuluTestKernel
 {
+    /**
+     * @return BundleInterface[]
+     */
     public function registerBundles(): array
     {
         /** @var BundleInterface[] $bundles */

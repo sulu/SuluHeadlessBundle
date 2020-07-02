@@ -20,5 +20,3 @@ parameters:
         console_application_loader: Tests/phpstan/console-application.php
     doctrine:
         objectManagerLoader: Tests/phpstan/object-manager.php
-    checkMissingIterableValueType: false
-    checkGenericClassInNonGenericObjectType: false

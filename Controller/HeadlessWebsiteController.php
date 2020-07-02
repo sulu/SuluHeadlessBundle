@@ -108,7 +108,10 @@ class HeadlessWebsiteController extends AbstractController
         );
     }
 
-    public static function getSubscribedServices()
+    /**
+     * @return mixed[]
+     */
+    public static function getSubscribedServices(): array
     {
         $subscribedServices = parent::getSubscribedServices();
         $subscribedServices['sulu_headless.structure_resolver'] = StructureResolverInterface::class;
