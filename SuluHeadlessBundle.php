@@ -23,7 +23,7 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
  */
 class SuluHeadlessBundle extends Bundle
 {
-    public function build(ContainerBuilder $container)
+    public function build(ContainerBuilder $container): void
     {
         $container->registerForAutoconfiguration(ContentTypeResolverInterface::class)
             ->addTag('sulu_headless.content_type_resolver');
