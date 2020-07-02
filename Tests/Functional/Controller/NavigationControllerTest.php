@@ -18,12 +18,18 @@ use Sulu\Bundle\HeadlessBundle\Tests\Traits\CreateMediaTrait;
 use Sulu\Bundle\HeadlessBundle\Tests\Traits\CreatePageTrait;
 use Sulu\Bundle\MediaBundle\DataFixtures\ORM\LoadCollectionTypes;
 use Sulu\Bundle\MediaBundle\DataFixtures\ORM\LoadMediaTypes;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\HttpFoundation\Response;
 
 class NavigationControllerTest extends BaseTestCase
 {
     use CreatePageTrait;
     use CreateMediaTrait;
+
+    /**
+     * @var KernelBrowser
+     */
+    private $websiteClient;
 
     /**
      * @var string
@@ -94,6 +100,14 @@ class NavigationControllerTest extends BaseTestCase
         ]);
     }
 
+    protected function setUp(): void
+    {
+        static::ensureKernelShutdown();
+        $this->websiteClient = $this->createWebsiteClient();
+
+        parent::setUp();
+    }
+
     /**
      * @return \Generator<mixed[]>
      */
@@ -157,10 +171,9 @@ class NavigationControllerTest extends BaseTestCase
             $context = $filters['context'];
         }
 
-        $websiteClient = $this->createWebsiteClient();
-        $websiteClient->request('GET', '/api/navigations/' . $context . '?' . http_build_query($filters));
+        $this->websiteClient->request('GET', '/api/navigations/' . $context . '?' . http_build_query($filters));
 
-        $response = $websiteClient->getResponse();
+        $response = $this->websiteClient->getResponse();
         $this->assertInstanceOf(Response::class, $response);
 
         $this->assertResponseContent(

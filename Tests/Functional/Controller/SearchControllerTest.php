@@ -15,11 +15,17 @@ namespace Sulu\Bundle\HeadlessBundle\Tests\Functional\Controller;
 
 use Sulu\Bundle\HeadlessBundle\Tests\Functional\BaseTestCase;
 use Sulu\Bundle\HeadlessBundle\Tests\Traits\CreatePageTrait;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\HttpFoundation\Response;
 
 class SearchControllerTest extends BaseTestCase
 {
     use CreatePageTrait;
+
+    /**
+     * @var KernelBrowser
+     */
+    private $websiteClient;
 
     public static function setUpBeforeClass(): void
     {
@@ -44,6 +50,14 @@ class SearchControllerTest extends BaseTestCase
                 'url' => '/awesome-massive-art',
             ]
         );
+    }
+
+    protected function setUp(): void
+    {
+        static::ensureKernelShutdown();
+        $this->websiteClient = $this->createWebsiteClient();
+
+        parent::setUp();
     }
 
     /**
@@ -71,10 +85,9 @@ class SearchControllerTest extends BaseTestCase
      */
     public function testGetAction(string $query, array $indices, string $expectedPatternFile): void
     {
-        $websiteClient = $this->createWebsiteClient();
-        $websiteClient->request('GET', '/api/search?q=' . $query . '&indices=' . implode(',', $indices));
+        $this->websiteClient->request('GET', '/api/search?q=' . $query . '&indices=' . implode(',', $indices));
 
-        $response = $websiteClient->getResponse();
+        $response = $this->websiteClient->getResponse();
         $this->assertInstanceOf(Response::class, $response);
 
         $this->assertResponseContent(
