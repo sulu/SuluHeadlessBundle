@@ -50,14 +50,13 @@ class SearchControllerTest extends BaseTestCase
                 'url' => '/awesome-massive-art',
             ]
         );
+
+        static::ensureKernelShutdown();
     }
 
     protected function setUp(): void
     {
-        static::ensureKernelShutdown();
         $this->websiteClient = $this->createWebsiteClient();
-
-        parent::setUp();
     }
 
     /**

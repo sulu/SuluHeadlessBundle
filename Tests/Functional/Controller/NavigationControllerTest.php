@@ -98,14 +98,13 @@ class NavigationControllerTest extends BaseTestCase
                 'main',
             ],
         ]);
+
+        static::ensureKernelShutdown();
     }
 
     protected function setUp(): void
     {
-        static::ensureKernelShutdown();
         $this->websiteClient = $this->createWebsiteClient();
-
-        parent::setUp();
     }
 
     /**

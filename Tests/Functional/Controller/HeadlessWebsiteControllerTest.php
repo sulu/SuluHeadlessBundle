@@ -41,14 +41,13 @@ class HeadlessWebsiteControllerTest extends BaseTestCase
                 'title' => 'excerpt-title',
             ],
         ]);
+
+        static::ensureKernelShutdown();
     }
 
     protected function setUp(): void
     {
-        static::ensureKernelShutdown();
         $this->websiteClient = $this->createWebsiteClient();
-
-        parent::setUp();
     }
 
     public function testIndexAction(): void

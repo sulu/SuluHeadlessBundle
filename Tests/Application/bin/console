@@ -11,7 +11,7 @@ require_once __DIR__ . '/../../bootstrap.php';
 
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArgvInput;
-use Symfony\Component\Debug\Debug;
+use Symfony\Component\ErrorHandler\Debug;
 use Sulu\Bundle\HeadlessBundle\Tests\Application\Kernel;
 
 $input = new ArgvInput();
