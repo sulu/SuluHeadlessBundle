@@ -23,6 +23,11 @@ class ContentResolver implements ContentResolverInterface
      */
     private $resolvers;
 
+    /**
+     * ContentResolver constructor.
+     *
+     * @param \Traversable<ContentTypeResolverInterface> $resolvers
+     */
     public function __construct(\Traversable $resolvers)
     {
         $this->resolvers = iterator_to_array($resolvers);

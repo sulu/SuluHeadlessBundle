@@ -16,24 +16,29 @@ namespace Sulu\Bundle\HeadlessBundle\Tests\Application;
 use Sulu\Bundle\HeadlessBundle\SuluHeadlessBundle;
 use Sulu\Bundle\TestBundle\Kernel\SuluTestKernel;
 use Symfony\Component\Config\Loader\LoaderInterface;
+use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 
 class Kernel extends SuluTestKernel
 {
-    public function registerBundles()
+    /**
+     * @return BundleInterface[]
+     */
+    public function registerBundles(): array
     {
+        /** @var BundleInterface[] $bundles */
         $bundles = parent::registerBundles();
         $bundles[] = new SuluHeadlessBundle();
 
         return $bundles;
     }
 
-    public function registerContainerConfiguration(LoaderInterface $loader)
+    public function registerContainerConfiguration(LoaderInterface $loader): void
     {
         parent::registerContainerConfiguration($loader);
         $loader->load(__DIR__ . '/config/config.yml');
     }
 
-    public function getProjectDir()
+    public function getProjectDir(): string
     {
         return __DIR__;
     }

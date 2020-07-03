@@ -79,6 +79,7 @@ class PageResolver implements DataProviderResolverInterface
 
         $properties = [];
         if (\array_key_exists('properties', $propertyParameter)) {
+            /** @var PropertyParameter[] $properties */
             $properties = $propertyParameter['properties']->getValue();
         }
 

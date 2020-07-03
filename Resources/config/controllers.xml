@@ -12,6 +12,8 @@
             <argument type="service" id="jms_serializer.serializer"/>
             <argument type="service" id="sulu_headless.serializer.media"/>
         </service>
+        <service id="Sulu\Bundle\HeadlessBundle\Controller\NavigationController"
+                 alias="sulu_headless.controller.navigation" public="true"/>
 
         <service
             id="sulu_headless.controller.search"
@@ -21,5 +23,21 @@
             <argument type="service" id="massive_search.search_manager"/>
             <argument type="service" id="jms_serializer.serializer"/>
         </service>
+        <service id="Sulu\Bundle\HeadlessBundle\Controller\SearchController"
+                 alias="sulu_headless.controller.search" public="true"/>
+
+        <service
+            id="sulu_headless.controller.website"
+            class="Sulu\Bundle\HeadlessBundle\Controller\HeadlessWebsiteController"
+            public="true"
+        >
+            <tag name="container.service_subscriber" />
+            <tag name="controller.service_arguments" />
+            <call method="setContainer">
+                <argument type="service" id="Psr\Container\ContainerInterface" />
+            </call>
+        </service>
+        <service id="Sulu\Bundle\HeadlessBundle\Controller\HeadlessWebsiteController"
+                 alias="sulu_headless.controller.website" public="true"/>
     </services>
 </container>

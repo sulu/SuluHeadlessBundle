@@ -215,7 +215,7 @@ class StructureResolver implements StructureResolverInterface
         /** @var BasePageDocument $document */
         $document = $structure->getDocument();
 
-        /** @var ExtensionContainer|array $extensionData */
+        /** @var ExtensionContainer|mixed[] $extensionData */
         $extensionData = [];
         if (method_exists($document, 'getExtensionsData')) {
             $extensionData = $document->getExtensionsData();

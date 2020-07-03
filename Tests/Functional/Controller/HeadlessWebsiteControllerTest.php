@@ -15,11 +15,17 @@ namespace Sulu\Bundle\HeadlessBundle\Tests\Functional\Controller;
 
 use Sulu\Bundle\HeadlessBundle\Tests\Functional\BaseTestCase;
 use Sulu\Bundle\HeadlessBundle\Tests\Traits\CreatePageTrait;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\HttpFoundation\Response;
 
 class HeadlessWebsiteControllerTest extends BaseTestCase
 {
     use CreatePageTrait;
+
+    /**
+     * @var KernelBrowser
+     */
+    private $websiteClient;
 
     public static function setUpBeforeClass(): void
     {
@@ -35,14 +41,20 @@ class HeadlessWebsiteControllerTest extends BaseTestCase
                 'title' => 'excerpt-title',
             ],
         ]);
+
+        static::ensureKernelShutdown();
+    }
+
+    protected function setUp(): void
+    {
+        $this->websiteClient = $this->createWebsiteClient();
     }
 
     public function testIndexAction(): void
     {
-        $websiteClient = $this->createWebsiteClient();
-        $websiteClient->request('GET', '/test.json');
+        $this->websiteClient->request('GET', '/test.json');
 
-        $response = $websiteClient->getResponse();
+        $response = $this->websiteClient->getResponse();
 
         $this->assertResponseContent(
             'headless_website__test_index.json',
@@ -53,10 +65,9 @@ class HeadlessWebsiteControllerTest extends BaseTestCase
 
     public function testIndexHtmlAction(): void
     {
-        $websiteClient = $this->createWebsiteClient();
-        $websiteClient->request('GET', '/test');
+        $this->websiteClient->request('GET', '/test');
 
-        $response = $websiteClient->getResponse();
+        $response = $this->websiteClient->getResponse();
         $this->assertInstanceOf(Response::class, $response);
 
         $content = $response->getContent();

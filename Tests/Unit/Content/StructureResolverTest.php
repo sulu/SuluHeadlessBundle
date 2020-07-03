@@ -20,7 +20,6 @@ use Sulu\Bundle\DocumentManagerBundle\Bridge\DocumentInspector;
 use Sulu\Bundle\HeadlessBundle\Content\ContentResolverInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolver;
-use Sulu\Bundle\PageBundle\Document\BasePageDocument;
 use Sulu\Bundle\PageBundle\Document\HomeDocument;
 use Sulu\Bundle\PageBundle\Document\PageDocument;
 use Sulu\Component\Content\Compat\PropertyInterface;
@@ -41,12 +40,12 @@ class StructureResolverTest extends TestCase
     private $excerpt;
 
     /**
-     * @var BasePageDocument|ObjectProphecy
+     * @var PageDocument|ObjectProphecy
      */
     private $pageDocument;
 
     /**
-     * @var BasePageDocument|ObjectProphecy
+     * @var HomeDocument|ObjectProphecy
      */
     private $homepageDocument;
 
@@ -110,6 +109,9 @@ class StructureResolverTest extends TestCase
         );
     }
 
+    /**
+     * @return ObjectProphecy<StructureBridge>
+     */
     private function prophesizeExcerpt(): ObjectProphecy
     {
         $excerpt = $this->prophesize(StructureBridge::class);
