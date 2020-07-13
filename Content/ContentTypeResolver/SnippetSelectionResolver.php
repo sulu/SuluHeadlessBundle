@@ -16,24 +16,30 @@ namespace Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolver;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
+use Sulu\Bundle\SnippetBundle\Document\SnippetDocument;
+use Sulu\Bundle\SnippetBundle\Snippet\DefaultSnippetManagerInterface;
+use Sulu\Bundle\SnippetBundle\Snippet\WrongSnippetTypeException;
 use Sulu\Component\Content\Compat\PropertyInterface;
+use Sulu\Component\Content\Compat\Structure\SnippetBridge;
+use Sulu\Component\Content\Compat\Structure\StructureBridge;
 use Sulu\Component\Content\Mapper\ContentMapperInterface;
 
 class SnippetSelectionResolver implements ContentTypeResolverInterface
 {
     /**
-     * @var array
-     */
-    private $snippetCache = [];
-
-    /**
      * @var StructureResolver
      */
     private $structureResolver;
+
     /**
      * @var ContentMapperInterface
      */
     private $contentMapper;
+
+    /**
+     * @var DefaultSnippetManagerInterface
+     */
+    private $defaultSnippetManager;
 
     /**
      * SnippetSelectionResolver constructor.
@@ -42,10 +48,12 @@ class SnippetSelectionResolver implements ContentTypeResolverInterface
      */
     public function __construct(
         ContentMapperInterface $contentMapper,
-        StructureResolverInterface $structureResolver
+        StructureResolverInterface $structureResolver,
+        DefaultSnippetManagerInterface $defaultSnippetManager
     ) {
         $this->contentMapper = $contentMapper;
         $this->structureResolver = $structureResolver;
+        $this->defaultSnippetManager = $defaultSnippetManager;
     }
 
     public static function getContentType(): string
@@ -62,42 +70,55 @@ class SnippetSelectionResolver implements ContentTypeResolverInterface
             return new ContentView([]);
         }
 
-        $shadowLocale = null;
-        if ($property->getStructure()->getIsShadow()) {
-            $shadowLocale = $property->getStructure()->getShadowBaseLanguage();
+        /** @var StructureBridge $structure */
+        $structure = $property->getStructure();
+        $webspaceKey = $structure->getWebspaceKey();
+        $shadowLocale = $structure->getIsShadow() ? $structure->getShadowBaseLanguage() : null;
+
+        $params = $property->getParams();
+        /** @var bool $loadExcerpt */
+        $loadExcerpt = isset($params['loadExcerpt']) ? $params['loadExcerpt']->getValue() : false;
+        /** @var string $defaultArea */
+        $defaultArea = isset($params['default']) ? $params['default']->getValue() : null;
+
+        $snippetIds = $data;
+        if (empty($snippetIds) && $defaultArea) {
+            $defaultSnippetId = $this->getDefaultSnippetId($webspaceKey, $defaultArea, $locale);
+            $snippetIds = $defaultSnippetId ? [$defaultSnippetId] : [];
         }
 
         $snippets = [];
-        foreach ($data as $uuid) {
-            if (!\array_key_exists($uuid, $this->snippetCache)) {
-                $snippet = $this->contentMapper->load($uuid, $property, $locale);
+        foreach ($snippetIds as $snippetId) {
+            /** @var SnippetBridge $snippet */
+            $snippet = $this->contentMapper->load($snippetId, $webspaceKey, $locale);
 
-                if (!$snippet->getHasTranslation() && null !== $shadowLocale) {
-                    $snippet = $this->contentMapper->load($uuid, $property, $shadowLocale);
-                }
-
-                $snippet->setIsShadow(null !== $shadowLocale);
-                $snippet->setShadowBaseLanguage($shadowLocale);
-
-                $resolved = $this->structureResolver->resolve($snippet, $locale);
-
-                if ($resolved['extension']['excerpt']) {
-                    $resolved['content']['taxonomies'] = [
-                        'categories' => $resolved['extension']['excerpt']['categories'],
-                        'tags' => $resolved['extension']['excerpt']['tags'],
-                    ];
-                    unset($resolved['extension']);
-                }
-
-                $resolved['view']['template'] = $snippet->getKey();
-                $resolved['view']['uuid'] = $snippet->getUuid();
-
-                $this->snippetCache[$uuid] = $resolved;
+            if (!$snippet->getHasTranslation() && null !== $shadowLocale) {
+                /** @var SnippetBridge $snippet */
+                $snippet = $this->contentMapper->load($snippetId, $webspaceKey, $shadowLocale);
             }
 
-            $snippets[] = $this->snippetCache[$uuid];
+            $snippet->setIsShadow(null !== $shadowLocale);
+            $snippet->setShadowBaseLanguage($shadowLocale);
+
+            $snippets[] = $this->structureResolver->resolve($snippet, $locale, $loadExcerpt);
         }
 
-        return new ContentView($snippets ?? null, $data);
+        return new ContentView($snippets, $data);
+    }
+
+    private function getDefaultSnippetId(string $webspaceKey, string $snippetArea, string $locale): ?string
+    {
+        try {
+            /** @var SnippetDocument|null $snippet */
+            $snippet = $this->defaultSnippetManager->load($webspaceKey, $snippetArea, $locale);
+        } catch (WrongSnippetTypeException $exception) {
+            return null;
+        }
+
+        if (!$snippet) {
+            return null;
+        }
+
+        return $snippet->getUuid();
     }
 }

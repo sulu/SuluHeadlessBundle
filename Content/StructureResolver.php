@@ -51,14 +51,20 @@ class StructureResolver implements StructureResolverInterface
     /**
      * @param StructureBridge $structure
      */
-    public function resolve(StructureInterface $structure, string $locale): array
-    {
+    public function resolve(
+        StructureInterface $structure,
+        string $locale,
+        bool $includeExtension = true
+    ): array {
         $data = $this->getStructureData($structure);
-        $data['extension'] = $this->resolveExtensionData(
-            $this->getExtensionData($structure),
-            $locale,
-            ['webspaceKey' => $structure->getWebspaceKey()]
-        );
+
+        if ($includeExtension) {
+            $data['extension'] = $this->resolveExtensionData(
+                $this->getExtensionData($structure),
+                $locale,
+                ['webspaceKey' => $structure->getWebspaceKey()]
+            );
+        }
 
         foreach ($structure->getProperties(true) as $property) {
             $contentView = $this->contentResolver->resolve(
