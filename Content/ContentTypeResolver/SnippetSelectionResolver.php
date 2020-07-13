@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver;
 
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
-use Sulu\Bundle\HeadlessBundle\Content\StructureResolver;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
 use Sulu\Bundle\SnippetBundle\Document\SnippetDocument;
 use Sulu\Bundle\SnippetBundle\Snippet\DefaultSnippetManagerInterface;
@@ -27,7 +26,7 @@ use Sulu\Component\Content\Mapper\ContentMapperInterface;
 class SnippetSelectionResolver implements ContentTypeResolverInterface
 {
     /**
-     * @var StructureResolver
+     * @var StructureResolverInterface
      */
     private $structureResolver;
 
@@ -41,11 +40,6 @@ class SnippetSelectionResolver implements ContentTypeResolverInterface
      */
     private $defaultSnippetManager;
 
-    /**
-     * SnippetSelectionResolver constructor.
-     *
-     * @param StructureResolver $structureResolver
-     */
     public function __construct(
         ContentMapperInterface $contentMapper,
         StructureResolverInterface $structureResolver,
@@ -66,10 +60,6 @@ class SnippetSelectionResolver implements ContentTypeResolverInterface
      */
     public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView
     {
-        if (null === $data) {
-            return new ContentView([]);
-        }
-
         /** @var StructureBridge $structure */
         $structure = $property->getStructure();
         $webspaceKey = $structure->getWebspaceKey();
@@ -81,7 +71,7 @@ class SnippetSelectionResolver implements ContentTypeResolverInterface
         /** @var string $defaultArea */
         $defaultArea = isset($params['default']) ? $params['default']->getValue() : null;
 
-        $snippetIds = $data;
+        $snippetIds = $data ?? [];
         if (empty($snippetIds) && $defaultArea) {
             $defaultSnippetId = $this->getDefaultSnippetId($webspaceKey, $defaultArea, $locale);
             $snippetIds = $defaultSnippetId ? [$defaultSnippetId] : [];
@@ -103,7 +93,7 @@ class SnippetSelectionResolver implements ContentTypeResolverInterface
             $snippets[] = $this->structureResolver->resolve($snippet, $locale, $loadExcerpt);
         }
 
-        return new ContentView($snippets, $data);
+        return new ContentView($snippets, $data ?? []);
     }
 
     private function getDefaultSnippetId(string $webspaceKey, string $snippetArea, string $locale): ?string
