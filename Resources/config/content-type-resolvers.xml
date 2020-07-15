@@ -18,8 +18,10 @@
             class="Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\PageSelectionResolver"
             lazy="true"
         >
-            <argument type="service" id="sulu_headless.serializer.page"/>
-            <argument type="service" id="sulu_headless.content_resolver.page_selection_container_factory"/>
+            <argument type="service" id="sulu_headless.structure_resolver"/>
+            <argument type="service" id="sulu_page.smart_content.data_provider.content.query_builder"/>
+            <argument type="service" id="sulu.content.mapper"/>
+            <argument>%sulu_document_manager.show_drafts%</argument>
 
             <tag name="sulu_headless.content_type_resolver"/>
         </service>
