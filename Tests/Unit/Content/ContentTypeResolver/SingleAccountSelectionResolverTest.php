@@ -108,7 +108,7 @@ class SingleAccountSelectionResolverTest extends TestCase
 
         $result = $this->singleAccountSelectionResolver->resolve(null, $property->reveal(), $locale);
 
-        $this->assertSame([], $result->getContent());
+        $this->assertNull($result->getContent());
 
         $this->assertSame([], $result->getView());
     }

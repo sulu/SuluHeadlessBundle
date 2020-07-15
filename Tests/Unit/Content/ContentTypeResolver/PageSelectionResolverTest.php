@@ -15,25 +15,31 @@ namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
 
 use PHPUnit\Framework\TestCase;
 use Prophecy\Prophecy\ObjectProphecy;
-use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\PageSelectionContainerFactory;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\PageSelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
-use Sulu\Bundle\HeadlessBundle\Content\Serializer\PageSerializerInterface;
+use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
 use Sulu\Bundle\PageBundle\Content\PageSelectionContainer;
 use Sulu\Component\Content\Compat\PropertyInterface;
 use Sulu\Component\Content\Compat\PropertyParameter;
+use Sulu\Component\Content\Mapper\ContentMapperInterface;
+use Sulu\Component\Content\Query\ContentQueryBuilderInterface;
 
 class PageSelectionResolverTest extends TestCase
 {
     /**
-     * @var PageSerializerInterface|ObjectProphecy
+     * @var StructureResolverInterface|ObjectProphecy
      */
-    private $pageSerializer;
+    private $structureResolver;
 
     /**
-     * @var PageSelectionContainerFactory|ObjectProphecy
+     * @var ContentQueryBuilderInterface|ObjectProphecy
      */
-    private $pageSelectionContainerFactory;
+    private $contentQueryBuilder;
+
+    /**
+     * @var ContentMapperInterface|ObjectProphecy
+     */
+    private $contentMapper;
 
     /**
      * @var PageSelectionResolver
@@ -42,12 +48,15 @@ class PageSelectionResolverTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->pageSerializer = $this->prophesize(PageSerializerInterface::class);
-        $this->pageSelectionContainerFactory = $this->prophesize(PageSelectionContainerFactory::class);
+        $this->structureResolver = $this->prophesize(StructureResolverInterface::class);
+        $this->contentQueryBuilder = $this->prophesize(ContentQueryBuilderInterface::class);
+        $this->contentMapper = $this->prophesize(ContentMapperInterface::class);
 
         $this->pageSelectionResolver = new PageSelectionResolver(
-            $this->pageSerializer->reveal(),
-            $this->pageSelectionContainerFactory->reveal()
+            $this->structureResolver->reveal(),
+            $this->contentQueryBuilder->reveal(),
+            $this->contentMapper->reveal(),
+            true
         );
     }
 
@@ -73,7 +82,7 @@ class PageSelectionResolverTest extends TestCase
         $property->getParams()->willReturn($params);
 
         $container = $this->prophesize(PageSelectionContainer::class);
-        $this->pageSelectionContainerFactory->createContainer($data, $params, 'sulu', $locale)
+        $this->contentQueryBuilder->createContainer($data, $params, 'sulu', $locale)
             ->willReturn($container->reveal());
 
         $pages = [
@@ -108,7 +117,7 @@ class PageSelectionResolverTest extends TestCase
         ];
 
         $container->getData()->willReturn($pages);
-        $this->pageSerializer->serialize($pages[0], $params['properties']->getValue())->willReturn(
+        $this->structureResolver->serialize($pages[0], $params['properties']->getValue())->willReturn(
             [
                 'id' => '2',
                 'uuid' => '1',
@@ -198,6 +207,18 @@ class PageSelectionResolverTest extends TestCase
         $property = $this->prophesize(PropertyInterface::class);
 
         $result = $this->pageSelectionResolver->resolve(null, $property->reveal(), $locale);
+
+        $this->assertSame([], $result->getContent());
+
+        $this->assertSame([], $result->getView());
+    }
+
+    public function testResolveDataIsEmptyArray(): void
+    {
+        $locale = 'en';
+        $property = $this->prophesize(PropertyInterface::class);
+
+        $result = $this->pageSelectionResolver->resolve([], $property->reveal(), $locale);
 
         $this->assertSame([], $result->getContent());
 
