@@ -59,7 +59,7 @@ class MediaResolver implements DataProviderResolverInterface
 
     public function resolve(
         array $filters,
-        array $propertyParameter,
+        array $propertyParameters,
         array $options = [],
         ?int $limit = null,
         int $page = 1,
@@ -67,7 +67,7 @@ class MediaResolver implements DataProviderResolverInterface
     ): DataProviderResult {
         $providerResult = $this->mediaDataProvider->resolveResourceItems(
             $filters,
-            $propertyParameter,
+            $propertyParameters,
             $options,
             $limit,
             $page,

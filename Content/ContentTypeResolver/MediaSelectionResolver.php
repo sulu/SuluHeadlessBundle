@@ -50,13 +50,6 @@ class MediaSelectionResolver implements ContentTypeResolverInterface
             return new ContentView([]);
         }
 
-        if (0 < \count($data) && \array_key_exists(0, $data) && $data[0] instanceof Media) {
-            // we do not need to load the media entities if they are already loaded
-            // this happens for example when resolving a smart-content property that uses the page provider
-
-            return new ContentView($this->resolveApiMedias($data));
-        }
-
         $medias = $this->mediaManager->getByIds($data['ids'] ?? [], $locale);
 
         return new ContentView($this->resolveApiMedias($medias), $data);

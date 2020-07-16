@@ -13,10 +13,12 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver;
 
-use Sulu\Bundle\HeadlessBundle\Content\Serializer\PageSerializerInterface;
+use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
 use Sulu\Component\Content\Compat\PropertyParameter;
+use Sulu\Component\Content\Compat\StructureInterface;
+use Sulu\Component\Content\Mapper\ContentMapperInterface;
+use Sulu\Component\Content\Query\ContentQueryBuilderInterface;
 use Sulu\Component\Content\SmartContent\PageDataProvider;
-use Sulu\Component\SmartContent\ArrayAccessItem;
 use Sulu\Component\SmartContent\Configuration\ProviderConfigurationInterface;
 
 class PageResolver implements DataProviderResolverInterface
@@ -32,16 +34,37 @@ class PageResolver implements DataProviderResolverInterface
     private $pageDataProvider;
 
     /**
-     * @var PageSerializerInterface
+     * @var StructureResolverInterface
      */
-    private $pageSerializer;
+    private $structureResolver;
+
+    /**
+     * @var ContentQueryBuilderInterface
+     */
+    private $contentQueryBuilder;
+
+    /**
+     * @var ContentMapperInterface
+     */
+    private $contentMapper;
+
+    /**
+     * @var bool
+     */
+    private $showDrafts;
 
     public function __construct(
         PageDataProvider $pageDataProvider,
-        PageSerializerInterface $pageSerializer
+        StructureResolverInterface $structureResolver,
+        ContentQueryBuilderInterface $contentQueryBuilder,
+        ContentMapperInterface $contentMapper,
+        bool $showDrafts
     ) {
         $this->pageDataProvider = $pageDataProvider;
-        $this->pageSerializer = $pageSerializer;
+        $this->structureResolver = $structureResolver;
+        $this->contentQueryBuilder = $contentQueryBuilder;
+        $this->contentMapper = $contentMapper;
+        $this->showDrafts = $showDrafts;
     }
 
     public function getProviderConfiguration(): ProviderConfigurationInterface
@@ -62,38 +85,78 @@ class PageResolver implements DataProviderResolverInterface
      */
     public function resolve(
         array $filters,
-        array $propertyParameter,
+        array $propertyParameters,
         array $options = [],
         ?int $limit = null,
         int $page = 1,
         ?int $pageSize = null
     ): DataProviderResult {
-        // the PageDataProvider resolves the data defined in the $propertyParameter using the default content types
-        // for example, this means that the result contains an array of media entities instead of an array of ids
-        // this forces us to add explicit checks inside of the resolvers of the bundle (eg. MediaSelectionResolver)
-        // TODO: find a solution that returns the unresolved data which can be passed safely to the headless resolvers
         $providerResult = $this->pageDataProvider->resolveResourceItems(
             $filters,
-            $propertyParameter,
+            $propertyParameters,
             $options,
             $limit,
             $page,
             $pageSize
         );
 
-        $properties = [];
-        if (\array_key_exists('properties', $propertyParameter)) {
-            /** @var PropertyParameter[] $properties */
-            $properties = $propertyParameter['properties']->getValue();
+        $pageIds = [];
+        foreach ($providerResult->getItems() as $resultPage) {
+            $pageIds[] = $resultPage->getId();
         }
 
-        $items = [];
 
-        /** @var ArrayAccessItem $providerItem */
-        foreach ($providerResult->getItems() as $providerItem) {
-            $items[] = $this->pageSerializer->serialize($providerItem->jsonSerialize(), $properties);
+        /** @var PropertyParameter[] $propertiesParamValue */
+        $propertiesParamValue = isset($propertyParameters['properties']) ? $propertyParameters['properties']->getValue() : [];
+
+        // the PageDataProvider resolves the data defined in the $propertiesParamValue using the default content types
+        // for example, this means that the result contains an array of media api entities instead of a raw array of ids
+        // to resolve the data with the resolvers of this bundle, we need to load the structures with the ContentMapper
+        $pageStructures = $this->loadPageStructures(
+            $pageIds,
+            $propertiesParamValue,
+            $options['webspaceKey'],
+            $options['locale']
+        );
+
+        $propertyMap = [];
+        foreach ($propertiesParamValue as $propertiesParamEntry) {
+            /** @var string $propertyValue */
+            $propertyValue = $propertiesParamEntry->getValue();
+            $propertyMap[$propertiesParamEntry->getName()] = $propertyValue;
         }
 
-        return new DataProviderResult($items, $providerResult->getHasNextPage());
+        $resolvedPages = [];
+        foreach ($pageStructures as $pageStructure) {
+            $resolvedPages[] = $this->structureResolver->resolveProperties($pageStructure, $propertyMap, $options['locale']);
+        }
+
+        return new DataProviderResult($resolvedPages, $providerResult->getHasNextPage());
+    }
+
+    /**
+     * @param string[] $pageIds
+     * @param PropertyParameter[] $propertiesParamValue
+     *
+     * @return StructureInterface[]
+     */
+    private function loadPageStructures(array $pageIds, array $propertiesParamValue, string $webspaceKey, string $locale): array
+    {
+        if (count($pageIds) === 0) {
+            return [];
+        }
+
+        $this->contentQueryBuilder->init([
+            'ids' => $pageIds,
+            'properties' => $propertiesParamValue,
+            'published' => !$this->showDrafts,
+        ]);
+        list($pagesQuery) = $this->contentQueryBuilder->build($webspaceKey, [$locale]);
+
+        return $this->contentMapper->loadBySql2(
+            $pagesQuery,
+            $locale,
+            $webspaceKey
+        );
     }
 }
