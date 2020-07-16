@@ -21,7 +21,7 @@ use Sulu\Component\Content\Query\ContentQueryBuilderInterface;
 use Sulu\Component\Content\SmartContent\PageDataProvider;
 use Sulu\Component\SmartContent\Configuration\ProviderConfigurationInterface;
 
-class PageResolver implements DataProviderResolverInterface
+class PageDataProviderResolver implements DataProviderResolverInterface
 {
     public static function getDataProvider(): string
     {

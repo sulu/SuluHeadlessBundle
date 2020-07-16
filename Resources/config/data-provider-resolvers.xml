@@ -15,7 +15,7 @@
 
         <service
             id="sulu_headless.provider_resolver.page"
-            class="Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver\PageResolver"
+            class="Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver\PageDataProviderResolver"
         >
             <argument type="service" id="sulu_page.smart_content.data_provider.content"/>
             <argument type="service" id="sulu_headless.structure_resolver"/>
