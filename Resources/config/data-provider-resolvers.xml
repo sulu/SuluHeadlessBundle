@@ -5,7 +5,7 @@
     <services>
         <service
             id="sulu_headless.provider_resolver.media"
-            class="Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver\MediaResolver"
+            class="Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver\MediaDataProviderResolver"
         >
             <argument type="service" id="sulu_media.smart_content.data_provider.media"/>
             <argument type="service" id="sulu_headless.serializer.media"/>

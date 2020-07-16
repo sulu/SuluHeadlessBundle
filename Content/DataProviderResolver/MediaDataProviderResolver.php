@@ -19,7 +19,7 @@ use Sulu\Component\Content\Compat\PropertyParameter;
 use Sulu\Component\Media\SmartContent\MediaDataProvider;
 use Sulu\Component\SmartContent\Configuration\ProviderConfigurationInterface;
 
-class MediaResolver implements DataProviderResolverInterface
+class MediaDataProviderResolver implements DataProviderResolverInterface
 {
     public static function getDataProvider(): string
     {
