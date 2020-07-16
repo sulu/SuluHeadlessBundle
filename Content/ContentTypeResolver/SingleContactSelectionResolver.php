@@ -54,7 +54,7 @@ class SingleContactSelectionResolver implements ContentTypeResolverInterface
         $serializationContext = new SerializationContext();
         $serializationContext->setGroups(['partialContact']);
 
-        $content = $this->contactSerializer->serialize($contact, $locale, $serializationContext);
+        $content = $this->contactSerializer->serialize($contact->getEntity(), $locale, $serializationContext);
 
         return new ContentView($content, [$data]);
     }

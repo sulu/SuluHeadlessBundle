@@ -19,6 +19,7 @@ use Prophecy\Argument;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\ContactBundle\Api\Contact;
 use Sulu\Bundle\ContactBundle\Contact\ContactManager;
+use Sulu\Bundle\ContactBundle\Entity\ContactInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\SingleContactSelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\ContactSerializerInterface;
@@ -61,11 +62,13 @@ class SingleContactSelectionResolverTest extends TestCase
     {
         $locale = 'en';
 
-        $contact = $this->prophesize(Contact::class);
+        $contact = $this->prophesize(ContactInterface::class);
+        $apiContact = $this->prophesize(Contact::class);
+        $apiContact->getEntity()->willReturn($contact->reveal());
 
         $data = 2;
 
-        $this->contactManager->getById(2, $locale)->willReturn($contact->reveal());
+        $this->contactManager->getById(2, $locale)->willReturn($apiContact->reveal());
         $this->contactSerializer->serialize($contact, $locale, Argument::type(SerializationContext::class))->willReturn([
             'id' => 2,
             'firstName' => 'John',
