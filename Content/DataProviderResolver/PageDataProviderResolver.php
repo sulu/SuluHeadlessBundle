@@ -105,7 +105,6 @@ class PageDataProviderResolver implements DataProviderResolverInterface
             $pageIds[] = $resultPage->getId();
         }
 
-
         /** @var PropertyParameter[] $propertiesParamValue */
         $propertiesParamValue = isset($propertyParameters['properties']) ? $propertyParameters['properties']->getValue() : [];
 
@@ -142,7 +141,7 @@ class PageDataProviderResolver implements DataProviderResolverInterface
      */
     private function loadPageStructures(array $pageIds, array $propertiesParamValue, string $webspaceKey, string $locale): array
     {
-        if (count($pageIds) === 0) {
+        if (0 === \count($pageIds)) {
             return [];
         }
 
