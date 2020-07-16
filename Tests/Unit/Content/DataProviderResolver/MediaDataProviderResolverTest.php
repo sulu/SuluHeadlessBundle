@@ -52,7 +52,7 @@ class MediaDataProviderResolverTest extends TestCase
         );
     }
 
-    public function testGetContentType(): void
+    public function testGetDataProvider(): void
     {
         self::assertSame('media', $this->mediaResolver::getDataProvider());
     }
