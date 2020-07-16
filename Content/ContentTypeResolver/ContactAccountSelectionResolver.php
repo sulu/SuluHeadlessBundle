@@ -78,7 +78,7 @@ class ContactAccountSelectionResolver implements ContentTypeResolverInterface
                 $account = $this->accountManager->getById((int) substr($entry, 1), $locale);
                 $serializationContext->setGroups(['partialAccount']);
 
-                $content[] = $this->accountSerializer->serialize($account, $locale, $serializationContext);
+                $content[] = $this->accountSerializer->serialize($account->getEntity(), $locale, $serializationContext);
             }
         }
 

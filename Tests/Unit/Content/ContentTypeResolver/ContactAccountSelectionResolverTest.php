@@ -21,6 +21,7 @@ use Sulu\Bundle\ContactBundle\Api\Account;
 use Sulu\Bundle\ContactBundle\Api\Contact;
 use Sulu\Bundle\ContactBundle\Contact\AccountManager;
 use Sulu\Bundle\ContactBundle\Contact\ContactManager;
+use Sulu\Bundle\ContactBundle\Entity\AccountInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\ContactAccountSelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\AccountSerializerInterface;
@@ -80,7 +81,9 @@ class ContactAccountSelectionResolverTest extends TestCase
 
         $contact = $this->prophesize(Contact::class);
 
-        $account = $this->prophesize(Account::class);
+        $account = $this->prophesize(AccountInterface::class);
+        $apiAccount = $this->prophesize(Account::class);
+        $apiAccount->getEntity()->willReturn($account->reveal());
 
         $data = ['c2', 'a3'];
 
@@ -98,7 +101,7 @@ class ContactAccountSelectionResolverTest extends TestCase
             ],
         ]);
 
-        $this->accountManager->getById(3, $locale)->willReturn($account->reveal());
+        $this->accountManager->getById(3, $locale)->willReturn($apiAccount->reveal());
         $this->accountSerializer->serialize($account, $locale, Argument::type(SerializationContext::class))->willReturn([
             'id' => 3,
             'depth' => 1,
