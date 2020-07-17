@@ -58,7 +58,7 @@ class CategorySerializer implements CategorySerializerInterface
 
         $categoryData['medias'] = [];
         foreach ($apiCategory->getMedias() as $media) {
-            $categoryData['medias'][] = $this->mediaSerializer->serialize($media);
+            $categoryData['medias'][] = $this->mediaSerializer->serialize($media->getEntity(), $locale);
         }
 
         return $categoryData;

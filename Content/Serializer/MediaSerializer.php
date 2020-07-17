@@ -15,12 +15,19 @@ namespace Sulu\Bundle\HeadlessBundle\Content\Serializer;
 
 use JMS\Serializer\SerializationContext;
 use Sulu\Bundle\MediaBundle\Api\Media;
+use Sulu\Bundle\MediaBundle\Entity\MediaInterface;
 use Sulu\Bundle\MediaBundle\Media\FormatCache\FormatCacheInterface;
 use Sulu\Bundle\MediaBundle\Media\ImageConverter\ImageConverterInterface;
+use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
 use Sulu\Component\Serializer\ArraySerializerInterface;
 
 class MediaSerializer implements MediaSerializerInterface
 {
+    /**
+     * @var MediaManagerInterface
+     */
+    private $mediaManager;
+
     /**
      * @var ArraySerializerInterface
      */
@@ -37,10 +44,12 @@ class MediaSerializer implements MediaSerializerInterface
     private $formatCache;
 
     public function __construct(
+        MediaManagerInterface $mediaManager,
         ArraySerializerInterface $arraySerializer,
         ImageConverterInterface $imageConverter,
         FormatCacheInterface $formatCache
     ) {
+        $this->mediaManager = $mediaManager;
         $this->arraySerializer = $arraySerializer;
         $this->imageConverter = $imageConverter;
         $this->formatCache = $formatCache;
@@ -49,9 +58,11 @@ class MediaSerializer implements MediaSerializerInterface
     /**
      * @return mixed[]
      */
-    public function serialize(Media $media, ?SerializationContext $context = null): array
+    public function serialize(MediaInterface $media, string $locale, ?SerializationContext $context = null): array
     {
-        $mediaData = $this->arraySerializer->serialize($media, $context);
+        $apiMedia = new Media($media, $locale);
+        $apiMedia = $this->mediaManager->addFormatsAndUrl($apiMedia);
+        $mediaData = $this->arraySerializer->serialize($apiMedia, $context);
 
         unset($mediaData['formats']);
         unset($mediaData['storageOptions']);
@@ -61,20 +72,20 @@ class MediaSerializer implements MediaSerializerInterface
         unset($mediaData['_hash']);
 
         /** @var string $fileName */
-        $fileName = $media->getName();
+        $fileName = $apiMedia->getName();
 
         // replace extension of filename with preferred media extension if possible
-        $preferredExtension = $this->imageConverter->getSupportedOutputImageFormats($media->getMimeType())[0] ?? null;
+        $preferredExtension = $this->imageConverter->getSupportedOutputImageFormats($apiMedia->getMimeType())[0] ?? null;
         if ($preferredExtension) {
             $fileName = pathinfo($fileName)['filename'] . '.' . $preferredExtension;
         }
 
         $mediaData['formatUri'] = $this->formatCache->getMediaUrl(
-            $media->getId(),
+            $apiMedia->getId(),
             $fileName,
             '{format}',
-            $media->getVersion(),
-            $media->getSubVersion()
+            $apiMedia->getVersion(),
+            $apiMedia->getSubVersion()
         );
 
         return $mediaData;

@@ -72,7 +72,7 @@ class AccountSerializer implements AccountSerializerInterface
             /** @var mixed[] $logoData */
             $logoData = $apiAccount->getLogo();
             $logo = $this->mediaManager->getById($logoData['id'], $locale);
-            $accountData['logo'] = $this->mediaSerializer->serialize($logo);
+            $accountData['logo'] = $this->mediaSerializer->serialize($logo->getEntity(), $locale);
         }
 
         return $accountData;

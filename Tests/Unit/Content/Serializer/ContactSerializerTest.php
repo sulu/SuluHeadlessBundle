@@ -28,6 +28,7 @@ use Sulu\Bundle\HeadlessBundle\Content\Serializer\ContactSerializer;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\ContactSerializerInterface;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializerInterface;
 use Sulu\Bundle\MediaBundle\Api\Media;
+use Sulu\Bundle\MediaBundle\Entity\MediaInterface;
 use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
 use Sulu\Component\Serializer\ArraySerializerInterface;
 
@@ -101,12 +102,9 @@ class ContactSerializerTest extends TestCase
         $contact = $this->prophesize(ContactInterface::class);
         $this->contactManager->getContact($contact->reveal(), $locale)->willReturn($apiContact->reveal());
 
-        $media = $this->prophesize(Media::class);
-        $media->getId()->willReturn(1);
-        $media->getName()->willReturn('media-1.png');
-        $media->getMimeType()->willReturn('image/png');
-        $media->getVersion()->willReturn(1);
-        $media->getSubVersion()->willReturn(0);
+        $media = $this->prophesize(MediaInterface::class);
+        $apiMedia = $this->prophesize(Media::class);
+        $apiMedia->getEntity()->willReturn($media->reveal());
 
         $this->arraySerializer->serialize($apiContact, null)->willReturn([
             'id' => 1,
@@ -117,12 +115,12 @@ class ContactSerializerTest extends TestCase
             'position' => 1,
         ]);
 
-        $this->mediaSerializer->serialize($media)->willReturn([
+        $this->mediaSerializer->serialize($media->reveal(), $locale)->willReturn([
             'id' => 2,
             'formatUri' => '/media/2/{format}/media-2.jpg?v=1-0',
         ]);
 
-        $this->mediaManager->getById(Argument::any(), $locale)->shouldBeCalled()->willReturn($media->reveal());
+        $this->mediaManager->getById(Argument::any(), $locale)->shouldBeCalled()->willReturn($apiMedia->reveal());
 
         $contactTitle = $this->prophesize(ContactTitle::class);
         $contactTitle->getTitle()->willReturn('fancyTitle');
@@ -163,12 +161,9 @@ class ContactSerializerTest extends TestCase
         $contact = $this->prophesize(ContactInterface::class);
         $this->contactManager->getContact($contact->reveal(), $locale)->willReturn($apiContact->reveal());
 
-        $media = $this->prophesize(Media::class);
-        $media->getId()->willReturn(1);
-        $media->getName()->willReturn('media-1.png');
-        $media->getMimeType()->willReturn('image/png');
-        $media->getVersion()->willReturn(1);
-        $media->getSubVersion()->willReturn(0);
+        $media = $this->prophesize(MediaInterface::class);
+        $apiMedia = $this->prophesize(Media::class);
+        $apiMedia->getEntity()->willReturn($media->reveal());
 
         $context = $this->prophesize(SerializationContext::class);
 
@@ -181,12 +176,12 @@ class ContactSerializerTest extends TestCase
             'position' => 1,
         ]);
 
-        $this->mediaSerializer->serialize($media)->willReturn([
+        $this->mediaSerializer->serialize($media->reveal(), $locale)->willReturn([
             'id' => 2,
             'formatUri' => '/media/2/{format}/media-2.jpg?v=1-0',
         ]);
 
-        $this->mediaManager->getById(Argument::any(), $locale)->shouldBeCalled()->willReturn($media->reveal());
+        $this->mediaManager->getById(Argument::any(), $locale)->shouldBeCalled()->willReturn($apiMedia->reveal());
 
         $contactTitle = $this->prophesize(ContactTitle::class);
         $contactTitle->getTitle()->willReturn('fancyTitle');

@@ -23,6 +23,7 @@ use Sulu\Bundle\HeadlessBundle\Content\Serializer\CategorySerializer;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\CategorySerializerInterface;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializerInterface;
 use Sulu\Bundle\MediaBundle\Api\Media;
+use Sulu\Bundle\MediaBundle\Entity\MediaInterface;
 use Sulu\Component\Serializer\ArraySerializerInterface;
 
 class CategorySerializerTest extends TestCase
@@ -66,9 +67,12 @@ class CategorySerializerTest extends TestCase
 
         $category = $this->prophesize(CategoryInterface::class);
 
-        $media = $this->prophesize(Media::class);
+        $media = $this->prophesize(MediaInterface::class);
+        $apiMedia = $this->prophesize(Media::class);
+        $apiMedia->getEntity()->willReturn($media->reveal());
+
         $apiCategory = $this->prophesize(Category::class);
-        $apiCategory->getMedias()->willReturn([$media->reveal()]);
+        $apiCategory->getMedias()->willReturn([$apiMedia->reveal()]);
 
         $this->categoryManager->getApiObject($category->reveal(), $locale)->willReturn($apiCategory->reveal());
 
@@ -83,7 +87,7 @@ class CategorySerializerTest extends TestCase
             'meta' => [],
         ]);
 
-        $this->mediaSerializer->serialize($media)->willReturn([
+        $this->mediaSerializer->serialize($media, $locale)->willReturn([
             'id' => 1,
             'formatUri' => '/media/1/{format}/media-1.jpg?=v1-0',
         ]);
@@ -112,9 +116,12 @@ class CategorySerializerTest extends TestCase
 
         $category = $this->prophesize(CategoryInterface::class);
 
-        $media = $this->prophesize(Media::class);
+        $media = $this->prophesize(MediaInterface::class);
+        $apiMedia = $this->prophesize(Media::class);
+        $apiMedia->getEntity()->willReturn($media->reveal());
+
         $apiCategory = $this->prophesize(Category::class);
-        $apiCategory->getMedias()->willReturn([$media->reveal()]);
+        $apiCategory->getMedias()->willReturn([$apiMedia->reveal()]);
 
         $this->categoryManager->getApiObject($category->reveal(), $locale)->willReturn($apiCategory->reveal());
 
@@ -129,7 +136,7 @@ class CategorySerializerTest extends TestCase
             'meta' => [],
         ]);
 
-        $this->mediaSerializer->serialize($media)->willReturn([
+        $this->mediaSerializer->serialize($media, $locale)->willReturn([
             'id' => 1,
             'formatUri' => '/media/1/{format}/media-1.jpg?=v1-0',
         ]);

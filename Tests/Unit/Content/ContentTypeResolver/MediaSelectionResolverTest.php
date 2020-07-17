@@ -19,6 +19,7 @@ use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\MediaSelectionResolve
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializerInterface;
 use Sulu\Bundle\MediaBundle\Api\Media;
+use Sulu\Bundle\MediaBundle\Entity\MediaInterface;
 use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
 use Sulu\Component\Content\Compat\PropertyInterface;
 
@@ -57,32 +58,30 @@ class MediaSelectionResolverTest extends TestCase
 
     public function testResolve(): void
     {
-        $media1 = $this->prophesize(Media::class);
-        $media1->getId()->willReturn(1);
-        $media1->getName()->willReturn('media-1');
-        $media1->getVersion()->willReturn(1);
-        $media1->getSubVersion()->willReturn(0);
+        $locale = 'en';
 
-        $media2 = $this->prophesize(Media::class);
-        $media2->getId()->willReturn(2);
-        $media2->getName()->willReturn('media-2');
-        $media2->getVersion()->willReturn(1);
-        $media2->getSubVersion()->willReturn(0);
+        $media1 = $this->prophesize(MediaInterface::class);
+        $apiMedia1 = $this->prophesize(Media::class);
+        $apiMedia1->getEntity()->willReturn($media1->reveal());
 
-        $this->mediaManager->getByIds([1, 2], 'en')->willReturn([$media1->reveal(), $media2->reveal()]);
+        $media2 = $this->prophesize(MediaInterface::class);
+        $apiMedia2 = $this->prophesize(Media::class);
+        $apiMedia2->getEntity()->willReturn($media2->reveal());
 
-        $this->mediaSerializer->serialize($media1)->willReturn([
+        $this->mediaManager->getByIds([1, 2], 'en')->willReturn([$apiMedia1->reveal(), $apiMedia2->reveal()]);
+
+        $this->mediaSerializer->serialize($media1->reveal(), $locale)->willReturn([
             'id' => 1,
             'formatUri' => '/media/1/{format}/media-1.jpg?v=1-0',
         ]);
-        $this->mediaSerializer->serialize($media2)->willReturn([
+        $this->mediaSerializer->serialize($media2->reveal(), $locale)->willReturn([
             'id' => 2,
             'formatUri' => '/media/2/{format}/media-2.jpg?v=1-0',
         ]);
 
         $property = $this->prophesize(PropertyInterface::class);
 
-        $result = $this->mediaResolver->resolve(['ids' => [1, 2]], $property->reveal(), 'en');
+        $result = $this->mediaResolver->resolve(['ids' => [1, 2]], $property->reveal(), $locale);
 
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame(

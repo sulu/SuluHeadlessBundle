@@ -23,6 +23,7 @@ use Sulu\Bundle\HeadlessBundle\Content\Serializer\AccountSerializer;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\AccountSerializerInterface;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializerInterface;
 use Sulu\Bundle\MediaBundle\Api\Media;
+use Sulu\Bundle\MediaBundle\Entity\MediaInterface;
 use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
 use Sulu\Component\Serializer\ArraySerializerInterface;
 
@@ -82,12 +83,9 @@ class AccountSerializerTest extends TestCase
         $account = $this->prophesize(AccountInterface::class);
         $this->accountFactory->createApiEntity($account->reveal(), $locale)->willReturn($apiAccount->reveal());
 
-        $media = $this->prophesize(Media::class);
-        $media->getId()->willReturn(2);
-        $media->getName()->willReturn('media-2.png');
-        $media->getMimeType()->willReturn('image/jpg');
-        $media->getVersion()->willReturn(1);
-        $media->getSubVersion()->willReturn(0);
+        $media = $this->prophesize(MediaInterface::class);
+        $apiMedia = $this->prophesize(Media::class);
+        $apiMedia->getEntity()->willReturn($media->reveal());
 
         $this->arraySerializer->serialize($apiAccount, null)->willReturn([
             'id' => 1,
@@ -96,12 +94,12 @@ class AccountSerializerTest extends TestCase
             'corporation' => 'Digital Agency',
         ]);
 
-        $this->mediaSerializer->serialize($media, null)->willReturn([
+        $this->mediaSerializer->serialize($media, $locale, null)->willReturn([
             'id' => 1,
             'formatUri' => '/media/1/{format}/media-2.jpg?v=1-0',
         ]);
 
-        $this->mediaManager->getById(1, $locale)->shouldBeCalled()->willReturn($media->reveal());
+        $this->mediaManager->getById(1, $locale)->shouldBeCalled()->willReturn($apiMedia->reveal());
 
         $result = $this->accountSerializer->serialize($account->reveal(), $locale, null);
 
@@ -132,12 +130,9 @@ class AccountSerializerTest extends TestCase
         $account = $this->prophesize(AccountInterface::class);
         $this->accountFactory->createApiEntity($account->reveal(), $locale)->willReturn($apiAccount->reveal());
 
-        $media = $this->prophesize(Media::class);
-        $media->getId()->willReturn(1);
-        $media->getName()->willReturn('media-1.png');
-        $media->getMimeType()->willReturn('image/png');
-        $media->getVersion()->willReturn(1);
-        $media->getSubVersion()->willReturn(0);
+        $media = $this->prophesize(MediaInterface::class);
+        $apiMedia = $this->prophesize(Media::class);
+        $apiMedia->getEntity()->willReturn($media->reveal());
 
         $context = $this->prophesize(SerializationContext::class);
 
@@ -148,12 +143,12 @@ class AccountSerializerTest extends TestCase
             'corporation' => 'Digital Agency',
         ]);
 
-        $this->mediaSerializer->serialize($media)->willReturn([
+        $this->mediaSerializer->serialize($media, $locale)->willReturn([
             'id' => 2,
             'formatUri' => '/media/2/{format}/media-2.jpg?v=1-0',
         ]);
 
-        $this->mediaManager->getById(2, $locale)->shouldBeCalled()->willReturn($media->reveal());
+        $this->mediaManager->getById(2, $locale)->shouldBeCalled()->willReturn($apiMedia->reveal());
 
         $result = $this->accountSerializer->serialize($account->reveal(), $locale, $context->reveal());
 
