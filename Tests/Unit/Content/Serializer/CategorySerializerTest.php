@@ -17,6 +17,8 @@ use JMS\Serializer\SerializationContext;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\CategoryBundle\Api\Category;
+use Sulu\Bundle\CategoryBundle\Category\CategoryManagerInterface;
+use Sulu\Bundle\CategoryBundle\Entity\CategoryInterface;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\CategorySerializer;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\CategorySerializerInterface;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializerInterface;
@@ -25,6 +27,11 @@ use Sulu\Component\Serializer\ArraySerializerInterface;
 
 class CategorySerializerTest extends TestCase
 {
+    /**
+     * @var CategoryManagerInterface|ObjectProphecy
+     */
+    private $categoryManager;
+
     /**
      * @var ArraySerializerInterface|ObjectProphecy
      */
@@ -42,11 +49,12 @@ class CategorySerializerTest extends TestCase
 
     protected function setUp(): void
     {
+        $this->categoryManager = $this->prophesize(CategoryManagerInterface::class);
         $this->arraySerializer = $this->prophesize(ArraySerializerInterface::class);
-
         $this->mediaSerializer = $this->prophesize(MediaSerializerInterface::class);
 
         $this->categorySerializer = new CategorySerializer(
+            $this->categoryManager->reveal(),
             $this->arraySerializer->reveal(),
             $this->mediaSerializer->reveal()
         );
@@ -54,22 +62,17 @@ class CategorySerializerTest extends TestCase
 
     public function testSerialize(): void
     {
-        $category = $this->prophesize(Category::class);
-        $category->getId()->willReturn(1);
-        $category->getLocale()->willReturn('en');
-        $category->getKey()->willReturn('key-1');
-        $category->getName()->willReturn('cat-1');
-        $category->getDescription()->willReturn('desc-1');
+        $locale = 'en';
+
+        $category = $this->prophesize(CategoryInterface::class);
 
         $media = $this->prophesize(Media::class);
-        $media->getId()->willReturn(1);
-        $media->getName()->willReturn('media-1');
-        $media->getVersion()->willReturn(1);
-        $media->getSubVersion()->willReturn(0);
+        $apiCategory = $this->prophesize(Category::class);
+        $apiCategory->getMedias()->willReturn([$media->reveal()]);
 
-        $category->getMedias()->willReturn([$media->reveal()]);
+        $this->categoryManager->getApiObject($category->reveal(), $locale)->willReturn($apiCategory->reveal());
 
-        $this->arraySerializer->serialize($category, null)->willReturn([
+        $this->arraySerializer->serialize($apiCategory, null)->willReturn([
             'id' => 1,
             'locale' => 'en',
             'defaultLocale' => 'en',
@@ -85,7 +88,7 @@ class CategorySerializerTest extends TestCase
             'formatUri' => '/media/1/{format}/media-1.jpg?=v1-0',
         ]);
 
-        $result = $this->categorySerializer->serialize($category->reveal());
+        $result = $this->categorySerializer->serialize($category->reveal(), $locale);
 
         $this->assertSame([
             'id' => 1,
@@ -104,24 +107,18 @@ class CategorySerializerTest extends TestCase
 
     public function testSerializeWithContext(): void
     {
-        $category = $this->prophesize(Category::class);
-        $category->getId()->willReturn(1);
-        $category->getLocale()->willReturn('en');
-        $category->getKey()->willReturn('key-1');
-        $category->getName()->willReturn('cat-1');
-        $category->getDescription()->willReturn('desc-1');
-
-        $media = $this->prophesize(Media::class);
-        $media->getId()->willReturn(1);
-        $media->getName()->willReturn('media-1');
-        $media->getVersion()->willReturn(1);
-        $media->getSubVersion()->willReturn(0);
-
-        $category->getMedias()->willReturn([$media->reveal()]);
-
+        $locale = 'en';
         $context = $this->prophesize(SerializationContext::class);
 
-        $this->arraySerializer->serialize($category, $context)->willReturn([
+        $category = $this->prophesize(CategoryInterface::class);
+
+        $media = $this->prophesize(Media::class);
+        $apiCategory = $this->prophesize(Category::class);
+        $apiCategory->getMedias()->willReturn([$media->reveal()]);
+
+        $this->categoryManager->getApiObject($category->reveal(), $locale)->willReturn($apiCategory->reveal());
+
+        $this->arraySerializer->serialize($apiCategory, $context)->willReturn([
             'id' => 1,
             'locale' => 'en',
             'defaultLocale' => 'en',
@@ -137,7 +134,7 @@ class CategorySerializerTest extends TestCase
             'formatUri' => '/media/1/{format}/media-1.jpg?=v1-0',
         ]);
 
-        $result = $this->categorySerializer->serialize($category->reveal(), $context->reveal());
+        $result = $this->categorySerializer->serialize($category->reveal(), $locale, $context->reveal());
 
         $this->assertSame([
             'id' => 1,

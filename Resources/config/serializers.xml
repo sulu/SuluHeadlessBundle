@@ -50,6 +50,7 @@
             id="sulu_headless.serializer.category"
             class="Sulu\Bundle\HeadlessBundle\Content\Serializer\CategorySerializer"
         >
+            <argument type="service" id="sulu_category.category_manager"/>
             <argument type="service" id="sulu_core.array_serializer"/>
             <argument type="service" id="sulu_headless.serializer.media"/>
         </service>

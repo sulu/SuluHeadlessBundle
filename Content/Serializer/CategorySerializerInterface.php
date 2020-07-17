@@ -14,12 +14,12 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Content\Serializer;
 
 use JMS\Serializer\SerializationContext;
-use Sulu\Bundle\CategoryBundle\Api\Category;
+use Sulu\Bundle\CategoryBundle\Entity\CategoryInterface;
 
 interface CategorySerializerInterface
 {
     /**
      * @return mixed[]
      */
-    public function serialize(Category $category, ?SerializationContext $context = null): array;
+    public function serialize(CategoryInterface $category, string $locale, ?SerializationContext $context = null): array;
 }
