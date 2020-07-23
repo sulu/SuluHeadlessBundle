@@ -131,7 +131,7 @@ class SmartContentResolver implements ContentTypeResolverInterface
         $limit = $configuration->hasLimit() ? $filters['limitResult'] ?? null : null;
         $options = [
             'webspaceKey' => $property->getStructure()->getWebspaceKey(),
-            'locale' => $property->getStructure()->getLanguageCode(),
+            'locale' => $locale,
         ];
 
         if (isset($params['max_per_page']) && $configuration->hasPagination()) {

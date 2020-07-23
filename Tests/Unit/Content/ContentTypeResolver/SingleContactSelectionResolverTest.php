@@ -112,7 +112,7 @@ class SingleContactSelectionResolverTest extends TestCase
 
         $result = $this->singleContactSelectionResolver->resolve(null, $property->reveal(), $locale);
 
-        $this->assertSame([], $result->getContent());
+        $this->assertNull($result->getContent());
 
         $this->assertSame([], $result->getView());
     }

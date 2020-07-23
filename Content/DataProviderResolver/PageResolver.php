@@ -70,7 +70,8 @@ class PageResolver implements DataProviderResolverInterface
     ): DataProviderResult {
         // the PageDataProvider resolves the data defined in the $propertyParameter using the default content types
         // for example, this means that the result contains an array of media entities instead of an array of ids
-        // TODO: find a solution that returns the unresolved data which can be passed to the resolvers of this bundle
+        // this forces us to add explicit checks inside of the resolvers of the bundle (eg. MediaSelectionResolver)
+        // TODO: find a solution that returns the unresolved data which can be passed safely to the headless resolvers
         $providerResult = $this->pageDataProvider->resolveResourceItems(
             $filters,
             $propertyParameter,

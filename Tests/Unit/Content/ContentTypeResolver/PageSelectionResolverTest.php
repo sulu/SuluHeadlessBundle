@@ -15,25 +15,31 @@ namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
 
 use PHPUnit\Framework\TestCase;
 use Prophecy\Prophecy\ObjectProphecy;
-use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\PageSelectionContainerFactory;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\PageSelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
-use Sulu\Bundle\HeadlessBundle\Content\Serializer\PageSerializerInterface;
-use Sulu\Bundle\PageBundle\Content\PageSelectionContainer;
+use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
 use Sulu\Component\Content\Compat\PropertyInterface;
 use Sulu\Component\Content\Compat\PropertyParameter;
+use Sulu\Component\Content\Compat\StructureInterface;
+use Sulu\Component\Content\Mapper\ContentMapperInterface;
+use Sulu\Component\Content\Query\ContentQueryBuilderInterface;
 
 class PageSelectionResolverTest extends TestCase
 {
     /**
-     * @var PageSerializerInterface|ObjectProphecy
+     * @var StructureResolverInterface|ObjectProphecy
      */
-    private $pageSerializer;
+    private $structureResolver;
 
     /**
-     * @var PageSelectionContainerFactory|ObjectProphecy
+     * @var ContentQueryBuilderInterface|ObjectProphecy
      */
-    private $pageSelectionContainerFactory;
+    private $contentQueryBuilder;
+
+    /**
+     * @var ContentMapperInterface|ObjectProphecy
+     */
+    private $contentMapper;
 
     /**
      * @var PageSelectionResolver
@@ -42,12 +48,15 @@ class PageSelectionResolverTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->pageSerializer = $this->prophesize(PageSerializerInterface::class);
-        $this->pageSelectionContainerFactory = $this->prophesize(PageSelectionContainerFactory::class);
+        $this->structureResolver = $this->prophesize(StructureResolverInterface::class);
+        $this->contentQueryBuilder = $this->prophesize(ContentQueryBuilderInterface::class);
+        $this->contentMapper = $this->prophesize(ContentMapperInterface::class);
 
         $this->pageSelectionResolver = new PageSelectionResolver(
-            $this->pageSerializer->reveal(),
-            $this->pageSelectionContainerFactory->reveal()
+            $this->structureResolver->reveal(),
+            $this->contentQueryBuilder->reveal(),
+            $this->contentMapper->reveal(),
+            true
         );
     }
 
@@ -58,8 +67,8 @@ class PageSelectionResolverTest extends TestCase
 
     public function testResolve(): void
     {
-        $locale = 'en';
-        $data = [1];
+        $structure = $this->prophesize(StructureInterface::class);
+        $structure->getWebspaceKey()->willReturn('webspace-key');
 
         /** @var PropertyInterface|ObjectProphecy $property */
         $property = $this->prophesize(PropertyInterface::class);
@@ -71,123 +80,106 @@ class PageSelectionResolverTest extends TestCase
             ]),
         ];
         $property->getParams()->willReturn($params);
+        $property->getStructure()->willReturn($structure->reveal());
 
-        $container = $this->prophesize(PageSelectionContainer::class);
-        $this->pageSelectionContainerFactory->createContainer($data, $params, 'sulu', $locale)
-            ->willReturn($container->reveal());
+        $this->contentQueryBuilder->init([
+            'ids' => ['page-id-1', 'page-id-2'],
+            'properties' => $params['properties']->getValue(),
+            'published' => false,
+        ])->shouldBeCalled();
+        $this->contentQueryBuilder->build('webspace-key', ['en'])->willReturn(['page-query-string']);
 
-        $pages = [
+        $pageStructure1 = $this->prophesize(StructureInterface::class);
+        $pageStructure2 = $this->prophesize(StructureInterface::class);
+        $this->contentMapper->loadBySql2(
+            'page-query-string',
+            'en',
+            'webspace-key'
+        )->willReturn([
+            $pageStructure1->reveal(),
+            $pageStructure2->reveal(),
+        ]);
+
+        $this->structureResolver->resolveProperties(
+            $pageStructure1->reveal(),
             [
-                'id' => '2',
-                'uuid' => '1',
-                'nodeType' => 1,
-                'path' => '/testpage',
-                'changer' => 1,
-                'publishedState' => true,
-                'creator' => 1,
-                'title' => 'TestPage',
-                'locale' => 'en',
-                'webspaceKey' => 'sulu',
-                'template' => 'headless',
-                'parent' => '1',
-                'author' => '2',
-                'order' => 30,
-                'description' => 'Main Test Description',
-                'excerptDescription' => 'Excerpt Test Description',
-                'excerptCategories' => [
-                    [
-                        'id' => 2,
-                        'key' => 'testcat_1',
-                        'name' => 'TestCat_1_en',
-                        'defaultLocale' => 'en',
-                        'creator' => 'Adam Ministrator',
-                        'changer' => 'Adam Ministrator',
-                    ],
-                ],
+                'title' => 'title',
+                'excerptTitle' => 'excerpt.title',
+                'categories' => 'excerpt.categories',
             ],
-        ];
+            'en'
+        )->willReturn([
+            'id' => 'page-id-1',
+            'template' => 'default',
+            'content' => [
+                'title' => 'Page Title 1',
+                'excerptTitle' => 'Page Excerpt Title 1',
+            ],
+            'view' => [
+                'title' => [],
+                'excerptTitle' => [],
+            ],
+        ]);
 
-        $container->getData()->willReturn($pages);
-        $this->pageSerializer->serialize($pages[0], $params['properties']->getValue())->willReturn(
+        $this->structureResolver->resolveProperties(
+            $pageStructure2->reveal(),
             [
-                'id' => '2',
-                'uuid' => '1',
-                'nodeType' => 1,
-                'path' => '/testpage',
-                'changer' => 1,
-                'publishedState' => true,
-                'creator' => 1,
-                'title' => 'TestPage',
-                'locale' => 'en',
-                'webspaceKey' => 'sulu',
-                'template' => 'headless',
-                'parent' => '1',
-                'author' => '2',
-                'order' => 30,
-                'description' => 'Main Test Description',
-                'excerptDescription' => 'Excerpt Test Description',
-                'excerptCategories' => [
-                    [
-                        'id' => 2,
-                        'key' => 'testcat_1',
-                        'name' => 'TestCat_1_en',
-                        'creator' => 'Adam Ministrator',
-                        'changer' => 'Adam Ministrator',
-                        'medias' => [
-                            [
-                                'id' => 1,
-                                'formatUri' => '/media/1/{format}/media-1.jpg?v=1-0',
-                            ],
-                        ],
-                    ],
-                ],
-            ]
-        );
+                'title' => 'title',
+                'excerptTitle' => 'excerpt.title',
+                'categories' => 'excerpt.categories',
+            ],
+            'en'
+        )->willReturn([
+            'id' => 'page-id-2',
+            'template' => 'default',
+            'content' => [
+                'title' => 'Page Title 2',
+                'excerptTitle' => 'Page Excerpt Title 2',
+            ],
+            'view' => [
+                'title' => [],
+                'excerptTitle' => [],
+            ],
+        ]);
 
-        $result = $this->pageSelectionResolver->resolve($data, $property->reveal(), $locale, ['webspaceKey' => 'sulu']);
+        $result = $this->pageSelectionResolver->resolve(
+            ['page-id-1', 'page-id-2'],
+            $property->reveal(),
+            'en'
+        );
 
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame(
             [
                 [
-                    'id' => '2',
-                    'uuid' => '1',
-                    'nodeType' => 1,
-                    'path' => '/testpage',
-                    'changer' => 1,
-                    'publishedState' => true,
-                    'creator' => 1,
-                    'title' => 'TestPage',
-                    'locale' => 'en',
-                    'webspaceKey' => 'sulu',
-                    'template' => 'headless',
-                    'parent' => '1',
-                    'author' => '2',
-                    'order' => 30,
-                    'description' => 'Main Test Description',
-                    'excerptDescription' => 'Excerpt Test Description',
-                    'excerptCategories' => [
-                        [
-                            'id' => 2,
-                            'key' => 'testcat_1',
-                            'name' => 'TestCat_1_en',
-                            'creator' => 'Adam Ministrator',
-                            'changer' => 'Adam Ministrator',
-                            'medias' => [
-                                [
-                                    'id' => 1,
-                                    'formatUri' => '/media/1/{format}/media-1.jpg?v=1-0',
-                                ],
-                            ],
-                        ],
+                    'id' => 'page-id-1',
+                    'template' => 'default',
+                    'content' => [
+                        'title' => 'Page Title 1',
+                        'excerptTitle' => 'Page Excerpt Title 1',
+                    ],
+                    'view' => [
+                        'title' => [],
+                        'excerptTitle' => [],
+                    ],
+                ],
+                [
+                    'id' => 'page-id-2',
+                    'template' => 'default',
+                    'content' => [
+                        'title' => 'Page Title 2',
+                        'excerptTitle' => 'Page Excerpt Title 2',
+                    ],
+                    'view' => [
+                        'title' => [],
+                        'excerptTitle' => [],
                     ],
                 ],
             ],
             $result->getContent()
         );
-
         $this->assertSame(
-            [1],
+            ['page-id-1', 'page-id-2'],
             $result->getView()
         );
     }
@@ -198,6 +190,18 @@ class PageSelectionResolverTest extends TestCase
         $property = $this->prophesize(PropertyInterface::class);
 
         $result = $this->pageSelectionResolver->resolve(null, $property->reveal(), $locale);
+
+        $this->assertSame([], $result->getContent());
+
+        $this->assertSame([], $result->getView());
+    }
+
+    public function testResolveDataIsEmptyArray(): void
+    {
+        $locale = 'en';
+        $property = $this->prophesize(PropertyInterface::class);
+
+        $result = $this->pageSelectionResolver->resolve([], $property->reveal(), $locale);
 
         $this->assertSame([], $result->getContent());
 
