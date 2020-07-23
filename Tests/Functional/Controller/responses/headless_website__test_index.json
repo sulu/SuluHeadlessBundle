@@ -32,11 +32,12 @@
             "title": "excerpt-title",
             "more": "",
             "description": "",
-            "categories":  [],
-            "tags":  [],
-            "images":  [],
-            "icon":  [],
-            "audience_targeting_groups":  []
+            "categories": [],
+            "tags": [],
+            "images": [],
+            "segment": null,
+            "icon": [],
+            "audience_targeting_groups": []
         }
     }
 }
