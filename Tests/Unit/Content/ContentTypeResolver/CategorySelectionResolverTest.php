@@ -58,13 +58,7 @@ class CategorySelectionResolverTest extends TestCase
         self::assertSame('category_selection', $this->categorySelectionResolver::getContentType());
     }
 
-    /**
-     * @dataProvider categoryResolverProvider
-     *
-     * @param mixed[] $data
-     * @param mixed[] $view
-     */
-    public function testResolve(array $data, array $view): void
+    public function testResolve(): void
     {
         $locale = 'en';
 
@@ -102,7 +96,7 @@ class CategorySelectionResolverTest extends TestCase
             ],
         ]);
 
-        $result = $this->categorySelectionResolver->resolve($data, $property->reveal(), $locale);
+        $result = $this->categorySelectionResolver->resolve([1], $property->reveal(), $locale);
 
         $this->assertInstanceOf(ContentView::class, $result);
 
@@ -126,7 +120,7 @@ class CategorySelectionResolverTest extends TestCase
         );
 
         $this->assertSame(
-            $view,
+            [1],
             $result->getView()
         );
     }
@@ -143,33 +137,15 @@ class CategorySelectionResolverTest extends TestCase
         $this->assertSame([], $result->getView());
     }
 
-    /**
-     * @return mixed[]
-     */
-    public function categoryResolverProvider(): array
+    public function testResolveDataIsEmptyArray(): void
     {
-        return [
-            [
-                [
-                    1,
-                ],
-                [
-                    1,
-                ],
-            ],
-            [
-                [
-                    [
-                        'id' => 1,
-                        'key' => 'key-1',
-                        'name' => 'cat-1',
-                        'desc' => 'desc-1',
-                    ],
-                ],
-                [
-                    1,
-                ],
-            ],
-        ];
+        $locale = 'en';
+        $property = $this->prophesize(PropertyInterface::class);
+
+        $result = $this->categorySelectionResolver->resolve(null, $property->reveal(), $locale);
+
+        $this->assertSame([], $result->getContent());
+
+        $this->assertSame([], $result->getView());
     }
 }

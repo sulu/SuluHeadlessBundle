@@ -5,7 +5,7 @@
     <services>
         <service
             id="sulu_headless.provider_resolver.media"
-            class="Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver\MediaResolver"
+            class="Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver\MediaDataProviderResolver"
         >
             <argument type="service" id="sulu_media.smart_content.data_provider.media"/>
             <argument type="service" id="sulu_headless.serializer.media"/>
@@ -15,10 +15,13 @@
 
         <service
             id="sulu_headless.provider_resolver.page"
-            class="Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver\PageResolver"
+            class="Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver\PageDataProviderResolver"
         >
             <argument type="service" id="sulu_page.smart_content.data_provider.content"/>
-            <argument type="service" id="sulu_headless.serializer.page"/>
+            <argument type="service" id="sulu_headless.structure_resolver"/>
+            <argument type="service" id="sulu_page.smart_content.data_provider.content.query_builder"/>
+            <argument type="service" id="sulu.content.mapper"/>
+            <argument>%sulu_document_manager.show_drafts%</argument>
 
             <tag name="sulu_headless.data_provider_resolver"/>
         </service>

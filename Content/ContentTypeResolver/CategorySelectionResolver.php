@@ -51,18 +51,6 @@ class CategorySelectionResolver implements ContentTypeResolverInterface
             return new ContentView([]);
         }
 
-        if (0 < \count($data) && \array_key_exists(0, $data) && isset($data[0]['id'])) {
-            // we need to extract the category ids if they are already loaded
-            // this happens for example when resolving a smart-content property that uses the page provider
-
-            $categoryIds = [];
-            foreach ($data as $category) {
-                $categoryIds[] = $category['id'];
-            }
-
-            $data = $categoryIds;
-        }
-
         /** @var Category[] $categories */
         $categories = $this->categoryManager->getApiObjects($this->categoryManager->findByIds($data), $locale);
 

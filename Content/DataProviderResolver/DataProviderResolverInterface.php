@@ -27,12 +27,12 @@ interface DataProviderResolverInterface
 
     /**
      * @param mixed[] $filters
-     * @param PropertyParameter[] $propertyParameter
+     * @param PropertyParameter[] $propertyParameters
      * @param mixed[] $options
      */
     public function resolve(
         array $filters,
-        array $propertyParameter,
+        array $propertyParameters,
         array $options = [],
         ?int $limit = null,
         int $page = 1,
