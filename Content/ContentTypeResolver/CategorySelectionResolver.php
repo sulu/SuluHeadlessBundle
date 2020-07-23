@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver;
 
 use JMS\Serializer\SerializationContext;
-use Sulu\Bundle\CategoryBundle\Api\Category;
 use Sulu\Bundle\CategoryBundle\Category\CategoryManagerInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\CategorySerializerInterface;
@@ -49,18 +48,6 @@ class CategorySelectionResolver implements ContentTypeResolverInterface
     {
         if (null === $data) {
             return new ContentView([]);
-        }
-
-        if (0 < \count($data) && \array_key_exists(0, $data) && isset($data[0]['id'])) {
-            // we need to extract the category ids if they are already loaded
-            // this happens for example when resolving a smart-content property that uses the page provider
-
-            $categoryIds = [];
-            foreach ($data as $category) {
-                $categoryIds[] = $category['id'];
-            }
-
-            $data = $categoryIds;
         }
 
         $serializedCategories = [];

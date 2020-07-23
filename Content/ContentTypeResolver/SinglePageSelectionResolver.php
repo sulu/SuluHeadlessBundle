@@ -36,11 +36,11 @@ class SinglePageSelectionResolver implements ContentTypeResolverInterface
     public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView
     {
         if (null === $data) {
-            return new ContentView([]);
+            return new ContentView(null);
         }
 
         $content = $this->pageSelectionResolver->resolve([$data], $property, $locale, $attributes);
 
-        return new ContentView($content->getContent()[0] ?? null, $content->getView());
+        return new ContentView($content->getContent()[0] ?? null, [$data]);
     }
 }

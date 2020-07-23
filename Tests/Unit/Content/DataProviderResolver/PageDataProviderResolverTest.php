@@ -11,21 +11,28 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
+namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\DataProviderResolver;
 
 use PHPUnit\Framework\TestCase;
 use Prophecy\Prophecy\ObjectProphecy;
-use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\PageSelectionResolver;
-use Sulu\Bundle\HeadlessBundle\Content\ContentView;
+use Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver\PageDataProviderResolver;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
-use Sulu\Component\Content\Compat\PropertyInterface;
 use Sulu\Component\Content\Compat\PropertyParameter;
 use Sulu\Component\Content\Compat\StructureInterface;
 use Sulu\Component\Content\Mapper\ContentMapperInterface;
 use Sulu\Component\Content\Query\ContentQueryBuilderInterface;
+use Sulu\Component\Content\SmartContent\PageDataProvider;
+use Sulu\Component\SmartContent\Configuration\ProviderConfigurationInterface;
+use Sulu\Component\SmartContent\DataProviderResult;
+use Sulu\Component\SmartContent\ResourceItemInterface;
 
-class PageSelectionResolverTest extends TestCase
+class PageDataProviderResolverTest extends TestCase
 {
+    /**
+     * @var PageDataProvider|ObjectProphecy
+     */
+    private $pageDataProvider;
+
     /**
      * @var StructureResolverInterface|ObjectProphecy
      */
@@ -42,17 +49,19 @@ class PageSelectionResolverTest extends TestCase
     private $contentMapper;
 
     /**
-     * @var PageSelectionResolver
+     * @var PageDataProviderResolver
      */
-    private $pageSelectionResolver;
+    private $pageResolver;
 
     protected function setUp(): void
     {
+        $this->pageDataProvider = $this->prophesize(PageDataProvider::class);
         $this->structureResolver = $this->prophesize(StructureResolverInterface::class);
         $this->contentQueryBuilder = $this->prophesize(ContentQueryBuilderInterface::class);
         $this->contentMapper = $this->prophesize(ContentMapperInterface::class);
 
-        $this->pageSelectionResolver = new PageSelectionResolver(
+        $this->pageResolver = new PageDataProviderResolver(
+            $this->pageDataProvider->reveal(),
             $this->structureResolver->reveal(),
             $this->contentQueryBuilder->reveal(),
             $this->contentMapper->reveal(),
@@ -60,31 +69,58 @@ class PageSelectionResolverTest extends TestCase
         );
     }
 
-    public function testGetContentType(): void
+    public function testGetDataProvider(): void
     {
-        self::assertSame('page_selection', $this->pageSelectionResolver::getContentType());
+        self::assertSame('pages', $this->pageResolver::getDataProvider());
+    }
+
+    public function testGetProviderConfiguration(): void
+    {
+        $configuration = $this->prophesize(ProviderConfigurationInterface::class);
+        $this->pageDataProvider->getConfiguration()->willReturn($configuration->reveal());
+
+        $this->assertSame($configuration->reveal(), $this->pageResolver->getProviderConfiguration());
+    }
+
+    public function testGetProviderDefaultParams(): void
+    {
+        $propertyParameter = $this->prophesize(PropertyParameter::class);
+        $this->pageDataProvider->getDefaultPropertyParameter()->willReturn(['test' => $propertyParameter->reveal()]);
+
+        $this->assertSame(['test' => $propertyParameter->reveal()], $this->pageResolver->getProviderDefaultParams());
     }
 
     public function testResolve(): void
     {
-        $structure = $this->prophesize(StructureInterface::class);
-        $structure->getWebspaceKey()->willReturn('webspace-key');
+        $providerResultItem1 = $this->prophesize(ResourceItemInterface::class);
+        $providerResultItem1->getId()->willReturn('page-id-1');
 
-        /** @var PropertyInterface|ObjectProphecy $property */
-        $property = $this->prophesize(PropertyInterface::class);
-        $params = [
+        $providerResultItem2 = $this->prophesize(ResourceItemInterface::class);
+        $providerResultItem2->getId()->willReturn('page-id-2');
+
+        $providerResult = $this->prophesize(DataProviderResult::class);
+        $providerResult->getHasNextPage()->willReturn(true);
+        $providerResult->getItems()->willReturn([$providerResultItem1->reveal(), $providerResultItem2->reveal()]);
+
+        $propertyParameters = [
             'properties' => new PropertyParameter('properties', [
-                new PropertyParameter('title', 'title'),
+                new PropertyParameter('contentTitle', 'title'),
                 new PropertyParameter('excerptTitle', 'excerpt.title'),
-                new PropertyParameter('categories', 'excerpt.categories'),
             ]),
         ];
-        $property->getParams()->willReturn($params);
-        $property->getStructure()->willReturn($structure->reveal());
+
+        $this->pageDataProvider->resolveResourceItems(
+            ['filter-key' => 'filter-value'],
+            $propertyParameters,
+            ['webspaceKey' => 'webspace-key', 'locale' => 'en'],
+            10,
+            1,
+            5
+        )->willReturn($providerResult->reveal());
 
         $this->contentQueryBuilder->init([
             'ids' => ['page-id-1', 'page-id-2'],
-            'properties' => $params['properties']->getValue(),
+            'properties' => $propertyParameters['properties']->getValue(),
             'published' => false,
         ])->shouldBeCalled();
         $this->contentQueryBuilder->build('webspace-key', ['en'])->willReturn(['page-query-string']);
@@ -103,9 +139,8 @@ class PageSelectionResolverTest extends TestCase
         $this->structureResolver->resolveProperties(
             $pageStructure1->reveal(),
             [
-                'title' => 'title',
+                'contentTitle' => 'title',
                 'excerptTitle' => 'excerpt.title',
-                'categories' => 'excerpt.categories',
             ],
             'en'
         )->willReturn([
@@ -124,9 +159,8 @@ class PageSelectionResolverTest extends TestCase
         $this->structureResolver->resolveProperties(
             $pageStructure2->reveal(),
             [
-                'title' => 'title',
+                'contentTitle' => 'title',
                 'excerptTitle' => 'excerpt.title',
-                'categories' => 'excerpt.categories',
             ],
             'en'
         )->willReturn([
@@ -142,13 +176,16 @@ class PageSelectionResolverTest extends TestCase
             ],
         ]);
 
-        $result = $this->pageSelectionResolver->resolve(
-            ['page-id-1', 'page-id-2'],
-            $property->reveal(),
-            'en'
+        $result = $this->pageResolver->resolve(
+            ['filter-key' => 'filter-value'],
+            $propertyParameters,
+            ['webspaceKey' => 'webspace-key', 'locale' => 'en'],
+            10,
+            1,
+            5
         );
 
-        $this->assertInstanceOf(ContentView::class, $result);
+        $this->assertTrue($result->getHasNextPage());
         $this->assertSame(
             [
                 [
@@ -176,35 +213,45 @@ class PageSelectionResolverTest extends TestCase
                     ],
                 ],
             ],
-            $result->getContent()
+            $result->getItems()
         );
+    }
+
+    public function testResolveEmptyProviderResult(): void
+    {
+        $providerResult = $this->prophesize(DataProviderResult::class);
+        $providerResult->getHasNextPage()->willReturn(false);
+        $providerResult->getItems()->willReturn([]);
+
+        $propertyParameters = [
+            'properties' => new PropertyParameter('properties', [
+                new PropertyParameter('contentTitle', 'title'),
+                new PropertyParameter('excerptTitle', 'excerpt.title'),
+            ]),
+        ];
+
+        $this->pageDataProvider->resolveResourceItems(
+            ['filter-key' => 'filter-value'],
+            $propertyParameters,
+            ['webspaceKey' => 'webspace-key', 'locale' => 'en'],
+            10,
+            1,
+            5
+        )->willReturn($providerResult->reveal());
+
+        $result = $this->pageResolver->resolve(
+            ['filter-key' => 'filter-value'],
+            $propertyParameters,
+            ['webspaceKey' => 'webspace-key', 'locale' => 'en'],
+            10,
+            1,
+            5
+        );
+
+        $this->assertFalse($result->getHasNextPage());
         $this->assertSame(
-            ['page-id-1', 'page-id-2'],
-            $result->getView()
+            [],
+            $result->getItems()
         );
-    }
-
-    public function testResolveDataIsNull(): void
-    {
-        $locale = 'en';
-        $property = $this->prophesize(PropertyInterface::class);
-
-        $result = $this->pageSelectionResolver->resolve(null, $property->reveal(), $locale);
-
-        $this->assertSame([], $result->getContent());
-
-        $this->assertSame([], $result->getView());
-    }
-
-    public function testResolveDataIsEmptyArray(): void
-    {
-        $locale = 'en';
-        $property = $this->prophesize(PropertyInterface::class);
-
-        $result = $this->pageSelectionResolver->resolve([], $property->reveal(), $locale);
-
-        $this->assertSame([], $result->getContent());
-
-        $this->assertSame([], $result->getView());
     }
 }

@@ -4,15 +4,6 @@
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
     <services>
         <service
-            id="sulu_headless.serializer.page"
-            class="Sulu\Bundle\HeadlessBundle\Content\Serializer\PageSerializer"
-        >
-            <argument type="service" id="sulu.content.structure_manager"/>
-            <argument type="service" id="sulu_headless.content_resolver"/>
-        </service>
-        <service id="Sulu\Bundle\HeadlessBundle\Content\Serializer\PageSerializerInterface" alias="sulu_headless.serializer.page"/>
-
-        <service
             id="sulu_headless.serializer.account"
             class="Sulu\Bundle\HeadlessBundle\Content\Serializer\AccountSerializer"
         >

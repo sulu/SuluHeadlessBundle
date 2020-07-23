@@ -108,7 +108,7 @@ class SinglePageSelectionResolverTest extends TestCase
 
         $result = $this->singlePageSelectionResolver->resolve(null, $property->reveal(), $locale);
 
-        $this->assertSame([], $result->getContent());
+        $this->assertNull($result->getContent());
 
         $this->assertSame([], $result->getView());
     }

@@ -47,7 +47,7 @@ class SingleContactSelectionResolver implements ContentTypeResolverInterface
     public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView
     {
         if (null === $data) {
-            return new ContentView([]);
+            return new ContentView(null);
         }
 
         $contact = $this->contactManager->getById($data, $locale);

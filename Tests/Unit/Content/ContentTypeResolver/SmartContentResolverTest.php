@@ -106,7 +106,6 @@ class SmartContentResolverTest extends TestCase
         $structure = $this->prophesize(StructureInterface::class);
         $structure->getUuid()->willReturn('uuid-123');
         $structure->getWebspaceKey()->willReturn('webspace-key');
-        $structure->getLanguageCode()->willReturn('locale-123');
         $property->getStructure()->willReturn($structure->reveal());
 
         $configuration = $this->prophesize(ProviderConfigurationInterface::class);
@@ -147,7 +146,7 @@ class SmartContentResolverTest extends TestCase
                 'websiteCategoriesOperator' => 'OR',
             ],
             Argument::any(),
-            ['webspaceKey' => 'webspace-key', 'locale' => 'locale-123'],
+            ['webspaceKey' => 'webspace-key', 'locale' => 'en'],
             10
         )->willReturn($providerResult->reveal());
 
@@ -193,7 +192,6 @@ class SmartContentResolverTest extends TestCase
         $structure = $this->prophesize(StructureInterface::class);
         $structure->getUuid()->willReturn('uuid-123');
         $structure->getWebspaceKey()->willReturn('webspace-key');
-        $structure->getLanguageCode()->willReturn('locale-123');
         $property->getStructure()->willReturn($structure->reveal());
 
         $configuration = $this->prophesize(ProviderConfigurationInterface::class);
@@ -238,7 +236,7 @@ class SmartContentResolverTest extends TestCase
                 'websiteCategoriesOperator' => 'OR',
             ],
             Argument::any(),
-            ['webspaceKey' => 'webspace-key', 'locale' => 'locale-123'],
+            ['webspaceKey' => 'webspace-key', 'locale' => 'en'],
             10,
             2,
             5
