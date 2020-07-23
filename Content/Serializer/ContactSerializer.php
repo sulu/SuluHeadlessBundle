@@ -15,6 +15,8 @@ namespace Sulu\Bundle\HeadlessBundle\Content\Serializer;
 
 use JMS\Serializer\SerializationContext;
 use Sulu\Bundle\ContactBundle\Api\Contact;
+use Sulu\Bundle\ContactBundle\Contact\ContactManager;
+use Sulu\Bundle\ContactBundle\Entity\ContactInterface;
 use Sulu\Bundle\ContactBundle\Entity\ContactTitle;
 use Sulu\Bundle\ContactBundle\Entity\ContactTitleRepository;
 use Sulu\Bundle\ContactBundle\Entity\Position;
@@ -24,6 +26,11 @@ use Sulu\Component\Serializer\ArraySerializerInterface;
 
 class ContactSerializer implements ContactSerializerInterface
 {
+    /**
+     * @var ContactManager
+     */
+    private $contactManager;
+
     /**
      * @var ArraySerializerInterface
      */
@@ -50,12 +57,14 @@ class ContactSerializer implements ContactSerializerInterface
     private $positionRepository;
 
     public function __construct(
+        ContactManager $contactManager,
         ArraySerializerInterface $arraySerializer,
         MediaManagerInterface $mediaManager,
         MediaSerializerInterface $mediaSerializer,
         ContactTitleRepository $contactTitleRepository,
         PositionRepository $positionRepository
     ) {
+        $this->contactManager = $contactManager;
         $this->arraySerializer = $arraySerializer;
         $this->mediaManager = $mediaManager;
         $this->mediaSerializer = $mediaSerializer;
@@ -66,13 +75,15 @@ class ContactSerializer implements ContactSerializerInterface
     /**
      * @return mixed[]
      */
-    public function serialize(Contact $contact, string $locale, ?SerializationContext $context = null): array
+    public function serialize(ContactInterface $contact, string $locale, ?SerializationContext $context = null): array
     {
-        $contactData = $this->arraySerializer->serialize($contact, $context);
+        /** @var Contact $apiContact */
+        $apiContact = $this->contactManager->getContact($contact, $locale);
+        $contactData = $this->arraySerializer->serialize($apiContact, $context);
 
         unset($contactData['_hash']);
 
-        $note = $contact->getNote();
+        $note = $apiContact->getNote();
         if ($note) {
             $contactData['note'] = $note;
         }
@@ -93,11 +104,11 @@ class ContactSerializer implements ContactSerializerInterface
             }
         }
 
-        if (null !== $contact->getAvatar()) {
+        if (null !== $apiContact->getAvatar()) {
             /** @var mixed[] $avatarData */
-            $avatarData = $contact->getAvatar();
+            $avatarData = $apiContact->getAvatar();
             $avatar = $this->mediaManager->getById($avatarData['id'], $locale);
-            $contactData['avatar'] = $this->mediaSerializer->serialize($avatar);
+            $contactData['avatar'] = $this->mediaSerializer->serialize($avatar->getEntity(), $locale);
         }
 
         return $contactData;

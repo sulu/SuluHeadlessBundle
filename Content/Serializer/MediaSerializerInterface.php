@@ -14,12 +14,12 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Content\Serializer;
 
 use JMS\Serializer\SerializationContext;
-use Sulu\Bundle\MediaBundle\Api\Media;
+use Sulu\Bundle\MediaBundle\Entity\MediaInterface;
 
 interface MediaSerializerInterface
 {
     /**
      * @return mixed[]
      */
-    public function serialize(Media $media, ?SerializationContext $context = null): array;
+    public function serialize(MediaInterface $media, string $locale, ?SerializationContext $context = null): array;
 }

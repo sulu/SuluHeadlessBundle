@@ -17,12 +17,11 @@ use JMS\Serializer\SerializationContext;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\Prophecy\ObjectProphecy;
-use Sulu\Bundle\CategoryBundle\Api\Category;
 use Sulu\Bundle\CategoryBundle\Category\CategoryManagerInterface;
+use Sulu\Bundle\CategoryBundle\Entity\CategoryInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\CategorySelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\CategorySerializerInterface;
-use Sulu\Bundle\MediaBundle\Api\Media;
 use Sulu\Component\Content\Compat\PropertyInterface;
 
 class CategorySelectionResolverTest extends TestCase
@@ -62,27 +61,15 @@ class CategorySelectionResolverTest extends TestCase
     {
         $locale = 'en';
 
-        $category = $this->prophesize(Category::class);
-        $category->getId()->willReturn(1);
-        $category->getLocale()->willReturn('en');
-        $category->getKey()->willReturn('key-1');
-        $category->getName()->willReturn('cat-1');
-        $category->getDescription()->willReturn('desc-1');
+        $category = $this->prophesize(CategoryInterface::class);
 
-        $media = $this->prophesize(Media::class);
-        $media->getId()->willReturn(1);
-        $media->getName()->willReturn('media-1');
-        $media->getVersion()->willReturn(1);
-        $media->getSubVersion()->willReturn(0);
+        $this->categoryManager->findByIds([1])->shouldBeCalled()->willReturn([$category->reveal()]);
 
-        $category->getMedias()->willReturn([$media->reveal()]);
-
-        $this->categoryManager->findByIds(Argument::any())->shouldbeCalled();
-        $this->categoryManager->getApiObjects(Argument::any(), $locale)->willReturn([$category->reveal()]);
-
-        $property = $this->prophesize(PropertyInterface::class);
-
-        $this->categorySerializer->serialize($category, Argument::type(SerializationContext::class))->willReturn([
+        $this->categorySerializer->serialize(
+            $category->reveal(),
+            $locale,
+            Argument::type(SerializationContext::class)
+        )->willReturn([
             'id' => 1,
             'locale' => 'en',
             'key' => 'key-1',
@@ -95,6 +82,8 @@ class CategorySelectionResolverTest extends TestCase
                 ],
             ],
         ]);
+
+        $property = $this->prophesize(PropertyInterface::class);
 
         $result = $this->categorySelectionResolver->resolve([1], $property->reveal(), $locale);
 

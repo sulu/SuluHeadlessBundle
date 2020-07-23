@@ -54,7 +54,7 @@ class SingleAccountSelectionResolver implements ContentTypeResolverInterface
         $serializationContext = new SerializationContext();
         $serializationContext->setGroups(['partialAccount']);
 
-        $content = $this->accountSerializer->serialize($account, $locale, $serializationContext);
+        $content = $this->accountSerializer->serialize($account->getEntity(), $locale, $serializationContext);
 
         return new ContentView($content, [$data]);
     }

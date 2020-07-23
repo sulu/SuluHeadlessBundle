@@ -14,12 +14,18 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Content\Serializer;
 
 use JMS\Serializer\SerializationContext;
-use Sulu\Bundle\ContactBundle\Api\Account;
+use Sulu\Bundle\ContactBundle\Contact\AccountFactoryInterface;
+use Sulu\Bundle\ContactBundle\Entity\AccountInterface;
 use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
 use Sulu\Component\Serializer\ArraySerializerInterface;
 
 class AccountSerializer implements AccountSerializerInterface
 {
+    /**
+     * @var AccountFactoryInterface
+     */
+    private $accountFactory;
+
     /**
      * @var ArraySerializerInterface
      */
@@ -36,10 +42,12 @@ class AccountSerializer implements AccountSerializerInterface
     private $mediaManager;
 
     public function __construct(
+        AccountFactoryInterface $accountFactory,
         ArraySerializerInterface $arraySerializer,
         MediaSerializerInterface $mediaSerializer,
         MediaManagerInterface $mediaManager
     ) {
+        $this->accountFactory = $accountFactory;
         $this->arraySerializer = $arraySerializer;
         $this->mediaSerializer = $mediaSerializer;
         $this->mediaManager = $mediaManager;
@@ -48,22 +56,23 @@ class AccountSerializer implements AccountSerializerInterface
     /**
      * @return mixed[]
      */
-    public function serialize(Account $account, string $locale, ?SerializationContext $context = null): array
+    public function serialize(AccountInterface $account, string $locale, ?SerializationContext $context = null): array
     {
-        $accountData = $this->arraySerializer->serialize($account, $context);
+        $apiAccount = $this->accountFactory->createApiEntity($account, $locale);
+        $accountData = $this->arraySerializer->serialize($apiAccount, $context);
 
         unset($accountData['_hash']);
 
-        $note = $account->getNote();
+        $note = $apiAccount->getNote();
         if ($note) {
             $accountData['note'] = $note;
         }
 
-        if (null !== $account->getLogo()) {
+        if (null !== $apiAccount->getLogo()) {
             /** @var mixed[] $logoData */
-            $logoData = $account->getLogo();
+            $logoData = $apiAccount->getLogo();
             $logo = $this->mediaManager->getById($logoData['id'], $locale);
-            $accountData['logo'] = $this->mediaSerializer->serialize($logo);
+            $accountData['logo'] = $this->mediaSerializer->serialize($logo->getEntity(), $locale);
         }
 
         return $accountData;

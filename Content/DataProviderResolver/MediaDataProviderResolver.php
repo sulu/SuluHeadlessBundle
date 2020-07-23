@@ -78,7 +78,7 @@ class MediaDataProviderResolver implements DataProviderResolverInterface
         foreach ($providerResult->getItems() as $providerItem) {
             /** @var Media $media */
             $media = $providerItem->getResource();
-            $items[] = $this->mediaSerializer->serialize($media);
+            $items[] = $this->mediaSerializer->serialize($media->getEntity(), $options['locale']);
         }
 
         return new DataProviderResult($items, $providerResult->getHasNextPage());

@@ -14,12 +14,12 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Content\Serializer;
 
 use JMS\Serializer\SerializationContext;
-use Sulu\Bundle\ContactBundle\Api\Account;
+use Sulu\Bundle\ContactBundle\Entity\AccountInterface;
 
 interface AccountSerializerInterface
 {
     /**
      * @return mixed[]
      */
-    public function serialize(Account $account, string $locale, ?SerializationContext $context = null): array;
+    public function serialize(AccountInterface $account, string $locale, ?SerializationContext $context = null): array;
 }

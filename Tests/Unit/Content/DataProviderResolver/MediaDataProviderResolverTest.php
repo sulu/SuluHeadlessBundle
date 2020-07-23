@@ -18,6 +18,7 @@ use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver\MediaDataProviderResolver;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializerInterface;
 use Sulu\Bundle\MediaBundle\Api\Media;
+use Sulu\Bundle\MediaBundle\Entity\MediaInterface;
 use Sulu\Component\Content\Compat\PropertyParameter;
 use Sulu\Component\Media\SmartContent\MediaDataProvider;
 use Sulu\Component\SmartContent\Configuration\ProviderConfigurationInterface;
@@ -75,41 +76,37 @@ class MediaDataProviderResolverTest extends TestCase
 
     public function testResolve(): void
     {
-        $media1 = $this->prophesize(Media::class);
-        $media1->getId()->willReturn(1);
-        $media1->getName()->willReturn('media-1');
-        $media1->getVersion()->willReturn(1);
-        $media1->getSubVersion()->willReturn(0);
+        $media1 = $this->prophesize(MediaInterface::class);
+        $apiMedia1 = $this->prophesize(Media::class);
+        $apiMedia1->getEntity()->willReturn($media1->reveal());
 
-        $media2 = $this->prophesize(Media::class);
-        $media2->getId()->willReturn(2);
-        $media2->getName()->willReturn('media-2');
-        $media2->getVersion()->willReturn(1);
-        $media2->getSubVersion()->willReturn(0);
+        $media2 = $this->prophesize(MediaInterface::class);
+        $apiMedia2 = $this->prophesize(Media::class);
+        $apiMedia2->getEntity()->willReturn($media2->reveal());
 
         $resourceItem1 = $this->prophesize(ResourceItemInterface::class);
-        $resourceItem1->getResource()->willReturn($media1->reveal());
+        $resourceItem1->getResource()->willReturn($apiMedia1->reveal());
 
         $resourceItem2 = $this->prophesize(ResourceItemInterface::class);
-        $resourceItem2->getResource()->willReturn($media2->reveal());
+        $resourceItem2->getResource()->willReturn($apiMedia2->reveal());
 
         $providerResult = $this->prophesize(DataProviderResult::class);
         $providerResult->getHasNextPage()->willReturn(true);
         $providerResult->getItems()->willReturn([$resourceItem1, $resourceItem2]);
 
-        $this->mediaDataProvider->resolveResourceItems([], [], [], 10, 1, 5)->willReturn($providerResult->reveal());
+        $this->mediaDataProvider->resolveResourceItems([], [], ['locale' => 'en'], 10, 1, 5)->willReturn($providerResult->reveal());
 
-        $this->mediaSerializer->serialize($media1)->willReturn([
+        $this->mediaSerializer->serialize($media1, 'en')->willReturn([
             'id' => 1,
             'formatUri' => '/media/1/{format}/media-1.jpg?v=1-0',
         ]);
 
-        $this->mediaSerializer->serialize($media2)->willReturn([
+        $this->mediaSerializer->serialize($media2, 'en')->willReturn([
             'id' => 2,
             'formatUri' => '/media/2/{format}/media-2.jpg?v=1-0',
         ]);
 
-        $result = $this->mediaResolver->resolve([], [], [], 10, 1, 5);
+        $result = $this->mediaResolver->resolve([], [], ['locale' => 'en'], 10, 1, 5);
 
         $this->assertTrue($result->getHasNextPage());
         $this->assertSame(

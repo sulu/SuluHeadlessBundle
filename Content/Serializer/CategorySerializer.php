@@ -14,11 +14,17 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Content\Serializer;
 
 use JMS\Serializer\SerializationContext;
-use Sulu\Bundle\CategoryBundle\Api\Category;
+use Sulu\Bundle\CategoryBundle\Category\CategoryManagerInterface;
+use Sulu\Bundle\CategoryBundle\Entity\CategoryInterface;
 use Sulu\Component\Serializer\ArraySerializerInterface;
 
 class CategorySerializer implements CategorySerializerInterface
 {
+    /**
+     * @var CategoryManagerInterface
+     */
+    private $categoryManager;
+
     /**
      * @var ArraySerializerInterface
      */
@@ -30,9 +36,11 @@ class CategorySerializer implements CategorySerializerInterface
     private $mediaSerializer;
 
     public function __construct(
+        CategoryManagerInterface $categoryManager,
         ArraySerializerInterface $arraySerializer,
         MediaSerializerInterface $mediaSerializer
     ) {
+        $this->categoryManager = $categoryManager;
         $this->arraySerializer = $arraySerializer;
         $this->mediaSerializer = $mediaSerializer;
     }
@@ -40,17 +48,17 @@ class CategorySerializer implements CategorySerializerInterface
     /**
      * @return mixed[]
      */
-    public function serialize(Category $category, ?SerializationContext $context = null): array
+    public function serialize(CategoryInterface $category, string $locale, ?SerializationContext $context = null): array
     {
-        $medias = $category->getMedias();
-        $categoryData = $this->arraySerializer->serialize($category, $context);
+        $apiCategory = $this->categoryManager->getApiObject($category, $locale);
+        $categoryData = $this->arraySerializer->serialize($apiCategory, $context);
 
         unset($categoryData['defaultLocale']);
         unset($categoryData['meta']);
 
         $categoryData['medias'] = [];
-        foreach ($medias as $media) {
-            $categoryData['medias'][] = $this->mediaSerializer->serialize($media);
+        foreach ($apiCategory->getMedias() as $media) {
+            $categoryData['medias'][] = $this->mediaSerializer->serialize($media->getEntity(), $locale);
         }
 
         return $categoryData;

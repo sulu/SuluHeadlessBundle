@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver;
 
 use JMS\Serializer\SerializationContext;
-use Sulu\Bundle\CategoryBundle\Api\Category;
 use Sulu\Bundle\CategoryBundle\Category\CategoryManagerInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\CategorySerializerInterface;
@@ -51,27 +50,15 @@ class CategorySelectionResolver implements ContentTypeResolverInterface
             return new ContentView([]);
         }
 
-        /** @var Category[] $categories */
-        $categories = $this->categoryManager->getApiObjects($this->categoryManager->findByIds($data), $locale);
+        $serializedCategories = [];
 
-        return new ContentView($this->resolveApiCategories($categories), $data ?? []);
-    }
-
-    /**
-     * @param Category[] $categories
-     *
-     * @return array[]
-     */
-    private function resolveApiCategories(array $categories): array
-    {
-        $content = [];
-        foreach ($categories as $category) {
+        foreach ($this->categoryManager->findByIds($data) as $category) {
             $serializationContext = new SerializationContext();
             $serializationContext->setGroups(['partialCategory']);
 
-            $content[] = $this->categorySerializer->serialize($category, $serializationContext);
+            $serializedCategories[] = $this->categorySerializer->serialize($category, $locale, $serializationContext);
         }
 
-        return $content;
+        return new ContentView($serializedCategories, $data ?? []);
     }
 }

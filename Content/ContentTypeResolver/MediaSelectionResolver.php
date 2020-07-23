@@ -52,7 +52,7 @@ class MediaSelectionResolver implements ContentTypeResolverInterface
 
         $medias = $this->mediaManager->getByIds($data['ids'] ?? [], $locale);
 
-        return new ContentView($this->resolveApiMedias($medias), $data);
+        return new ContentView($this->resolveApiMedias($medias, $locale), $data);
     }
 
     /**
@@ -60,11 +60,11 @@ class MediaSelectionResolver implements ContentTypeResolverInterface
      *
      * @return array[]
      */
-    private function resolveApiMedias(array $medias): array
+    private function resolveApiMedias(array $medias, string $locale): array
     {
         $content = [];
         foreach ($medias as $media) {
-            $content[] = $this->mediaSerializer->serialize($media);
+            $content[] = $this->mediaSerializer->serialize($media->getEntity(), $locale);
         }
 
         return $content;

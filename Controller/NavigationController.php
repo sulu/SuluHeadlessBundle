@@ -70,7 +70,7 @@ class NavigationController
         $navigation = $this->loadNavigation($webspace->getKey(), $locale, $depth, $flat, $context, $excerpt, $uuid);
 
         // need to serialize the media entities inside the excerpt to keep the media serialization consistent
-        $navigation = $this->serializeExcerptMedia($navigation);
+        $navigation = $this->serializeExcerptMedia($navigation, $locale);
 
         return new Response(
             $this->serializer->serialize(
@@ -124,19 +124,21 @@ class NavigationController
      *
      * @return mixed[]
      */
-    private function serializeExcerptMedia(array $navigation): array
+    private function serializeExcerptMedia(array $navigation, string $locale): array
     {
         foreach ($navigation as $itemIndex => $navigationItem) {
             if (\array_key_exists('excerpt', $navigationItem)) {
                 foreach ($navigationItem['excerpt']['icon'] as $iconIndex => $iconMedia) {
                     $navigation[$itemIndex]['excerpt']['icon'][$iconIndex] = $this->mediaSerializer->serialize(
-                        $iconMedia
+                        $iconMedia->getEntity(),
+                        $locale
                     );
                 }
 
                 foreach ($navigationItem['excerpt']['images'] as $imageIndex => $imageMedia) {
                     $navigation[$itemIndex]['excerpt']['images'][$imageIndex] = $this->mediaSerializer->serialize(
-                        $imageMedia
+                        $imageMedia->getEntity(),
+                        $locale
                     );
                 }
             }
