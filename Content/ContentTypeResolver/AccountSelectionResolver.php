@@ -51,8 +51,7 @@ class AccountSelectionResolver implements ContentTypeResolverInterface
         }
 
         $content = [];
-        foreach ($data as $key => $accountId) {
-            $account = $this->accountManager->getById((int) $accountId, $locale);
+        foreach ($this->accountManager->getByIds($data, $locale) as $account) {
             $serializationContext = new SerializationContext();
             $serializationContext->setGroups(['partialAccount']);
 

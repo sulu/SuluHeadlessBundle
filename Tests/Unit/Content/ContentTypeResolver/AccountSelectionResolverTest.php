@@ -58,7 +58,7 @@ class AccountSelectionResolverTest extends TestCase
         self::assertSame('account_selection', $this->accountSelectionResolver::getContentType());
     }
 
-    public function testResolve(): void
+    public function testResolveWithOneAccount(): void
     {
         $locale = 'en';
 
@@ -68,17 +68,19 @@ class AccountSelectionResolverTest extends TestCase
 
         $data = [3];
 
-        $this->accountManager->getById(3, $locale)->willReturn($apiAccount->reveal());
-        $this->accountSerializer->serialize($account, $locale, Argument::type(SerializationContext::class))->willReturn([
-            'id' => 3,
-            'depth' => 1,
-            'name' => 'Sulu GmbH',
-            'corporation' => 'Digital Agency',
-            'logo' => [
-                'id' => 2,
-                'formatUri' => '/media/2/{format}/media-2.jpg?v=1-0',
-            ],
-        ]);
+        $this->accountManager->getByIds($data, $locale)->willReturn([$apiAccount->reveal()]);
+        $this->accountSerializer->serialize($account, $locale, Argument::type(SerializationContext::class))->willReturn(
+            [
+                'id' => 3,
+                'depth' => 1,
+                'name' => 'Sulu GmbH',
+                'corporation' => 'Digital Agency',
+                'logo' => [
+                    'id' => 2,
+                    'formatUri' => '/media/2/{format}/media-2.jpg?v=1-0',
+                ],
+            ]
+        );
 
         $property = $this->prophesize(PropertyInterface::class);
         $result = $this->accountSelectionResolver->resolve($data, $property->reveal(), $locale);
@@ -103,6 +105,98 @@ class AccountSelectionResolverTest extends TestCase
         $this->assertSame(
             [
                 [3],
+            ],
+            $result->getView()
+        );
+    }
+
+    public function testResolveWithManyAccounts(): void
+    {
+        $locale = 'en';
+
+        $account = $this->prophesize(AccountInterface::class);
+        $apiAccount = $this->prophesize(Account::class);
+        $apiAccount->getEntity()->willReturn($account->reveal());
+
+        $data = [3, 4, 5];
+
+        $this->accountManager->getByIds($data, $locale)->willReturn([$apiAccount->reveal(), $apiAccount->reveal(), $apiAccount->reveal()]);
+        $this->accountSerializer->serialize($account, $locale, Argument::type(SerializationContext::class))->willReturn(
+            [
+                'id' => 3,
+                'depth' => 1,
+                'name' => 'Sulu GmbH',
+                'corporation' => 'Digital Agency',
+                'logo' => [
+                    'id' => 2,
+                    'formatUri' => '/media/2/{format}/media-2.jpg?v=1-0',
+                ],
+            ],
+            [
+                'id' => 4,
+                'depth' => 1,
+                'name' => 'Test GmbH',
+                'corporation' => 'Digital Agency',
+                'logo' => [
+                    'id' => 3,
+                    'formatUri' => '/media/3/{format}/media-2.jpg?v=1-0',
+                ],
+            ],
+            [
+                'id' => 5,
+                'depth' => 1,
+                'name' => 'Test Inc',
+                'corporation' => 'Fancy big incorporated',
+                'logo' => [
+                    'id' => 3,
+                    'formatUri' => '/media/3/{format}/media-2.jpg?v=1-0',
+                ],
+            ]
+        );
+
+        $property = $this->prophesize(PropertyInterface::class);
+        $result = $this->accountSelectionResolver->resolve($data, $property->reveal(), $locale);
+
+        $this->assertInstanceOf(ContentView::class, $result);
+        $this->assertSame(
+            [
+                [
+                    'id' => 3,
+                    'depth' => 1,
+                    'name' => 'Sulu GmbH',
+                    'corporation' => 'Digital Agency',
+                    'logo' => [
+                        'id' => 2,
+                        'formatUri' => '/media/2/{format}/media-2.jpg?v=1-0',
+                    ],
+                ],
+                [
+                    'id' => 4,
+                    'depth' => 1,
+                    'name' => 'Test GmbH',
+                    'corporation' => 'Digital Agency',
+                    'logo' => [
+                        'id' => 3,
+                        'formatUri' => '/media/3/{format}/media-2.jpg?v=1-0',
+                    ],
+                ],
+                [
+                    'id' => 5,
+                    'depth' => 1,
+                    'name' => 'Test Inc',
+                    'corporation' => 'Fancy big incorporated',
+                    'logo' => [
+                        'id' => 3,
+                        'formatUri' => '/media/3/{format}/media-2.jpg?v=1-0',
+                    ],
+                ],
+            ],
+            $result->getContent()
+        );
+
+        $this->assertSame(
+            [
+                [3, 4, 5],
             ],
             $result->getView()
         );
