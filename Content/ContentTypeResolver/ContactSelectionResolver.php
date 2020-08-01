@@ -51,8 +51,7 @@ class ContactSelectionResolver implements ContentTypeResolverInterface
         }
 
         $content = [];
-        foreach ($data as $key => $contactId) {
-            $contact = $this->contactManager->getById($contactId, $locale);
+        foreach ($this->contactManager->getByIds($data, $locale) as $contact) {
             $serializationContext = new SerializationContext();
             $serializationContext->setGroups(['partialContact']);
 

@@ -58,7 +58,7 @@ class ContactSelectionResolverTest extends TestCase
         self::assertSame('contact_selection', $this->contactSelectionResolver::getContentType());
     }
 
-    public function testResolve(): void
+    public function testResolveWithOneContact(): void
     {
         $locale = 'en';
 
@@ -68,19 +68,21 @@ class ContactSelectionResolverTest extends TestCase
 
         $data = [2];
 
-        $this->contactManager->getById(2, $locale)->willReturn($apiContact->reveal());
-        $this->contactSerializer->serialize($contact, $locale, Argument::type(SerializationContext::class))->willReturn([
-            'id' => 2,
-            'firstName' => 'John',
-            'lastName' => 'Doe',
-            'fullName' => 'John Doe',
-            'title' => 'fancyTitle',
-            'position' => 'CEO',
-            'avatar' => [
+        $this->contactManager->getByIds($data, $locale)->willReturn([$apiContact->reveal()]);
+        $this->contactSerializer->serialize($contact, $locale, Argument::type(SerializationContext::class))->willReturn(
+            [
                 'id' => 2,
-                'formatUri' => '/media/2/{format}/media-2.jpg?v=1-0',
-            ],
-        ]);
+                'firstName' => 'John',
+                'lastName' => 'Doe',
+                'fullName' => 'John Doe',
+                'title' => 'fancyTitle',
+                'position' => 'CEO',
+                'avatar' => [
+                    'id' => 2,
+                    'formatUri' => '/media/2/{format}/media-2.jpg?v=1-0',
+                ],
+            ]
+        );
 
         $property = $this->prophesize(PropertyInterface::class);
         $result = $this->contactSelectionResolver->resolve($data, $property->reveal(), $locale);
@@ -107,6 +109,110 @@ class ContactSelectionResolverTest extends TestCase
         $this->assertSame(
             [
                 [2],
+            ],
+            $result->getView()
+        );
+    }
+
+    public function testResolveWithManyContacts(): void
+    {
+        $locale = 'en';
+
+        $contact = $this->prophesize(ContactInterface::class);
+        $apiContact = $this->prophesize(Contact::class);
+        $apiContact->getEntity()->willReturn($contact->reveal());
+
+        $data = [2, 3, 4];
+
+        $this->contactManager->getByIds($data, $locale)->willReturn([$apiContact->reveal(), $apiContact->reveal(), $apiContact->reveal()]);
+        $this->contactSerializer->serialize($contact, $locale, Argument::type(SerializationContext::class))->willReturn(
+            [
+                'id' => 2,
+                'firstName' => 'John',
+                'lastName' => 'Doe',
+                'fullName' => 'John Doe',
+                'title' => 'fancyTitle',
+                'position' => 'CEO',
+                'avatar' => [
+                    'id' => 2,
+                    'formatUri' => '/media/2/{format}/media-2.jpg?v=1-0',
+                ],
+            ],
+            [
+                'id' => 3,
+                'firstName' => 'Max',
+                'lastName' => 'Mustermann',
+                'fullName' => 'Max Mustermann',
+                'title' => 'fancyTitle',
+                'position' => 'CTO',
+                'avatar' => [
+                    'id' => 3,
+                    'formatUri' => '/media/3/{format}/media-3.jpg?v=1-0',
+                ],
+            ],
+            [
+                'id' => 4,
+                'firstName' => 'Diana',
+                'lastName' => 'Doe',
+                'fullName' => 'Diana Doe',
+                'title' => 'fancyTitle',
+                'position' => 'CFO',
+                'avatar' => [
+                    'id' => 4,
+                    'formatUri' => '/media/4/{format}/media-2.jpg?v=1-0',
+                ],
+            ]
+        );
+
+        $property = $this->prophesize(PropertyInterface::class);
+        $result = $this->contactSelectionResolver->resolve($data, $property->reveal(), $locale);
+
+        $this->assertInstanceOf(ContentView::class, $result);
+        $this->assertSame(
+            [
+                [
+                    'id' => 2,
+                    'firstName' => 'John',
+                    'lastName' => 'Doe',
+                    'fullName' => 'John Doe',
+                    'title' => 'fancyTitle',
+                    'position' => 'CEO',
+                    'avatar' => [
+                        'id' => 2,
+                        'formatUri' => '/media/2/{format}/media-2.jpg?v=1-0',
+                    ],
+                ],
+                [
+                    'id' => 3,
+                    'firstName' => 'Max',
+                    'lastName' => 'Mustermann',
+                    'fullName' => 'Max Mustermann',
+                    'title' => 'fancyTitle',
+                    'position' => 'CTO',
+                    'avatar' => [
+                        'id' => 3,
+                        'formatUri' => '/media/3/{format}/media-3.jpg?v=1-0',
+                    ],
+                ],
+                [
+                    'id' => 4,
+                    'firstName' => 'Diana',
+                    'lastName' => 'Doe',
+                    'fullName' => 'Diana Doe',
+                    'title' => 'fancyTitle',
+                    'position' => 'CFO',
+                    'avatar' => [
+                        'id' => 4,
+                        'formatUri' => '/media/4/{format}/media-2.jpg?v=1-0',
+                    ],
+                ],
+            ],
+            $result->getContent()
+        );
+
+        $this->assertSame(
+            [
+                [2, 3, 4],
             ],
             $result->getView()
         );
