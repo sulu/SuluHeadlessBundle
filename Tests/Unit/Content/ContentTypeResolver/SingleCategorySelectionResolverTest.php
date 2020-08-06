@@ -119,7 +119,7 @@ class SingleCategorySelectionResolverTest extends TestCase
 
         $result = $this->singleCategorySelectionResolver->resolve(null, $property->reveal(), $locale);
 
-        $this->assertSame([], $result->getContent());
+        $this->assertNull($result->getContent());
 
         $this->assertSame([], $result->getView());
     }
@@ -131,7 +131,7 @@ class SingleCategorySelectionResolverTest extends TestCase
 
         $result = $this->singleCategorySelectionResolver->resolve(null, $property->reveal(), $locale);
 
-        $this->assertSame([], $result->getContent());
+        $this->assertNull($result->getContent());
 
         $this->assertSame([], $result->getView());
     }
