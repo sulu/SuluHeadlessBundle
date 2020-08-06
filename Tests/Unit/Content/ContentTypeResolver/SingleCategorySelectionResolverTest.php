@@ -107,7 +107,7 @@ class SingleCategorySelectionResolverTest extends TestCase
         );
 
         $this->assertSame(
-            [1],
+            [[1]],
             $result->getView()
         );
     }
