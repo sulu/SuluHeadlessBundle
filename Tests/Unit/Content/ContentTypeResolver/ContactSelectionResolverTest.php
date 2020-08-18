@@ -107,9 +107,7 @@ class ContactSelectionResolverTest extends TestCase
         );
 
         $this->assertSame(
-            [
-                [2],
-            ],
+            [2],
             $result->getView()
         );
     }
@@ -211,9 +209,7 @@ class ContactSelectionResolverTest extends TestCase
         );
 
         $this->assertSame(
-            [
-                [2, 3, 4],
-            ],
+            [2, 3, 4],
             $result->getView()
         );
     }
