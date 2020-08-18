@@ -83,6 +83,16 @@
         </service>
 
         <service
+                id="sulu_headless.content_resolver.single_category_selection"
+                class="Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\SingleCategorySelectionResolver"
+        >
+            <argument type="service" id="sulu_category.category_manager"/>
+            <argument type="service" id="sulu_headless.serializer.category"/>
+
+            <tag name="sulu_headless.content_type_resolver"/>
+        </service>
+
+        <service
             id="sulu_headless.content_resolver.single_media_selection"
             class="Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\SingleMediaSelectionResolver"
         >
