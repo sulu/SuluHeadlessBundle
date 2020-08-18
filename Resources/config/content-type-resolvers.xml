@@ -135,5 +135,16 @@
 
             <tag name="sulu_headless.content_type_resolver"/>
         </service>
+
+        <service
+                id="sulu_headless.content_resolver.account_selection"
+                class="Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\AccountSelectionResolver"
+                lazy="true"
+        >
+            <argument type="service" id="sulu_contact.account_manager"/>
+            <argument type="service" id="sulu_headless.serializer.account"/>
+
+            <tag name="sulu_headless.content_type_resolver"/>
+        </service>
     </services>
 </container>
