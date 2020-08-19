@@ -103,7 +103,7 @@ class SingleContactSelectionResolverTest extends TestCase
         );
 
         $this->assertSame(
-            [2],
+            ['id' => 2],
             $result->getView()
         );
     }

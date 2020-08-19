@@ -56,6 +56,6 @@ class SingleContactSelectionResolver implements ContentTypeResolverInterface
 
         $content = $this->contactSerializer->serialize($contact->getEntity(), $locale, $serializationContext);
 
-        return new ContentView($content, [$data]);
+        return new ContentView($content, ['id' => $data]);
     }
 }

@@ -103,7 +103,7 @@ class AccountSelectionResolverTest extends TestCase
         );
 
         $this->assertSame(
-            [3],
+            ['ids' => [3]],
             $result->getView()
         );
     }
@@ -193,7 +193,7 @@ class AccountSelectionResolverTest extends TestCase
         );
 
         $this->assertSame(
-            [3, 4, 5],
+            ['ids' => [3, 4, 5]],
             $result->getView()
         );
     }

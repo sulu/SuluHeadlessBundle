@@ -85,7 +85,7 @@ class SingleCategorySelectionResolverTest extends TestCase
 
         $property = $this->prophesize(PropertyInterface::class);
 
-        $result = $this->singleCategorySelectionResolver->resolve([1], $property->reveal(), $locale);
+        $result = $this->singleCategorySelectionResolver->resolve(1, $property->reveal(), $locale);
 
         $this->assertInstanceOf(ContentView::class, $result);
 
@@ -107,7 +107,7 @@ class SingleCategorySelectionResolverTest extends TestCase
         );
 
         $this->assertSame(
-            [[1]],
+            ['id' => 1],
             $result->getView()
         );
     }

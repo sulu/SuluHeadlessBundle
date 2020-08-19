@@ -56,6 +56,6 @@ class SingleAccountSelectionResolver implements ContentTypeResolverInterface
 
         $content = $this->accountSerializer->serialize($account->getEntity(), $locale, $serializationContext);
 
-        return new ContentView($content, [$data]);
+        return new ContentView($content, ['id' => $data]);
     }
 }

@@ -56,6 +56,6 @@ class SingleCategorySelectionResolver implements ContentTypeResolverInterface
 
         $content = $this->categorySerializer->serialize($category, $locale, $serializationContext);
 
-        return new ContentView($content, [$data]);
+        return new ContentView($content, ['id' => $data]);
     }
 }
