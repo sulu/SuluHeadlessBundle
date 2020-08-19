@@ -50,6 +50,17 @@
         </service>
 
         <service
+                id="sulu_headless.content_resolver.contact_selection"
+                class="Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\ContactSelectionResolver"
+                lazy="true"
+        >
+            <argument type="service" id="sulu_contact.contact_manager"/>
+            <argument type="service" id="sulu_headless.serializer.contact"/>
+
+            <tag name="sulu_headless.content_type_resolver"/>
+        </service>
+
+        <service
             id="sulu_headless.content_resolver.single_account_selection"
             class="Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\SingleAccountSelectionResolver"
             lazy="true"
