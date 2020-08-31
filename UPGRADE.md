@@ -2,6 +2,32 @@
 
 ## master
 
+### View Parameter of Single and Multi Selection Content Types changed
+
+The view parameter of the single and multi selection has changed to be consistent through all selections:
+
+**Before:**
+
+```json
+"view" {
+    "single_selection": 1,
+    "multi_selection": [1, 2],
+}
+```
+
+**After:**
+
+```json
+"view" {
+    "single_selection": {
+        "id": 1,
+    },
+    "multi_selection": {
+        "ids": [1, 2]
+    },
+}
+```
+
 ### Refactored serializer services to accept doctrine-entities and locale instead of api-entities
 
 The following services where adjusted to accept doctrine-entities and locale instead of api-entities:

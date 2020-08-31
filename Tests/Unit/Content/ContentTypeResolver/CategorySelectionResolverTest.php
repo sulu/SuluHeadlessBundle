@@ -109,7 +109,7 @@ class CategorySelectionResolverTest extends TestCase
         );
 
         $this->assertSame(
-            [1],
+            ['ids' => [1]],
             $result->getView()
         );
     }

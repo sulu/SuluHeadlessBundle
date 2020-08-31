@@ -149,7 +149,7 @@ class ContactAccountSelectionResolverTest extends TestCase
         );
 
         $this->assertSame(
-            ['c2', 'a3'],
+            ['ids' => ['c2', 'a3']],
             $result->getView()
         );
     }

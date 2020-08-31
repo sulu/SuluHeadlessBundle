@@ -99,7 +99,7 @@ class SingleAccountSelectionResolverTest extends TestCase
         );
 
         $this->assertSame(
-            [3],
+            ['id' => 3],
             $result->getView()
         );
     }
