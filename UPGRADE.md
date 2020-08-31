@@ -23,7 +23,7 @@ The view parameter of the single and multi selection has changed to be consisten
         "id": 1,
     },
     "multi_selection": {
-        "ids" [1, 2]
+        "ids": [1, 2]
     },
 }
 ```
