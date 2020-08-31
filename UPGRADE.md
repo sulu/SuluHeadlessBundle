@@ -1,6 +1,6 @@
 # Upgrade
 
-## master
+## 0.2.0
 
 ### Data given into Twig file changed
 
