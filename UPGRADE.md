@@ -2,6 +2,38 @@
 
 ## master
 
+### Data given into Twig file changed
+
+The data given to has changed to fill out the meta tags correctly:
+
+**Before:**
+
+```json
+{
+    "jsonData": "...",
+    "data": {
+        "content": {},
+        "view": {},
+        "extension": {
+            "seo": {}
+        }
+    }
+}
+```
+
+**After:**
+
+```json
+{
+    "jsonData": "...",
+    "content": {},
+    "view": {},
+    "extension": {
+        "seo": {}
+    }
+}
+```
+
 ### View Parameter of Single and Multi Selection Content Types changed
 
 The view parameter of the single and multi selection has changed to be consistent through all selections:
