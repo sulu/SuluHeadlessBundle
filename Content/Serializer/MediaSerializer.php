@@ -69,6 +69,7 @@ class MediaSerializer implements MediaSerializerInterface
         unset($mediaData['thumbnails']);
         unset($mediaData['versions']);
         unset($mediaData['downloadCounter']);
+        unset($mediaData['adminUrl']);
         unset($mediaData['_hash']);
 
         /** @var string $fileName */
