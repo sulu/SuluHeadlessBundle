@@ -7,7 +7,7 @@
             id="sulu_headless.serializer.account"
             class="Sulu\Bundle\HeadlessBundle\Content\Serializer\AccountSerializer"
         >
-            <argument type="service" id="sulu_contact.account_factory"/>
+            <argument type="service" id="sulu_contact.account_manager"/>
             <argument type="service" id="sulu_core.array_serializer"/>
             <argument type="service" id="sulu_headless.serializer.media"/>
             <argument type="service" id="sulu_media.media_manager"/>
