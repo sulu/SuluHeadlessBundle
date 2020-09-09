@@ -14,7 +14,9 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Content\Serializer;
 
 use JMS\Serializer\SerializationContext;
-use Sulu\Bundle\ContactBundle\Contact\AccountFactoryInterface;
+use Sulu\Bundle\ContactBundle\Api\Account;
+use Sulu\Bundle\ContactBundle\Contact\AccountManager;
+use Sulu\Bundle\ContactBundle\Entity\Account as EntityAccount;
 use Sulu\Bundle\ContactBundle\Entity\AccountInterface;
 use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
 use Sulu\Component\Serializer\ArraySerializerInterface;
@@ -22,9 +24,9 @@ use Sulu\Component\Serializer\ArraySerializerInterface;
 class AccountSerializer implements AccountSerializerInterface
 {
     /**
-     * @var AccountFactoryInterface
+     * @var AccountManager
      */
-    private $accountFactory;
+    private $accountManager;
 
     /**
      * @var ArraySerializerInterface
@@ -42,23 +44,26 @@ class AccountSerializer implements AccountSerializerInterface
     private $mediaManager;
 
     public function __construct(
-        AccountFactoryInterface $accountFactory,
+        AccountManager $accountManager,
         ArraySerializerInterface $arraySerializer,
         MediaSerializerInterface $mediaSerializer,
         MediaManagerInterface $mediaManager
     ) {
-        $this->accountFactory = $accountFactory;
+        $this->accountManager = $accountManager;
         $this->arraySerializer = $arraySerializer;
         $this->mediaSerializer = $mediaSerializer;
         $this->mediaManager = $mediaManager;
     }
 
     /**
+     * @param EntityAccount $account
+     *
      * @return mixed[]
      */
     public function serialize(AccountInterface $account, string $locale, ?SerializationContext $context = null): array
     {
-        $apiAccount = $this->accountFactory->createApiEntity($account, $locale);
+        /** @var Account $apiAccount */
+        $apiAccount = $this->accountManager->getAccount($account, $locale);
         $accountData = $this->arraySerializer->serialize($apiAccount, $context);
 
         unset($accountData['_hash']);

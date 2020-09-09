@@ -17,7 +17,7 @@ use JMS\Serializer\SerializationContext;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\ContactBundle\Api\Account;
-use Sulu\Bundle\ContactBundle\Contact\AccountFactoryInterface;
+use Sulu\Bundle\ContactBundle\Contact\AccountManager;
 use Sulu\Bundle\ContactBundle\Entity\AccountInterface;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\AccountSerializer;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\AccountSerializerInterface;
@@ -30,9 +30,9 @@ use Sulu\Component\Serializer\ArraySerializerInterface;
 class AccountSerializerTest extends TestCase
 {
     /**
-     * @var AccountFactoryInterface|ObjectProphecy
+     * @var AccountManager|ObjectProphecy
      */
-    private $accountFactory;
+    private $accountManager;
 
     /**
      * @var ArraySerializerInterface|ObjectProphecy
@@ -56,13 +56,13 @@ class AccountSerializerTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->accountFactory = $this->prophesize(AccountFactoryInterface::class);
+        $this->accountManager = $this->prophesize(AccountManager::class);
         $this->arraySerializer = $this->prophesize(ArraySerializerInterface::class);
         $this->mediaSerializer = $this->prophesize(MediaSerializerInterface::class);
         $this->mediaManager = $this->prophesize(MediaManagerInterface::class);
 
         $this->accountSerializer = new AccountSerializer(
-            $this->accountFactory->reveal(),
+            $this->accountManager->reveal(),
             $this->arraySerializer->reveal(),
             $this->mediaSerializer->reveal(),
             $this->mediaManager->reveal()
@@ -81,7 +81,7 @@ class AccountSerializerTest extends TestCase
         ]);
 
         $account = $this->prophesize(AccountInterface::class);
-        $this->accountFactory->createApiEntity($account->reveal(), $locale)->willReturn($apiAccount->reveal());
+        $this->accountManager->getAccount($account->reveal(), $locale)->willReturn($apiAccount->reveal());
 
         $media = $this->prophesize(MediaInterface::class);
         $apiMedia = $this->prophesize(Media::class);
@@ -128,7 +128,7 @@ class AccountSerializerTest extends TestCase
         ]);
 
         $account = $this->prophesize(AccountInterface::class);
-        $this->accountFactory->createApiEntity($account->reveal(), $locale)->willReturn($apiAccount->reveal());
+        $this->accountManager->getAccount($account->reveal(), $locale)->willReturn($apiAccount->reveal());
 
         $media = $this->prophesize(MediaInterface::class);
         $apiMedia = $this->prophesize(Media::class);
@@ -173,7 +173,7 @@ class AccountSerializerTest extends TestCase
         $apiAccount->getLogo()->willReturn(null);
 
         $account = $this->prophesize(AccountInterface::class);
-        $this->accountFactory->createApiEntity($account->reveal(), $locale)->willReturn($apiAccount->reveal());
+        $this->accountManager->getAccount($account->reveal(), $locale)->willReturn($apiAccount->reveal());
 
         $context = $this->prophesize(SerializationContext::class);
 
