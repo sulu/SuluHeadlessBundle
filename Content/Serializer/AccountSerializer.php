@@ -59,7 +59,7 @@ class AccountSerializer implements AccountSerializerInterface
      */
     public function serialize(AccountInterface $account, string $locale, ?SerializationContext $context = null): array
     {
-         /** @var Account $apiAccount */
+        /** @var Account $apiAccount */
         $apiAccount = $this->accountManager->getAccount($account, $locale);
         $accountData = $this->arraySerializer->serialize($apiAccount, $context);
 
