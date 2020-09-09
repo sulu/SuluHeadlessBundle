@@ -16,6 +16,7 @@ namespace Sulu\Bundle\HeadlessBundle\Content\Serializer;
 use JMS\Serializer\SerializationContext;
 use Sulu\Bundle\ContactBundle\Api\Account;
 use Sulu\Bundle\ContactBundle\Contact\AccountManager;
+use Sulu\Bundle\ContactBundle\Entity\Account as EntityAccount;
 use Sulu\Bundle\ContactBundle\Entity\AccountInterface;
 use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
 use Sulu\Component\Serializer\ArraySerializerInterface;
@@ -55,6 +56,8 @@ class AccountSerializer implements AccountSerializerInterface
     }
 
     /**
+     * @param EntityAccount $account
+     *
      * @return mixed[]
      */
     public function serialize(AccountInterface $account, string $locale, ?SerializationContext $context = null): array
