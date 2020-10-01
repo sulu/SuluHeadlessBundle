@@ -44,14 +44,14 @@ class HeadlessWebsiteController extends AbstractController
         $data = $this->resolveStructure($structure);
         $json = $this->serializeData($data);
 
+        $response = null;
         if ('json' !== $request->getRequestFormat()) {
             $data['jsonData'] = $json;
-
-            return $this->renderTemplateResponse($structure, $requestFormat, $preview, $data);
+            $response = $this->renderTemplateResponse($structure, $requestFormat, $preview, $data);
+        } else {
+            $response = new Response($json);
+            $response->headers->set('Content-Type', 'application/json');
         }
-
-        $response = new Response($json);
-        $response->headers->set('Content-Type', 'application/json');
 
         if (!$preview && $this->getCacheTimeLifeEnhancer()) {
             $this->getCacheTimeLifeEnhancer()->enhance($response, $structure);
