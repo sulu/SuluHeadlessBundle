@@ -17,6 +17,7 @@ use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
 use Sulu\Bundle\HttpCacheBundle\CacheLifetime\CacheLifetimeEnhancer;
+use Sulu\Bundle\HttpCacheBundle\CacheLifetime\CacheLifetimeEnhancerInterface;
 use Sulu\Bundle\PreviewBundle\Preview\Preview;
 use Sulu\Component\Content\Compat\PageInterface;
 use Sulu\Component\Content\Compat\StructureInterface;
@@ -53,8 +54,9 @@ class HeadlessWebsiteController extends AbstractController
             $response->headers->set('Content-Type', 'application/json');
         }
 
-        if (!$preview && $this->getCacheTimeLifeEnhancer()) {
-            $this->getCacheTimeLifeEnhancer()->enhance($response, $structure);
+        $cacheLifetimeEnhancer = $this->getCacheLifetimeEnhancer();
+        if (!$preview && $cacheLifetimeEnhancer) {
+            $cacheLifetimeEnhancer->enhance($response, $structure);
         }
 
         return $response;
@@ -117,16 +119,20 @@ class HeadlessWebsiteController extends AbstractController
         $subscribedServices = parent::getSubscribedServices();
         $subscribedServices['sulu_headless.structure_resolver'] = StructureResolverInterface::class;
         $subscribedServices['jms_serializer'] = SerializerInterface::class;
+        $subscribedServices['sulu_http_cache.cache_lifetime.enhancer'] = '?' . CacheLifetimeEnhancerInterface::class;
 
         return $subscribedServices;
     }
 
-    protected function getCacheTimeLifeEnhancer(): ?CacheLifetimeEnhancer
+    protected function getCacheLifetimeEnhancer(): ?CacheLifetimeEnhancer
     {
         if (!$this->has('sulu_http_cache.cache_lifetime.enhancer')) {
             return null;
         }
 
-        return $this->get('sulu_http_cache.cache_lifetime.enhancer');
+        /** @var CacheLifetimeEnhancer $cacheLifetimeEnhancer */
+        $cacheLifetimeEnhancer = $this->get('sulu_http_cache.cache_lifetime.enhancer');
+
+        return $cacheLifetimeEnhancer;
     }
 }
