@@ -31,7 +31,7 @@
                     "categories": [],
                     "audience_targeting_groups": [],
                     "tags": [],
-                    "segment": "",
+                    "segments": [],
                     "icon": [],
                     "images": []
                 },
@@ -67,7 +67,7 @@
                     "categories": [],
                     "audience_targeting_groups": [],
                     "tags": [],
-                    "segment": "",
+                    "segments": [],
                     "icon": [
                         {
                             "id": "@integer@",
