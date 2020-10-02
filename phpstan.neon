@@ -18,5 +18,6 @@ parameters:
     symfony:
         container_xml_path: %rootDir%/../../../Tests/Application/var/cache/admin/dev/Sulu_Bundle_HeadlessBundle_Tests_Application_KernelDevDebugContainer.xml
         console_application_loader: Tests/phpstan/console-application.php
+        constant_hassers: false
     doctrine:
         objectManagerLoader: Tests/phpstan/object-manager.php
