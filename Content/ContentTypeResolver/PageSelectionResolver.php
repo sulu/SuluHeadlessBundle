@@ -83,7 +83,10 @@ class PageSelectionResolver implements ContentTypeResolverInterface
             $property->getStructure()->getWebspaceKey()
         );
 
-        $propertyMap = [];
+        $propertyMap = [
+            'title' => 'title',
+            'url' => 'url',
+        ];
         foreach ($propertiesParamValue as $propertiesParamEntry) {
             /** @var string $propertyValue */
             $propertyValue = $propertiesParamEntry->getValue();
