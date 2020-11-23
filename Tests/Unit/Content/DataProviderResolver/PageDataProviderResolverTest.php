@@ -148,6 +148,7 @@ class PageDataProviderResolverTest extends TestCase
             'template' => 'default',
             'content' => [
                 'title' => 'Page Title 1',
+                'url' => '/page-url-1',
                 'excerptTitle' => 'Page Excerpt Title 1',
             ],
             'view' => [
@@ -168,6 +169,7 @@ class PageDataProviderResolverTest extends TestCase
             'template' => 'default',
             'content' => [
                 'title' => 'Page Title 2',
+                'url' => '/page-url-2',
                 'excerptTitle' => 'Page Excerpt Title 2',
             ],
             'view' => [
@@ -193,6 +195,7 @@ class PageDataProviderResolverTest extends TestCase
                     'template' => 'default',
                     'content' => [
                         'title' => 'Page Title 1',
+                        'url' => '/page-url-1',
                         'excerptTitle' => 'Page Excerpt Title 1',
                     ],
                     'view' => [
@@ -205,6 +208,7 @@ class PageDataProviderResolverTest extends TestCase
                     'template' => 'default',
                     'content' => [
                         'title' => 'Page Title 2',
+                        'url' => '/page-url-2',
                         'excerptTitle' => 'Page Excerpt Title 2',
                     ],
                     'view' => [

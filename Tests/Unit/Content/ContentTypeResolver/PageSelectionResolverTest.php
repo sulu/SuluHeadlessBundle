@@ -75,7 +75,6 @@ class PageSelectionResolverTest extends TestCase
         $params = [
             'properties' => new PropertyParameter('properties', [
                 new PropertyParameter('title', 'title'),
-                new PropertyParameter('url', 'url'),
                 new PropertyParameter('excerptTitle', 'excerpt.title'),
                 new PropertyParameter('categories', 'excerpt.categories'),
             ]),
