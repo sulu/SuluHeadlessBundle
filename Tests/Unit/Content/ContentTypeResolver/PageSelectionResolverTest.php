@@ -75,10 +75,12 @@ class PageSelectionResolverTest extends TestCase
         $params = [
             'properties' => new PropertyParameter('properties', [
                 new PropertyParameter('title', 'title'),
+                new PropertyParameter('url', 'url'),
                 new PropertyParameter('excerptTitle', 'excerpt.title'),
                 new PropertyParameter('categories', 'excerpt.categories'),
             ]),
         ];
+
         $property->getParams()->willReturn($params);
         $property->getStructure()->willReturn($structure->reveal());
 
@@ -104,6 +106,7 @@ class PageSelectionResolverTest extends TestCase
             $pageStructure1->reveal(),
             [
                 'title' => 'title',
+                'url' => 'url',
                 'excerptTitle' => 'excerpt.title',
                 'categories' => 'excerpt.categories',
             ],
@@ -113,6 +116,7 @@ class PageSelectionResolverTest extends TestCase
             'template' => 'default',
             'content' => [
                 'title' => 'Page Title 1',
+                'url' => '/page-url-1',
                 'excerptTitle' => 'Page Excerpt Title 1',
             ],
             'view' => [
@@ -125,6 +129,7 @@ class PageSelectionResolverTest extends TestCase
             $pageStructure2->reveal(),
             [
                 'title' => 'title',
+                'url' => 'url',
                 'excerptTitle' => 'excerpt.title',
                 'categories' => 'excerpt.categories',
             ],
@@ -134,6 +139,7 @@ class PageSelectionResolverTest extends TestCase
             'template' => 'default',
             'content' => [
                 'title' => 'Page Title 2',
+                'url' => '/page-url-2',
                 'excerptTitle' => 'Page Excerpt Title 2',
             ],
             'view' => [
@@ -156,6 +162,7 @@ class PageSelectionResolverTest extends TestCase
                     'template' => 'default',
                     'content' => [
                         'title' => 'Page Title 1',
+                        'url' => '/page-url-1',
                         'excerptTitle' => 'Page Excerpt Title 1',
                     ],
                     'view' => [
@@ -168,6 +175,7 @@ class PageSelectionResolverTest extends TestCase
                     'template' => 'default',
                     'content' => [
                         'title' => 'Page Title 2',
+                        'url' => '/page-url-2',
                         'excerptTitle' => 'Page Excerpt Title 2',
                     ],
                     'view' => [
