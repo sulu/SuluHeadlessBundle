@@ -89,7 +89,7 @@ class StructureResolver implements StructureResolverInterface
         array $propertyMap,
         string $locale,
         bool $includeExtension = false
-    ): array {
+    ): ?array {
         $data = $this->getStructureData($structure);
         $unresolvedExtensionData = $this->getExtensionData($structure);
 
