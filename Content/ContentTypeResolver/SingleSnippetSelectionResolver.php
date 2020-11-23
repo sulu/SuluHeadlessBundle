@@ -77,7 +77,7 @@ class SingleSnippetSelectionResolver implements ContentTypeResolverInterface
             $snippetId = $defaultSnippetId ?: null;
         }
 
-        if (null === $snippetId) {
+        if (empty($snippetIds)) {
             return new ContentView(null);
         }
 
