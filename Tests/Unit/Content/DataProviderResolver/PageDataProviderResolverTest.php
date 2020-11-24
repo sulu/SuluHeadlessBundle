@@ -105,6 +105,7 @@ class PageDataProviderResolverTest extends TestCase
         $propertyParameters = [
             'properties' => new PropertyParameter('properties', [
                 new PropertyParameter('contentTitle', 'title'),
+                new PropertyParameter('url', 'url'),
                 new PropertyParameter('excerptTitle', 'excerpt.title'),
             ]),
         ];
@@ -140,6 +141,7 @@ class PageDataProviderResolverTest extends TestCase
             $pageStructure1->reveal(),
             [
                 'contentTitle' => 'title',
+                'url' => 'url',
                 'excerptTitle' => 'excerpt.title',
             ],
             'en'
@@ -161,6 +163,7 @@ class PageDataProviderResolverTest extends TestCase
             $pageStructure2->reveal(),
             [
                 'contentTitle' => 'title',
+                'url' => 'url',
                 'excerptTitle' => 'excerpt.title',
             ],
             'en'

@@ -100,7 +100,6 @@ class PageSelectionResolverTest extends TestCase
             $pageStructure1->reveal(),
             $pageStructure2->reveal(),
         ]);
-
         $this->structureResolver->resolveProperties(
             $pageStructure1->reveal(),
             [
