@@ -36,5 +36,5 @@ interface StructureResolverInterface
         array $propertyMap,
         string $locale,
         bool $includeExtension = false
-    ): ?array;
+    ): array;
 }
