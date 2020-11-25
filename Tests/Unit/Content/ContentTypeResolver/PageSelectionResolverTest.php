@@ -116,10 +116,13 @@ class PageSelectionResolverTest extends TestCase
                 'title' => 'Page Title 1',
                 'url' => '/page-url-1',
                 'excerptTitle' => 'Page Excerpt Title 1',
+                'categories' => [],
             ],
             'view' => [
                 'title' => [],
+                'url' => [],
                 'excerptTitle' => [],
+                'categories' => [],
             ],
         ]);
 
@@ -139,10 +142,13 @@ class PageSelectionResolverTest extends TestCase
                 'title' => 'Page Title 2',
                 'url' => '/page-url-2',
                 'excerptTitle' => 'Page Excerpt Title 2',
+                'categories' => [],
             ],
             'view' => [
                 'title' => [],
+                'url' => [],
                 'excerptTitle' => [],
+                'categories' => [],
             ],
         ]);
 
@@ -162,10 +168,13 @@ class PageSelectionResolverTest extends TestCase
                         'title' => 'Page Title 1',
                         'url' => '/page-url-1',
                         'excerptTitle' => 'Page Excerpt Title 1',
+                        'categories' => [],
                     ],
                     'view' => [
                         'title' => [],
+                        'url' => [],
                         'excerptTitle' => [],
+                        'categories' => [],
                     ],
                 ],
                 [
@@ -175,10 +184,13 @@ class PageSelectionResolverTest extends TestCase
                         'title' => 'Page Title 2',
                         'url' => '/page-url-2',
                         'excerptTitle' => 'Page Excerpt Title 2',
+                        'categories' => [],
                     ],
                     'view' => [
                         'title' => [],
+                        'url' => [],
                         'excerptTitle' => [],
+                        'categories' => [],
                     ],
                 ],
             ],

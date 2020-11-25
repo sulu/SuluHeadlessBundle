@@ -119,7 +119,7 @@ class PageDataProviderResolver implements DataProviderResolverInterface
         );
 
         $propertyMap = [
-            'contentTitle' => 'title',
+            'title' => 'title',
             'url' => 'url',
         ];
         foreach ($propertiesParamValue as $propertiesParamEntry) {

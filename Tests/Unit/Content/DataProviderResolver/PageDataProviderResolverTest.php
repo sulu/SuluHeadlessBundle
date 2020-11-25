@@ -105,7 +105,6 @@ class PageDataProviderResolverTest extends TestCase
         $propertyParameters = [
             'properties' => new PropertyParameter('properties', [
                 new PropertyParameter('contentTitle', 'title'),
-                new PropertyParameter('url', 'url'),
                 new PropertyParameter('excerptTitle', 'excerpt.title'),
             ]),
         ];
@@ -140,8 +139,9 @@ class PageDataProviderResolverTest extends TestCase
         $this->structureResolver->resolveProperties(
             $pageStructure1->reveal(),
             [
-                'contentTitle' => 'title',
+                'title' => 'title',
                 'url' => 'url',
+                'contentTitle' => 'title',
                 'excerptTitle' => 'excerpt.title',
             ],
             'en'
@@ -155,6 +155,7 @@ class PageDataProviderResolverTest extends TestCase
             ],
             'view' => [
                 'title' => [],
+                'url' => [],
                 'excerptTitle' => [],
             ],
         ]);
@@ -162,8 +163,9 @@ class PageDataProviderResolverTest extends TestCase
         $this->structureResolver->resolveProperties(
             $pageStructure2->reveal(),
             [
-                'contentTitle' => 'title',
+                'title' => 'title',
                 'url' => 'url',
+                'contentTitle' => 'title',
                 'excerptTitle' => 'excerpt.title',
             ],
             'en'
@@ -177,6 +179,7 @@ class PageDataProviderResolverTest extends TestCase
             ],
             'view' => [
                 'title' => [],
+                'url' => [],
                 'excerptTitle' => [],
             ],
         ]);
@@ -203,6 +206,7 @@ class PageDataProviderResolverTest extends TestCase
                     ],
                     'view' => [
                         'title' => [],
+                        'url' => [],
                         'excerptTitle' => [],
                     ],
                 ],
@@ -216,6 +220,7 @@ class PageDataProviderResolverTest extends TestCase
                     ],
                     'view' => [
                         'title' => [],
+                        'url' => [],
                         'excerptTitle' => [],
                     ],
                 ],
