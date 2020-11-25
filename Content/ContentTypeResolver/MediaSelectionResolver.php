@@ -46,13 +46,13 @@ class MediaSelectionResolver implements ContentTypeResolverInterface
 
     public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView
     {
-        if (null === $data) {
-            return new ContentView([]);
+        if (empty($data)) {
+            return new ContentView([], ['ids' => []]);
         }
 
         $medias = $this->mediaManager->getByIds($data['ids'] ?? [], $locale);
 
-        return new ContentView($this->resolveApiMedias($medias, $locale), $data);
+        return new ContentView($this->resolveApiMedias($medias, $locale), array_merge(['ids' => []], $data));
     }
 
     /**
