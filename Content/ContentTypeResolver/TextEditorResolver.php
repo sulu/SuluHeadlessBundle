@@ -37,7 +37,7 @@ class TextEditorResolver implements ContentTypeResolverInterface
 
     public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView
     {
-        if (empty($data)) {
+        if (null === $data) {
             return new ContentView(null);
         }
 

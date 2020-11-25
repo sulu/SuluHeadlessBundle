@@ -84,9 +84,11 @@ class TextEditorResolverTest extends TestCase
     {
         $property = $this->prophesize(PropertyInterface::class);
 
+        $this->markupParser->parse('', 'en')->willReturn('');
+
         $result = $this->textEditorResolver->resolve('', $property->reveal(), 'en');
 
-        $this->assertNull($result->getContent());
+        $this->assertSame('', $result->getContent());
 
         $this->assertSame([], $result->getView());
     }
