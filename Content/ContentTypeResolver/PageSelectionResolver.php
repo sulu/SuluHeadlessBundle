@@ -87,6 +87,7 @@ class PageSelectionResolver implements ContentTypeResolverInterface
             'title' => 'title',
             'url' => 'url',
         ];
+
         foreach ($propertiesParamValue as $propertiesParamEntry) {
             /** @var string $propertyValue */
             $propertyValue = $propertiesParamEntry->getValue();

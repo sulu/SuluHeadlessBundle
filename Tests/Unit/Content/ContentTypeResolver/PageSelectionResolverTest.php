@@ -99,7 +99,7 @@ class PageSelectionResolverTest extends TestCase
         )->willReturn([
             $pageStructure1->reveal(),
             $pageStructure2->reveal(),
-        ]);
+        ])->shouldBeCalledOnce();
         $this->structureResolver->resolveProperties(
             $pageStructure1->reveal(),
             [
@@ -124,7 +124,7 @@ class PageSelectionResolverTest extends TestCase
                 'excerptTitle' => [],
                 'categories' => [],
             ],
-        ]);
+        ])->shouldBeCalledOnce();
 
         $this->structureResolver->resolveProperties(
             $pageStructure2->reveal(),
@@ -150,7 +150,7 @@ class PageSelectionResolverTest extends TestCase
                 'excerptTitle' => [],
                 'categories' => [],
             ],
-        ]);
+        ])->shouldBeCalledOnce();
 
         $result = $this->pageSelectionResolver->resolve(
             ['page-id-1', 'page-id-2'],
