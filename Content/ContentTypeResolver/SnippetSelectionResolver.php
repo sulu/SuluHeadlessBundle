@@ -93,7 +93,7 @@ class SnippetSelectionResolver implements ContentTypeResolverInterface
             $snippets[] = $this->structureResolver->resolve($snippet, $locale, $loadExcerpt);
         }
 
-        return new ContentView($snippets, $data ?? []);
+        return new ContentView($snippets, ['ids' => $data ?: []]);
     }
 
     private function getDefaultSnippetId(string $webspaceKey, string $snippetArea, string $locale): ?string

@@ -62,7 +62,7 @@ class PageSelectionResolver implements ContentTypeResolverInterface
     public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView
     {
         if (empty($data)) {
-            return new ContentView([]);
+            return new ContentView([], ['ids' => []]);
         }
 
         /** @var PropertyParameter[] $params */
@@ -99,6 +99,6 @@ class PageSelectionResolver implements ContentTypeResolverInterface
             $pages[] = $this->structureResolver->resolveProperties($pageStructure, $propertyMap, $locale);
         }
 
-        return new ContentView($pages, $data);
+        return new ContentView($pages, ['ids' => $data ?: []]);
     }
 }

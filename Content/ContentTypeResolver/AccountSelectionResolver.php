@@ -46,8 +46,8 @@ class AccountSelectionResolver implements ContentTypeResolverInterface
 
     public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView
     {
-        if (null === $data) {
-            return new ContentView(null);
+        if (empty($data)) {
+            return new ContentView([], ['ids' => []]);
         }
 
         $content = [];

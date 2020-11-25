@@ -113,6 +113,6 @@ class SingleAccountSelectionResolverTest extends TestCase
 
         $this->assertNull($result->getContent());
 
-        $this->assertSame([], $result->getView());
+        $this->assertSame(['id' => null], $result->getView());
     }
 }

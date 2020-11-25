@@ -221,8 +221,20 @@ class ContactSelectionResolverTest extends TestCase
 
         $result = $this->contactSelectionResolver->resolve(null, $property->reveal(), $locale);
 
-        $this->assertNull($result->getContent());
+        $this->assertSame([], $result->getContent());
 
-        $this->assertSame([], $result->getView());
+        $this->assertSame(['ids' => []], $result->getView());
+    }
+
+    public function testResolveDataIsEmptyArray(): void
+    {
+        $locale = 'en';
+        $property = $this->prophesize(PropertyInterface::class);
+
+        $result = $this->contactSelectionResolver->resolve([], $property->reveal(), $locale);
+
+        $this->assertSame([], $result->getContent());
+
+        $this->assertSame(['ids' => []], $result->getView());
     }
 }

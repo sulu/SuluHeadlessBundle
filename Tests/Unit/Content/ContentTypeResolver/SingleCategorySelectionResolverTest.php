@@ -121,18 +121,6 @@ class SingleCategorySelectionResolverTest extends TestCase
 
         $this->assertNull($result->getContent());
 
-        $this->assertSame([], $result->getView());
-    }
-
-    public function testResolveDataIsEmptyArray(): void
-    {
-        $locale = 'en';
-        $property = $this->prophesize(PropertyInterface::class);
-
-        $result = $this->singleCategorySelectionResolver->resolve(null, $property->reveal(), $locale);
-
-        $this->assertNull($result->getContent());
-
-        $this->assertSame([], $result->getView());
+        $this->assertSame(['id' => null], $result->getView());
     }
 }

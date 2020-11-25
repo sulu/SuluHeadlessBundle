@@ -114,7 +114,19 @@ class MediaSelectionResolverTest extends TestCase
 
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame([], $result->getContent());
-        $this->assertSame([], $result->getView());
+        $this->assertSame(['ids' => []], $result->getView());
+    }
+
+    public function testResolveDataIsEmptyArray(): void
+    {
+        $locale = 'en';
+        $property = $this->prophesize(PropertyInterface::class);
+
+        $result = $this->mediaResolver->resolve([], $property->reveal(), $locale);
+
+        $this->assertInstanceOf(ContentView::class, $result);
+        $this->assertSame([], $result->getContent());
+        $this->assertSame(['ids' => []], $result->getView());
     }
 
     public function testResolveDataWithoutIds(): void
@@ -129,6 +141,6 @@ class MediaSelectionResolverTest extends TestCase
 
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame([], $result->getContent());
-        $this->assertSame($dataWithoutIdsKey, $result->getView());
+        $this->assertSame(['ids' => [], 'unrelatedKey' => 'unrelatedValue'], $result->getView());
     }
 }

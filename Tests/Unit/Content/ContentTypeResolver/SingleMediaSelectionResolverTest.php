@@ -88,7 +88,7 @@ class SingleMediaSelectionResolverTest extends TestCase
 
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertNull($result->getContent());
-        $this->assertSame([], $result->getView());
+        $this->assertSame(['id' => null], $result->getView());
     }
 
     public function testResolveDataWithoutId(): void
@@ -105,6 +105,6 @@ class SingleMediaSelectionResolverTest extends TestCase
 
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertNull($result->getContent());
-        $this->assertSame($dataWithoutIdKey, $result->getView());
+        $this->assertSame(['id' => null, 'unrelatedKey' => 'unrelatedValue'], $result->getView());
     }
 }
