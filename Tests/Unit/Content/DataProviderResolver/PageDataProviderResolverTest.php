@@ -116,7 +116,7 @@ class PageDataProviderResolverTest extends TestCase
             10,
             1,
             5
-        )->willReturn($providerResult->reveal());
+        )->willReturn($providerResult->reveal())->shouldBeCalledOnce();
 
         $this->contentQueryBuilder->init([
             'ids' => ['page-id-1', 'page-id-2'],
@@ -134,11 +134,13 @@ class PageDataProviderResolverTest extends TestCase
         )->willReturn([
             $pageStructure1->reveal(),
             $pageStructure2->reveal(),
-        ]);
+        ])->shouldBeCalledOnce();
 
         $this->structureResolver->resolveProperties(
             $pageStructure1->reveal(),
             [
+                'title' => 'title',
+                'url' => 'url',
                 'contentTitle' => 'title',
                 'excerptTitle' => 'excerpt.title',
             ],
@@ -148,17 +150,21 @@ class PageDataProviderResolverTest extends TestCase
             'template' => 'default',
             'content' => [
                 'title' => 'Page Title 1',
+                'url' => '/page-url-1',
                 'excerptTitle' => 'Page Excerpt Title 1',
             ],
             'view' => [
                 'title' => [],
+                'url' => [],
                 'excerptTitle' => [],
             ],
-        ]);
+        ])->shouldBeCalledOnce();
 
         $this->structureResolver->resolveProperties(
             $pageStructure2->reveal(),
             [
+                'title' => 'title',
+                'url' => 'url',
                 'contentTitle' => 'title',
                 'excerptTitle' => 'excerpt.title',
             ],
@@ -168,13 +174,15 @@ class PageDataProviderResolverTest extends TestCase
             'template' => 'default',
             'content' => [
                 'title' => 'Page Title 2',
+                'url' => '/page-url-2',
                 'excerptTitle' => 'Page Excerpt Title 2',
             ],
             'view' => [
                 'title' => [],
+                'url' => [],
                 'excerptTitle' => [],
             ],
-        ]);
+        ])->shouldBeCalledOnce();
 
         $result = $this->pageResolver->resolve(
             ['filter-key' => 'filter-value'],
@@ -193,10 +201,12 @@ class PageDataProviderResolverTest extends TestCase
                     'template' => 'default',
                     'content' => [
                         'title' => 'Page Title 1',
+                        'url' => '/page-url-1',
                         'excerptTitle' => 'Page Excerpt Title 1',
                     ],
                     'view' => [
                         'title' => [],
+                        'url' => [],
                         'excerptTitle' => [],
                     ],
                 ],
@@ -205,10 +215,12 @@ class PageDataProviderResolverTest extends TestCase
                     'template' => 'default',
                     'content' => [
                         'title' => 'Page Title 2',
+                        'url' => '/page-url-2',
                         'excerptTitle' => 'Page Excerpt Title 2',
                     ],
                     'view' => [
                         'title' => [],
+                        'url' => [],
                         'excerptTitle' => [],
                     ],
                 ],
@@ -237,7 +249,7 @@ class PageDataProviderResolverTest extends TestCase
             10,
             1,
             5
-        )->willReturn($providerResult->reveal());
+        )->willReturn($providerResult->reveal())->shouldBeCalledOnce();
 
         $result = $this->pageResolver->resolve(
             ['filter-key' => 'filter-value'],

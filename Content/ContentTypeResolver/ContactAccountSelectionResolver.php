@@ -70,7 +70,7 @@ class ContactAccountSelectionResolver implements ContentTypeResolverInterface
         foreach ($data as $entry) {
             $serializationContext = new SerializationContext();
             if (0 === strncmp($entry, 'c', 1)) {
-                $contact = $this->contactManager->getById(substr($entry, 1), $locale);
+                $contact = $this->contactManager->getById((int) substr($entry, 1), $locale);
                 $serializationContext->setGroups(['partialContact']);
 
                 $content[] = $this->contactSerializer->serialize($contact->getEntity(), $locale, $serializationContext);

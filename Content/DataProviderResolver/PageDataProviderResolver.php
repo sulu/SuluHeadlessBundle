@@ -118,7 +118,11 @@ class PageDataProviderResolver implements DataProviderResolverInterface
             $options['locale']
         );
 
-        $propertyMap = [];
+        $propertyMap = [
+            'title' => 'title',
+            'url' => 'url',
+        ];
+
         foreach ($propertiesParamValue as $propertiesParamEntry) {
             /** @var string $propertyValue */
             $propertyValue = $propertiesParamEntry->getValue();

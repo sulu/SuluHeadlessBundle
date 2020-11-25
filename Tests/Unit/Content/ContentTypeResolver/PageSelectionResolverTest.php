@@ -79,6 +79,7 @@ class PageSelectionResolverTest extends TestCase
                 new PropertyParameter('categories', 'excerpt.categories'),
             ]),
         ];
+
         $property->getParams()->willReturn($params);
         $property->getStructure()->willReturn($structure->reveal());
 
@@ -98,12 +99,12 @@ class PageSelectionResolverTest extends TestCase
         )->willReturn([
             $pageStructure1->reveal(),
             $pageStructure2->reveal(),
-        ]);
-
+        ])->shouldBeCalledOnce();
         $this->structureResolver->resolveProperties(
             $pageStructure1->reveal(),
             [
                 'title' => 'title',
+                'url' => 'url',
                 'excerptTitle' => 'excerpt.title',
                 'categories' => 'excerpt.categories',
             ],
@@ -113,18 +114,23 @@ class PageSelectionResolverTest extends TestCase
             'template' => 'default',
             'content' => [
                 'title' => 'Page Title 1',
+                'url' => '/page-url-1',
                 'excerptTitle' => 'Page Excerpt Title 1',
+                'categories' => [],
             ],
             'view' => [
                 'title' => [],
+                'url' => [],
                 'excerptTitle' => [],
+                'categories' => [],
             ],
-        ]);
+        ])->shouldBeCalledOnce();
 
         $this->structureResolver->resolveProperties(
             $pageStructure2->reveal(),
             [
                 'title' => 'title',
+                'url' => 'url',
                 'excerptTitle' => 'excerpt.title',
                 'categories' => 'excerpt.categories',
             ],
@@ -134,13 +140,17 @@ class PageSelectionResolverTest extends TestCase
             'template' => 'default',
             'content' => [
                 'title' => 'Page Title 2',
+                'url' => '/page-url-2',
                 'excerptTitle' => 'Page Excerpt Title 2',
+                'categories' => [],
             ],
             'view' => [
                 'title' => [],
+                'url' => [],
                 'excerptTitle' => [],
+                'categories' => [],
             ],
-        ]);
+        ])->shouldBeCalledOnce();
 
         $result = $this->pageSelectionResolver->resolve(
             ['page-id-1', 'page-id-2'],
@@ -156,11 +166,15 @@ class PageSelectionResolverTest extends TestCase
                     'template' => 'default',
                     'content' => [
                         'title' => 'Page Title 1',
+                        'url' => '/page-url-1',
                         'excerptTitle' => 'Page Excerpt Title 1',
+                        'categories' => [],
                     ],
                     'view' => [
                         'title' => [],
+                        'url' => [],
                         'excerptTitle' => [],
+                        'categories' => [],
                     ],
                 ],
                 [
@@ -168,11 +182,15 @@ class PageSelectionResolverTest extends TestCase
                     'template' => 'default',
                     'content' => [
                         'title' => 'Page Title 2',
+                        'url' => '/page-url-2',
                         'excerptTitle' => 'Page Excerpt Title 2',
+                        'categories' => [],
                     ],
                     'view' => [
                         'title' => [],
+                        'url' => [],
                         'excerptTitle' => [],
+                        'categories' => [],
                     ],
                 ],
             ],
