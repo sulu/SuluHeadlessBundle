@@ -123,7 +123,7 @@ class SnippetSelectionResolverTest extends TestCase
         );
 
         $this->assertSame(
-            ['snippet-1', 'snippet-2'],
+            ['ids' => ['snippet-1', 'snippet-2']],
             $result->getView()
         );
     }
@@ -168,7 +168,7 @@ class SnippetSelectionResolverTest extends TestCase
         );
 
         $this->assertSame(
-            ['snippet-1'],
+            ['ids' => ['snippet-1']],
             $result->getView()
         );
     }
@@ -212,7 +212,7 @@ class SnippetSelectionResolverTest extends TestCase
         );
 
         $this->assertSame(
-            ['snippet-1'],
+            ['ids' => ['snippet-1']],
             $result->getView()
         );
     }
@@ -259,7 +259,7 @@ class SnippetSelectionResolverTest extends TestCase
         );
 
         $this->assertSame(
-            ['snippet-1'],
+            ['ids' => ['snippet-1']],
             $result->getView()
         );
     }
@@ -282,7 +282,7 @@ class SnippetSelectionResolverTest extends TestCase
         );
 
         $this->assertSame(
-            [],
+            ['ids' => []],
             $result->getView()
         );
     }
@@ -332,7 +332,7 @@ class SnippetSelectionResolverTest extends TestCase
         );
 
         $this->assertSame(
-            [],
+            ['ids' => []],
             $result->getView()
         );
     }

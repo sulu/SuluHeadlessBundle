@@ -213,7 +213,7 @@ class SingleSnippetSelectionResolverTest extends TestCase
         );
 
         $this->assertSame(
-            [],
+            ['id' => null],
             $result->getView()
         );
     }

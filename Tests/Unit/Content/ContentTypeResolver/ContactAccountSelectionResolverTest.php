@@ -163,6 +163,18 @@ class ContactAccountSelectionResolverTest extends TestCase
 
         $this->assertSame([], $result->getContent());
 
-        $this->assertSame([], $result->getView());
+        $this->assertSame(['ids' => []], $result->getView());
+    }
+
+    public function testResolveDataIsEmptyArray(): void
+    {
+        $locale = 'en';
+        $property = $this->prophesize(PropertyInterface::class);
+
+        $result = $this->contactAccountResolver->resolve([], $property->reveal(), $locale);
+
+        $this->assertSame([], $result->getContent());
+
+        $this->assertSame(['ids' => []], $result->getView());
     }
 }

@@ -95,7 +95,7 @@ class SinglePageSelectionResolverTest extends TestCase
         );
         $this->assertSame(
             [
-                1,
+                'id' => 1,
             ],
             $result->getView()
         );
@@ -110,6 +110,6 @@ class SinglePageSelectionResolverTest extends TestCase
 
         $this->assertNull($result->getContent());
 
-        $this->assertSame([], $result->getView());
+        $this->assertSame(['id' => null], $result->getView());
     }
 }

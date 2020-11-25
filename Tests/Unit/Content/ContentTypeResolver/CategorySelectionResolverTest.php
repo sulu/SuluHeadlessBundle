@@ -123,7 +123,7 @@ class CategorySelectionResolverTest extends TestCase
 
         $this->assertSame([], $result->getContent());
 
-        $this->assertSame([], $result->getView());
+        $this->assertSame(['ids' => []], $result->getView());
     }
 
     public function testResolveDataIsEmptyArray(): void
@@ -131,10 +131,10 @@ class CategorySelectionResolverTest extends TestCase
         $locale = 'en';
         $property = $this->prophesize(PropertyInterface::class);
 
-        $result = $this->categorySelectionResolver->resolve(null, $property->reveal(), $locale);
+        $result = $this->categorySelectionResolver->resolve([], $property->reveal(), $locale);
 
         $this->assertSame([], $result->getContent());
 
-        $this->assertSame([], $result->getView());
+        $this->assertSame(['ids' => []], $result->getView());
     }
 }

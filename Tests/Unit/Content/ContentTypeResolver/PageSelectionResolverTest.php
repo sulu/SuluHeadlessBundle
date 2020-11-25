@@ -197,7 +197,7 @@ class PageSelectionResolverTest extends TestCase
             $result->getContent()
         );
         $this->assertSame(
-            ['page-id-1', 'page-id-2'],
+            ['ids' => ['page-id-1', 'page-id-2']],
             $result->getView()
         );
     }
@@ -211,7 +211,7 @@ class PageSelectionResolverTest extends TestCase
 
         $this->assertSame([], $result->getContent());
 
-        $this->assertSame([], $result->getView());
+        $this->assertSame(['ids' => []], $result->getView());
     }
 
     public function testResolveDataIsEmptyArray(): void
@@ -223,6 +223,6 @@ class PageSelectionResolverTest extends TestCase
 
         $this->assertSame([], $result->getContent());
 
-        $this->assertSame([], $result->getView());
+        $this->assertSame(['ids' => []], $result->getView());
     }
 }

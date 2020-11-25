@@ -205,8 +205,20 @@ class AccountSelectionResolverTest extends TestCase
 
         $result = $this->accountSelectionResolver->resolve(null, $property->reveal(), $locale);
 
-        $this->assertNull($result->getContent());
+        $this->assertSame([], $result->getContent());
 
-        $this->assertSame([], $result->getView());
+        $this->assertSame(['ids' => []], $result->getView());
+    }
+
+    public function testResolveDataIsEmptyArray(): void
+    {
+        $locale = 'en';
+        $property = $this->prophesize(PropertyInterface::class);
+
+        $result = $this->accountSelectionResolver->resolve([], $property->reveal(), $locale);
+
+        $this->assertSame([], $result->getContent());
+
+        $this->assertSame(['ids' => []], $result->getView());
     }
 }
