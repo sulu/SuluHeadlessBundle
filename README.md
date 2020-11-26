@@ -213,7 +213,7 @@ initialize and start the application:
     <div id="sulu-headless-container"></div>
     
     {# initialize application with json data of current page to prevent second request on first load #}
-    <script>window.SULU_HEADLESS_VIEW_DATA = {{ jsonData|raw }};</script>
+    <script>window.SULU_HEADLESS_VIEW_DATA = {{ headless|json_encode|raw }};</script>
     <script>window.SULU_HEADLESS_API_ENDPOINT = '{{ sulu_content_path('/api') }}';</script>
     
     {# start single page application by including built javascript code #}
