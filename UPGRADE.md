@@ -1,5 +1,31 @@
 # Upgrade
 
+### View Parameter of Single and Multi Selection Content Types changed
+
+The view parameter of the single and multi selection has changed to be consistent through all selections:
+
+**Before:**
+
+```json
+"view" {
+    "single_selection": 1,
+    "multi_selection": [1, 2],
+}
+```
+
+**After:**
+
+```json
+"view" {
+    "single_selection": {
+        "id": 1,
+    },
+    "multi_selection": {
+        "ids": [1, 2]
+    },
+}
+```
+
 ## 0.2.0
 
 ### Data given into Twig file changed
