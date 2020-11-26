@@ -169,5 +169,14 @@
 
             <tag name="sulu_headless.content_type_resolver"/>
         </service>
+
+        <service
+            id="sulu_headless.content_resolver.text_editor"
+            class="Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\TextEditorResolver"
+        >
+            <argument type="service" id="sulu_markup.parser"/>
+
+            <tag name="sulu_headless.content_type_resolver"/>
+        </service>
     </services>
 </container>
