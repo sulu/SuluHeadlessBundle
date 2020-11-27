@@ -155,13 +155,11 @@ information** such as the page template and the data of the page excerpt:
 ```
 
 If the content of a page that uses the `HeadlessWebsiteController` is requested without the `.json` suffix, the
-controller will render Twig template that is set as `view` of the template of the page. This is similar to the 
-default behavior of Sulu and **allows to start a javascript application** that utilizes the functionality of the 
-SuluHeadlessBundle after the initial request of the user. 
-
-Be aware that the data that is passed to the Twig template 
-by the `HeadlessWebsiteController` contains only scalar values and therefore **might differ from the data** that would 
-be passed by the default Sulu `WebsiteController`.
+controller will render Twig template that is set as `view` of the template of the page. 
+In this case, the data that would have been returned in case of a `.json` request is available in the twig 
+template via a `headless` variable. 
+This behaviour is compatible with the default Sulu `WebsiteController` and **allows to start a javascript application** 
+that utilizes the functionality of the SuluHeadlessBundle after the initial request of the user. 
 
 #### Resolve content data to scalar values via ContentTypeResolver
 
