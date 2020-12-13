@@ -23,8 +23,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 class NavigationControllerTest extends BaseTestCase
 {
-    use CreatePageTrait;
     use CreateMediaTrait;
+    use CreatePageTrait;
 
     /**
      * @var KernelBrowser
