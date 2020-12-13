@@ -69,7 +69,7 @@ sulu_headless:
 ```
 
 This will enable a JSON API to access the **search functionality** of Sulu via `{host}/api/search` and a JSON API for 
-retrieving the **navigation contexts** of the project via `{host}/api/navigations/{contextName}`.
+retrieving the **navigation contexts** of the project via `{host}/api/navigations/{contextKey}`.
 
 ### Set the controller of you template
 
@@ -180,7 +180,7 @@ The Sulu content management system comes with various services and Twig extensio
 rendering complex websites. This functionality is not available when serving the content of the website in a headless 
 way, therefore the SuluHeadlessBundle includes controllers to **provide JSON APIs for accessing these features**.
 
-- Sulu navigation contexts of the application can be retrieved as JSON object via `{host}/api/navigations/{contextName}`. 
+- Sulu navigation contexts of the application can be retrieved as JSON object via `{host}/api/navigations/{contextKey}`. 
 Similar to the Twig extension, the API respects the following query parameters `depth`, `flat` and `excerpt`.
 
 - The search functionality of SULU is accessible as JSON API via via `{host}/api/search?q={searchTerm}`.
