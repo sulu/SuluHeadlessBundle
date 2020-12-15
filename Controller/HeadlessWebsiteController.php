@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Controller;
 
-use JMS\Serializer\SerializerInterface;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
 use Sulu\Bundle\WebsiteBundle\Controller\WebsiteController;
 use Sulu\Component\Content\Compat\PageInterface;
@@ -78,7 +77,6 @@ class HeadlessWebsiteController extends WebsiteController
     {
         $subscribedServices = parent::getSubscribedServices();
         $subscribedServices['sulu_headless.structure_resolver'] = StructureResolverInterface::class;
-        $subscribedServices['jms_serializer'] = SerializerInterface::class;
 
         return $subscribedServices;
     }
