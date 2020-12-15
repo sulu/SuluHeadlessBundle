@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Controller;
 
-use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
 use Sulu\Bundle\WebsiteBundle\Controller\WebsiteController;
@@ -69,11 +68,7 @@ class HeadlessWebsiteController extends WebsiteController
      */
     protected function serializeData(array $data): string
     {
-        return $this->get('jms_serializer')->serialize(
-            $data,
-            'json',
-            (new SerializationContext())->setSerializeNull(true)
-        );
+        return json_encode($data, JSON_PRETTY_PRINT) ?: '';
     }
 
     /**
