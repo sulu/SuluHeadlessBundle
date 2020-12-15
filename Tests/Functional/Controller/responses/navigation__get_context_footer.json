@@ -5,7 +5,6 @@
                 "id": "@uuid@",
                 "uuid": "@uuid@",
                 "nodeType": 1,
-                "path": "\/test-3",
                 "publishedState": true,
                 "published": "@string@.isDateTime()",
                 "title": "Test 3",
