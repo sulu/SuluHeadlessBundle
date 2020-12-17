@@ -13,8 +13,6 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Controller;
 
-use JMS\Serializer\SerializationContext;
-use JMS\Serializer\SerializerInterface;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
 use Sulu\Bundle\WebsiteBundle\Controller\WebsiteController;
 use Sulu\Component\Content\Compat\PageInterface;
@@ -69,11 +67,7 @@ class HeadlessWebsiteController extends WebsiteController
      */
     protected function serializeData(array $data): string
     {
-        return $this->get('jms_serializer')->serialize(
-            $data,
-            'json',
-            (new SerializationContext())->setSerializeNull(true)
-        );
+        return json_encode($data, JSON_THROW_ON_ERROR);
     }
 
     /**
@@ -83,7 +77,6 @@ class HeadlessWebsiteController extends WebsiteController
     {
         $subscribedServices = parent::getSubscribedServices();
         $subscribedServices['sulu_headless.structure_resolver'] = StructureResolverInterface::class;
-        $subscribedServices['jms_serializer'] = SerializerInterface::class;
 
         return $subscribedServices;
     }

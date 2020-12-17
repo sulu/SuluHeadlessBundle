@@ -4,7 +4,7 @@
     "type": "sulu-bundle",
     "description": "Bundle that provides controllers and services for using Sulu as headless content management system",
     "require": {
-        "php": "^7.2",
+        "php": "^7.3",
         "sulu/sulu": "^2.0.1",
         "symfony/config": "^4.3 || ^5.0",
         "symfony/dependency-injection": "^4.3 || ^5.0",
@@ -13,7 +13,7 @@
         "symfony/http-kernel": "^4.3 || ^5.0"
     },
     "require-dev": {
-        "coduo/php-matcher": "^4.0",
+        "coduo/php-matcher": "^4.0 || ^5.0",
         "handcraftedinthealps/code-coverage-checker": "^0.2.1",
         "handcraftedinthealps/zendsearch": "^2.0",
         "jackalope/jackalope-doctrine-dbal": "^1.3.4",

@@ -2,6 +2,11 @@
 
 ## dev-master
 
+### Increased mimimum PHP version to 7.3
+
+The mimimum PHP version was increased from 7.2 to 7.3. The reason is that PHP 7.2 is not maintained anymore and this
+allows the bundle to use the `JSON_THROW_ON_ERROR` flag.
+
 ### Changed attributes which are passed to templates by the HeadlessWebsiteController
 
 The attributes that are passed to the .twig template by the `HeadlessWebsiteController` were changed to improve
@@ -94,8 +99,6 @@ The view parameter of the single and multi selection has changed to be consisten
     },
 }
 ```
-
-## 0.2.0
 
 ### Data given into Twig file changed
 

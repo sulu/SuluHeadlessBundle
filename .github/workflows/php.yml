@@ -28,6 +28,12 @@ jobs:
             - name: Checkout project
               uses: actions/checkout@v1
 
+            - name: Install and configure PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: '7.4'
+                  coverage: pcov
+
             - name: Validate composer.json and composer.lock
               run: composer validate
 
@@ -68,6 +74,11 @@ jobs:
         steps:
             - name: Checkout project
               uses: actions/checkout@v1
+
+            - name: Install and configure PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: '7.4'
 
             - name: Create downloads directory
               run: mkdir downloads
