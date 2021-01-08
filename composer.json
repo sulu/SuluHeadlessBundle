@@ -45,6 +45,8 @@
         "lint": [
             "@phpstan",
             "@php-cs",
+            "@lint-twig",
+            "@lint-yaml",
             "@lint-container",
             "@lint-composer",
             "@lint-doctrine"
@@ -60,6 +62,8 @@
         "php-cs": "vendor/bin/php-cs-fixer fix --verbose --diff --dry-run",
         "php-cs-fix": "vendor/bin/php-cs-fixer fix",
         "lint-composer": "@composer validate --strict",
+        "lint-twig": "Tests/Application/bin/console lint:twig Tests/Application/templates",
+        "lint-yaml": "Tests/Application/bin/console lint:yaml Resources/config Tests/Application/config",
         "lint-container": [
             "Tests/Application/bin/console lint:container --env dev",
             "Tests/Application/bin/console lint:container --env test",
