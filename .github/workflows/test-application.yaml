@@ -7,8 +7,8 @@ on:
             - master
 
 jobs:
-    tests:
-        name: "Run tests with php ${{ matrix.php-version }}"
+    test:
+        name: "Run tests with php 7.4"
         runs-on: ubuntu-latest
 
         env:
@@ -64,5 +64,5 @@ jobs:
             - name: Execute functional test cases
               run: composer test -- Tests/Functional --log-junit var/junit.xml
 
-          -   name: Check code coverage
+            - name: Check code coverage
               run: php vendor/bin/code-coverage-checker "var/coverage.php" "line" "95" "Content"
