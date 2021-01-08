@@ -1,0 +1,68 @@
+name: Test application
+
+on:
+    pull_request:
+    push:
+        branches:
+            - master
+
+jobs:
+    test:
+        name: "Run tests with php 7.4"
+        runs-on: ubuntu-latest
+
+        env:
+            DATABASE_URL: mysql://root:root@127.0.0.1:3306/su_headless_test?serverVersion=5.7
+            DATABASE_CHARSET: utf8mb4
+            DATABASE_COLLATE: utf8mb4_unicode_ci
+
+        services:
+            mysql:
+                image: mysql:5.7
+                env:
+                    MYSQL_ROOT_PASSWORD: root
+                ports:
+                    - 3306:3306
+                options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
+
+        steps:
+            - name: Checkout project
+              uses: actions/checkout@v2
+
+            - name: Install and configure PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: '7.4'
+                  extensions: ctype, iconv, mysql
+                  coverage: pcov
+                  tools: composer
+
+            - name: Get composer cache directory
+              id: composer-cache-dir
+              run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+            - name: Cache dependencies
+              uses: actions/cache@v2
+              with:
+                  path: ${{ steps.composer-cache-dir.outputs.dir }}
+                  key: ${{ runner.os }}-composer-${{ hashFiles('composer.json', 'composer.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-composer-
+
+            - name: Install dependencies
+              run: composer install --prefer-dist --no-interaction
+
+            - name: Bootstrap test environment
+              run: composer bootstrap-test-environment
+
+            - name: Lint code
+              run: composer lint
+
+            - name: Execute unit test cases
+              run: composer test -- Tests/Unit --coverage-php var/coverage.php --coverage-html coverage-report --log-junit var/junit.xml
+
+            - name: Execute functional test cases
+              run: composer test -- Tests/Functional --log-junit var/junit.xml
+
+            - name: Check code coverage
+              run: php vendor/bin/code-coverage-checker "var/coverage.php" "line" "95" "Content"
