@@ -7,7 +7,7 @@ on:
             - master
 
 jobs:
-    test:
+    tests:
         name: "Run tests with php ${{ matrix.php-version }}"
         runs-on: ubuntu-latest
 
