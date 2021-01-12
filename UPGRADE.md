@@ -1,6 +1,6 @@
 # Upgrade
 
-## dev-master
+## 0.x
 
 ### Increased mimimum PHP version to 7.3
 
