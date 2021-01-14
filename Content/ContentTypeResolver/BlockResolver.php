@@ -17,6 +17,7 @@ use Sulu\Bundle\HeadlessBundle\Content\ContentResolverInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Component\Content\Compat\Block\BlockPropertyInterface;
 use Sulu\Component\Content\Compat\PropertyInterface;
+use Sulu\Component\Content\Types\Block\BlockVisitorInterface;
 
 class BlockResolver implements ContentTypeResolverInterface
 {
@@ -30,9 +31,18 @@ class BlockResolver implements ContentTypeResolverInterface
      */
     private $resolver;
 
-    public function __construct(ContentResolverInterface $resolver)
+    /**
+     * @var \Traversable<BlockVisitorInterface>
+     */
+    private $blockVisitors;
+
+    /**
+     * @param \Traversable<BlockVisitorInterface> $blockVisitors
+     */
+    public function __construct(ContentResolverInterface $contentResolver, \Traversable $blockVisitors)
     {
-        $this->resolver = $resolver;
+        $this->resolver = $contentResolver;
+        $this->blockVisitors = $blockVisitors;
     }
 
     /**
@@ -40,16 +50,32 @@ class BlockResolver implements ContentTypeResolverInterface
      */
     public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView
     {
-        $content = [];
-        $view = [];
+        $blockPropertyTypes = [];
         for ($i = 0; $i < $property->getLength(); ++$i) {
             $blockPropertyType = $property->getProperties($i);
 
+            foreach ($this->blockVisitors as $blockVisitor) {
+                $blockPropertyType = $blockVisitor->visit($blockPropertyType);
+
+                if (!$blockPropertyType) {
+                    break;
+                }
+            }
+
+            if ($blockPropertyType) {
+                $blockPropertyTypes[] = $blockPropertyType;
+            }
+        }
+
+        $content = [];
+        $view = [];
+        foreach ($blockPropertyTypes as $i => $blockPropertyType) {
             $content[$i] = ['type' => $blockPropertyType->getName()];
             $view[$i] = [];
 
             foreach ($blockPropertyType->getChildProperties() as $childProperty) {
                 $contentView = $this->resolver->resolve($childProperty->getValue(), $childProperty, $locale, $attributes);
+
                 $content[$i][$childProperty->getName()] = $contentView->getContent();
                 $view[$i][$childProperty->getName()] = $contentView->getView();
             }
