@@ -42,4 +42,19 @@ class Kernel extends SuluTestKernel
     {
         return __DIR__;
     }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function getKernelParameters()
+    {
+        $parameters = parent::getKernelParameters();
+
+        $gedmoFileName = (new \ReflectionClass(\Gedmo\Exception::class))->getFileName();
+        if ($gedmoFileName) {
+            $parameters['gedmo_directory'] = \dirname($gedmoFileName);
+        }
+
+        return $parameters;
+    }
 }
