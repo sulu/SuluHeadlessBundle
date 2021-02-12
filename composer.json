@@ -5,7 +5,7 @@
     "description": "Bundle that provides controllers and services for using Sulu as headless content management system",
     "require": {
         "php": "^7.3",
-        "sulu/sulu": "^2.0.1",
+        "sulu/sulu": "^2.0.1 || ^2.3@dev",
         "symfony/config": "^4.3 || ^5.0",
         "symfony/dependency-injection": "^4.3 || ^5.0",
         "symfony/framework-bundle": "^4.3 || ^5.0",
@@ -31,7 +31,6 @@
         "symfony/monolog-bundle": "^3.1",
         "thecodingmachine/phpstan-strict-rules": "^0.12"
     },
-    "minimum-stability": "dev",
     "autoload": {
         "psr-4": {
             "Sulu\\Bundle\\HeadlessBundle\\": ""

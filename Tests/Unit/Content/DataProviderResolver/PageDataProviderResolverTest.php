@@ -104,7 +104,7 @@ class PageDataProviderResolverTest extends TestCase
 
         $propertyParameters = [
             'properties' => new PropertyParameter('properties', [
-                new PropertyParameter('contentTitle', 'title'),
+                new PropertyParameter('contentDescription', 'description'),
                 new PropertyParameter('excerptTitle', 'excerpt.title'),
             ]),
         ];
@@ -141,8 +141,8 @@ class PageDataProviderResolverTest extends TestCase
             [
                 'title' => 'title',
                 'url' => 'url',
-                'contentTitle' => 'title',
-                'excerptTitle' => 'excerpt.title',
+                'description' => 'contentDescription',
+                'excerpt.title' => 'excerptTitle',
             ],
             'en'
         )->willReturn([
@@ -151,11 +151,13 @@ class PageDataProviderResolverTest extends TestCase
             'content' => [
                 'title' => 'Page Title 1',
                 'url' => '/page-url-1',
+                'contentDescription' => 'Page Content Description',
                 'excerptTitle' => 'Page Excerpt Title 1',
             ],
             'view' => [
                 'title' => [],
                 'url' => [],
+                'contentDescription' => [],
                 'excerptTitle' => [],
             ],
         ])->shouldBeCalledOnce();
@@ -165,8 +167,8 @@ class PageDataProviderResolverTest extends TestCase
             [
                 'title' => 'title',
                 'url' => 'url',
-                'contentTitle' => 'title',
-                'excerptTitle' => 'excerpt.title',
+                'description' => 'contentDescription',
+                'excerpt.title' => 'excerptTitle',
             ],
             'en'
         )->willReturn([
@@ -175,11 +177,13 @@ class PageDataProviderResolverTest extends TestCase
             'content' => [
                 'title' => 'Page Title 2',
                 'url' => '/page-url-2',
+                'contentDescription' => 'Page Content Description',
                 'excerptTitle' => 'Page Excerpt Title 2',
             ],
             'view' => [
                 'title' => [],
                 'url' => [],
+                'contentDescription' => [],
                 'excerptTitle' => [],
             ],
         ])->shouldBeCalledOnce();
@@ -202,11 +206,13 @@ class PageDataProviderResolverTest extends TestCase
                     'content' => [
                         'title' => 'Page Title 1',
                         'url' => '/page-url-1',
+                        'contentDescription' => 'Page Content Description',
                         'excerptTitle' => 'Page Excerpt Title 1',
                     ],
                     'view' => [
                         'title' => [],
                         'url' => [],
+                        'contentDescription' => [],
                         'excerptTitle' => [],
                     ],
                 ],
@@ -216,11 +222,13 @@ class PageDataProviderResolverTest extends TestCase
                     'content' => [
                         'title' => 'Page Title 2',
                         'url' => '/page-url-2',
+                        'contentDescription' => 'Page Content Description',
                         'excerptTitle' => 'Page Excerpt Title 2',
                     ],
                     'view' => [
                         'title' => [],
                         'url' => [],
+                        'contentDescription' => [],
                         'excerptTitle' => [],
                     ],
                 ],
@@ -237,7 +245,7 @@ class PageDataProviderResolverTest extends TestCase
 
         $propertyParameters = [
             'properties' => new PropertyParameter('properties', [
-                new PropertyParameter('contentTitle', 'title'),
+                new PropertyParameter('contentDescription', 'description'),
                 new PropertyParameter('excerptTitle', 'excerpt.title'),
             ]),
         ];

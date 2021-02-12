@@ -2,6 +2,33 @@
 
 ## 0.x
 
+### Switched meaning of key and value of propertyMap parameter of StructureResolver::resolveProperties
+
+The meaning of the key and value of the propertyMap parameter of StructureResolver::resolveProperties method was switched 
+to be consistent with similar methods in Sulu.  If you call this method in your project, you need to adjust the parameter.
+
+**Before:**
+
+```php
+$this->structureResolver->resolveProperties(
+    $structure,
+    ['title' => 'title', 'excerptTitle' => 'excerpt.title'],
+    'en'
+);
+```
+
+**After:**
+
+```php
+$this->structureResolver->resolveProperties(
+    $structure,
+    ['title' => 'title', 'excerpt.title' => 'excerptTitle'],
+    'en'
+);
+```
+
+## 0.4.0
+
 ### Increased mimimum PHP version to 7.3
 
 The mimimum PHP version was increased from 7.2 to 7.3. The reason is that PHP 7.2 is not maintained anymore and this

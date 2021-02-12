@@ -74,7 +74,7 @@ class PageSelectionResolverTest extends TestCase
         $property = $this->prophesize(PropertyInterface::class);
         $params = [
             'properties' => new PropertyParameter('properties', [
-                new PropertyParameter('title', 'title'),
+                new PropertyParameter('contentDescription', 'description'),
                 new PropertyParameter('excerptTitle', 'excerpt.title'),
                 new PropertyParameter('categories', 'excerpt.categories'),
             ]),
@@ -105,8 +105,9 @@ class PageSelectionResolverTest extends TestCase
             [
                 'title' => 'title',
                 'url' => 'url',
-                'excerptTitle' => 'excerpt.title',
-                'categories' => 'excerpt.categories',
+                'description' => 'contentDescription',
+                'excerpt.title' => 'excerptTitle',
+                'excerpt.categories' => 'categories',
             ],
             'en'
         )->willReturn([
@@ -115,12 +116,14 @@ class PageSelectionResolverTest extends TestCase
             'content' => [
                 'title' => 'Page Title 1',
                 'url' => '/page-url-1',
+                'contentDescription' => 'Page Content Description',
                 'excerptTitle' => 'Page Excerpt Title 1',
                 'categories' => [],
             ],
             'view' => [
                 'title' => [],
                 'url' => [],
+                'contentDescription' => [],
                 'excerptTitle' => [],
                 'categories' => [],
             ],
@@ -131,8 +134,9 @@ class PageSelectionResolverTest extends TestCase
             [
                 'title' => 'title',
                 'url' => 'url',
-                'excerptTitle' => 'excerpt.title',
-                'categories' => 'excerpt.categories',
+                'description' => 'contentDescription',
+                'excerpt.title' => 'excerptTitle',
+                'excerpt.categories' => 'categories',
             ],
             'en'
         )->willReturn([
@@ -141,12 +145,14 @@ class PageSelectionResolverTest extends TestCase
             'content' => [
                 'title' => 'Page Title 2',
                 'url' => '/page-url-2',
+                'contentDescription' => 'Page Content Description',
                 'excerptTitle' => 'Page Excerpt Title 2',
                 'categories' => [],
             ],
             'view' => [
                 'title' => [],
                 'url' => [],
+                'contentDescription' => [],
                 'excerptTitle' => [],
                 'categories' => [],
             ],
@@ -167,12 +173,14 @@ class PageSelectionResolverTest extends TestCase
                     'content' => [
                         'title' => 'Page Title 1',
                         'url' => '/page-url-1',
+                        'contentDescription' => 'Page Content Description',
                         'excerptTitle' => 'Page Excerpt Title 1',
                         'categories' => [],
                     ],
                     'view' => [
                         'title' => [],
                         'url' => [],
+                        'contentDescription' => [],
                         'excerptTitle' => [],
                         'categories' => [],
                     ],
@@ -183,12 +191,14 @@ class PageSelectionResolverTest extends TestCase
                     'content' => [
                         'title' => 'Page Title 2',
                         'url' => '/page-url-2',
+                        'contentDescription' => 'Page Content Description',
                         'excerptTitle' => 'Page Excerpt Title 2',
                         'categories' => [],
                     ],
                     'view' => [
                         'title' => [],
                         'url' => [],
+                        'contentDescription' => [],
                         'excerptTitle' => [],
                         'categories' => [],
                     ],

@@ -357,7 +357,7 @@ class StructureResolverTest extends TestCase
 
         $result = $this->structureResolver->resolveProperties(
             $this->structure->reveal(),
-            ['myTitle' => 'title', 'seoDescription' => 'seo.description', 'excerptTitle' => 'excerpt.title'],
+            ['title' => 'myTitle', 'seo.description' => 'seoDescription', 'excerpt.title' => 'excerptTitle'],
             'en'
         );
 
@@ -435,7 +435,7 @@ class StructureResolverTest extends TestCase
 
         $result = $this->structureResolver->resolveProperties(
             $this->structure->reveal(),
-            ['myTitle' => 'title'],
+            ['title' => 'myTitle'],
             'en',
             true
         );
