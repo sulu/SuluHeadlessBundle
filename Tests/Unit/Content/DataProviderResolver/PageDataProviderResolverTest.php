@@ -141,8 +141,8 @@ class PageDataProviderResolverTest extends TestCase
             [
                 'title' => 'title',
                 'url' => 'url',
-                'description' => 'contentDescription',
-                'excerpt.title' => 'excerptTitle',
+                'contentDescription' => 'description',
+                'excerptTitle' => 'excerpt.title',
             ],
             'en'
         )->willReturn([
@@ -167,8 +167,8 @@ class PageDataProviderResolverTest extends TestCase
             [
                 'title' => 'title',
                 'url' => 'url',
-                'description' => 'contentDescription',
-                'excerpt.title' => 'excerptTitle',
+                'contentDescription' => 'description',
+                'excerptTitle' => 'excerpt.title',
             ],
             'en'
         )->willReturn([

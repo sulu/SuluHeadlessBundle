@@ -105,9 +105,9 @@ class PageSelectionResolverTest extends TestCase
             [
                 'title' => 'title',
                 'url' => 'url',
-                'description' => 'contentDescription',
-                'excerpt.title' => 'excerptTitle',
-                'excerpt.categories' => 'categories',
+                'contentDescription' => 'description',
+                'excerptTitle' => 'excerpt.title',
+                'categories' => 'excerpt.categories',
             ],
             'en'
         )->willReturn([
@@ -134,9 +134,9 @@ class PageSelectionResolverTest extends TestCase
             [
                 'title' => 'title',
                 'url' => 'url',
-                'description' => 'contentDescription',
-                'excerpt.title' => 'excerptTitle',
-                'excerpt.categories' => 'categories',
+                'contentDescription' => 'description',
+                'excerptTitle' => 'excerpt.title',
+                'categories' => 'excerpt.categories',
             ],
             'en'
         )->willReturn([
