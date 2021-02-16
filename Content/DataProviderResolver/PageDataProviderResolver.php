@@ -124,9 +124,9 @@ class PageDataProviderResolver implements DataProviderResolverInterface
         ];
 
         foreach ($propertiesParamValue as $propertiesParamEntry) {
+            $paramName = $propertiesParamEntry->getName();
             $paramValue = $propertiesParamEntry->getValue();
-            $sourceProperty = \is_string($paramValue) ? $paramValue : $propertiesParamEntry->getName();
-            $propertyMap[$sourceProperty] = $propertiesParamEntry->getName();
+            $propertyMap[$paramName] = \is_string($paramValue) ? $paramValue : $paramName;
         }
 
         $resolvedPages = [];

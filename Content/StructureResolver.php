@@ -100,9 +100,9 @@ class StructureResolver implements StructureResolverInterface
             $data['extension'] = $this->resolveExtensionData($unresolvedExtensionData, $locale, $attributes);
         }
 
-        foreach ($propertyMap as $sourceProperty => $targetProperty) {
-            if (!\is_string($sourceProperty)) {
-                $sourceProperty = $targetProperty;
+        foreach ($propertyMap as $targetProperty => $sourceProperty) {
+            if (!\is_string($targetProperty)) {
+                $targetProperty = $sourceProperty;
             }
 
             // the '.' is used to separate the extension name from the property name.
