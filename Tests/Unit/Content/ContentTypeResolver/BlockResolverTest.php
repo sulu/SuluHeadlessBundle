@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
 
 use PHPUnit\Framework\TestCase;
-use Prophecy\Argument;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\HeadlessBundle\Content\ContentResolverInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\BlockResolver;
@@ -31,39 +30,14 @@ class BlockResolverTest extends TestCase
      */
     private $contentResolver;
 
-    /**
-     * @var BlockVisitorInterface|ObjectProphecy
-     */
-    private $blockVisitor1;
-
-    /**
-     * @var BlockVisitorInterface|ObjectProphecy
-     */
-    private $blockVisitor2;
-
-    /**
-     * @var BlockResolver
-     */
-    private $blockResolver;
-
     protected function setUp(): void
     {
         $this->contentResolver = $this->prophesize(ContentResolverInterface::class);
-        $this->blockVisitor1 = $this->prophesize(BlockVisitorInterface::class);
-        $this->blockVisitor2 = $this->prophesize(BlockVisitorInterface::class);
-
-        $this->blockVisitor1->visit(Argument::any())->will(function ($arguments) {return $arguments[0]; });
-        $this->blockVisitor2->visit(Argument::any())->will(function ($arguments) {return $arguments[0]; });
-
-        $this->blockResolver = new BlockResolver(
-            $this->contentResolver->reveal(),
-            new \ArrayIterator([$this->blockVisitor1->reveal(), $this->blockVisitor2->reveal()])
-        );
     }
 
     public function testGetContentType(): void
     {
-        self::assertSame('block', $this->blockResolver::getContentType());
+        self::assertSame('block', BlockResolver::getContentType());
     }
 
     public function testResolve(): void
@@ -122,14 +96,12 @@ class BlockResolverTest extends TestCase
         $blockProperty->getLength()->willReturn(2);
 
         $blockProperty->getProperties(0)->willReturn($titleType->reveal());
-        $this->blockVisitor1->visit($titleType->reveal())->willReturn($titleType->reveal());
-        $this->blockVisitor2->visit($titleType->reveal())->willReturn($titleType->reveal());
 
         $blockProperty->getProperties(1)->willReturn($mediaType->reveal());
-        $this->blockVisitor1->visit($mediaType->reveal())->willReturn($mediaType->reveal());
-        $this->blockVisitor2->visit($mediaType->reveal())->willReturn($mediaType->reveal());
 
-        $result = $this->blockResolver->resolve($data, $blockProperty->reveal(), 'en', ['webspaceKey' => 'sulu_io']);
+        $blockResolver = $this->createBlockResolver();
+
+        $result = $blockResolver->resolve($data, $blockProperty->reveal(), 'en', ['webspaceKey' => 'sulu_io']);
 
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame(
@@ -158,8 +130,12 @@ class BlockResolverTest extends TestCase
         );
     }
 
-    public function testResolveWithSkips(): void
+    public function testResolveWithVisitors(): void
     {
+        if (!class_exists(BlockVisitorInterface::class)) {
+            $this->markTestSkipped('Requires a newer sulu version with block visitors.');
+        }
+
         $titleProperty = $this->prophesize(PropertyInterface::class);
         $titleProperty->getName()->willReturn('title');
         $titleProperty->getValue()->willReturn('test-123');
@@ -209,19 +185,124 @@ class BlockResolverTest extends TestCase
             ],
         ];
 
+        $blockVisitor1 = $this->prophesize(BlockVisitorInterface::class);
+        $blockVisitor2 = $this->prophesize(BlockVisitorInterface::class);
+
         $blockProperty = $this->prophesize(BlockPropertyInterface::class);
         $blockProperty->getValue()->willReturn($data);
         $blockProperty->getLength()->willReturn(2);
 
         $blockProperty->getProperties(0)->willReturn($titleType->reveal());
-        $this->blockVisitor1->visit($titleType->reveal())->willReturn(null);
-        $this->blockVisitor2->visit($titleType->reveal())->willReturn($titleType->reveal());
+        $blockVisitor1->visit($titleType->reveal())->willReturn($titleType->reveal());
+        $blockVisitor2->visit($titleType->reveal())->willReturn($titleType->reveal());
 
         $blockProperty->getProperties(1)->willReturn($mediaType->reveal());
-        $this->blockVisitor1->visit($mediaType->reveal())->willReturn($mediaType->reveal());
-        $this->blockVisitor2->visit($mediaType->reveal())->willReturn(null);
+        $blockVisitor1->visit($mediaType->reveal())->willReturn($mediaType->reveal());
+        $blockVisitor2->visit($mediaType->reveal())->willReturn($mediaType->reveal());
 
-        $result = $this->blockResolver->resolve($data, $blockProperty->reveal(), 'en', ['webspaceKey' => 'sulu_io']);
+        $blockResolver = $this->createBlockResolver([$blockVisitor1->reveal(), $blockVisitor2->reveal()]);
+
+        $result = $blockResolver->resolve($data, $blockProperty->reveal(), 'en', ['webspaceKey' => 'sulu_io']);
+
+        $this->assertInstanceOf(ContentView::class, $result);
+        $this->assertSame(
+            [
+                [
+                    'type' => 'title',
+                    'title' => 'test-123',
+                ],
+                [
+                    'type' => 'media',
+                    'media' => ['media1', 'media2', 'media3'],
+                ],
+            ],
+            $result->getContent()
+        );
+        $this->assertSame(
+            [
+                [
+                    'title' => [],
+                ],
+                [
+                    'media' => ['ids' => [1, 2, 3]],
+                ],
+            ],
+            $result->getView()
+        );
+    }
+
+    public function testResolveWithSkips(): void
+    {
+        if (!class_exists(BlockVisitorInterface::class)) {
+            $this->markTestSkipped('Requires a newer sulu version with block visitors.');
+        }
+
+        $titleProperty = $this->prophesize(PropertyInterface::class);
+        $titleProperty->getName()->willReturn('title');
+        $titleProperty->getValue()->willReturn('test-123');
+
+        $titleType = $this->prophesize(BlockPropertyType::class);
+        $titleType->getName()->willReturn('title');
+        $titleType->getChildProperties()->willReturn([$titleProperty->reveal()]);
+
+        $titleContentView = $this->prophesize(ContentView::class);
+        $titleContentView->getContent()->willReturn('test-123');
+        $titleContentView->getView()->willReturn([]);
+
+        $this->contentResolver->resolve(
+            'test-123',
+            $titleProperty->reveal(),
+            'en',
+            ['webspaceKey' => 'sulu_io']
+        )->willReturn($titleContentView->reveal());
+
+        $mediaProperty = $this->prophesize(PropertyInterface::class);
+        $mediaProperty->getName()->willReturn('media');
+        $mediaProperty->getValue()->willReturn(['ids' => [1, 2, 3]]);
+
+        $mediaType = $this->prophesize(BlockPropertyType::class);
+        $mediaType->getName()->willReturn('media');
+        $mediaType->getChildProperties()->willReturn([$mediaProperty->reveal()]);
+
+        $mediaContentView = $this->prophesize(ContentView::class);
+        $mediaContentView->getContent()->willReturn(['media1', 'media2', 'media3']);
+        $mediaContentView->getView()->willReturn(['ids' => [1, 2, 3]]);
+
+        $this->contentResolver->resolve(
+            ['ids' => [1, 2, 3]],
+            $mediaProperty->reveal(),
+            'en',
+            ['webspaceKey' => 'sulu_io']
+        )->willReturn($mediaContentView->reveal());
+
+        $data = [
+            [
+                'type' => 'title',
+                'title' => 'test-123',
+            ],
+            [
+                'type' => 'media',
+                'media' => ['ids' => [1, 2, 3]],
+            ],
+        ];
+
+        $blockVisitor1 = $this->prophesize(BlockVisitorInterface::class);
+        $blockVisitor2 = $this->prophesize(BlockVisitorInterface::class);
+
+        $blockProperty = $this->prophesize(BlockPropertyInterface::class);
+        $blockProperty->getValue()->willReturn($data);
+        $blockProperty->getLength()->willReturn(2);
+
+        $blockProperty->getProperties(0)->willReturn($titleType->reveal());
+        $blockVisitor1->visit($titleType->reveal())->willReturn(null);
+        $blockVisitor2->visit($titleType->reveal())->willReturn($titleType->reveal());
+
+        $blockProperty->getProperties(1)->willReturn($mediaType->reveal());
+        $blockVisitor1->visit($mediaType->reveal())->willReturn($mediaType->reveal());
+        $blockVisitor2->visit($mediaType->reveal())->willReturn(null);
+
+        $blockResolver = $this->createBlockResolver([$blockVisitor1->reveal(), $blockVisitor2->reveal()]);
+        $result = $blockResolver->resolve($data, $blockProperty->reveal(), 'en', ['webspaceKey' => 'sulu_io']);
 
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame(
@@ -231,6 +312,17 @@ class BlockResolverTest extends TestCase
         $this->assertSame(
             [],
             $result->getView()
+        );
+    }
+
+    /**
+     * @param BlockVisitorInterface[] $blockVisitors
+     */
+    private function createBlockResolver(array $blockVisitors = []): BlockResolver
+    {
+        return new BlockResolver(
+            $this->contentResolver->reveal(),
+            new \ArrayIterator($blockVisitors)
         );
     }
 }
