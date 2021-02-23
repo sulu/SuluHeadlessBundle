@@ -31,7 +31,7 @@
                     "categories": [],
                     "audience_targeting_groups": [],
                     "tags": [],
-                    "segments": "@array@.optional()",
+                    "segments": "@array@.isEmpty().optional()",
                     "icon": [],
                     "images": []
                 },
@@ -67,7 +67,7 @@
                     "categories": [],
                     "audience_targeting_groups": [],
                     "tags": [],
-                    "segments": "@array@.optional()",
+                    "segments": "@array@.isEmpty().optional()",
                     "icon": [
                         {
                             "id": "@integer@",
@@ -107,5 +107,4 @@
         ]
     }
 }
-
 

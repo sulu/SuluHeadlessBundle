@@ -13,7 +13,7 @@
                 "template": "default",
                 "parent": "@uuid@",
                 "url": "\/test-1",
-                "path": "@string@.optional()",
+                "path": "@string@.match(\"parent/child\").optional()",
                 "urls": {
                     "de": "\/test-1"
                 },
