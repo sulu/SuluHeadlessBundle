@@ -184,10 +184,16 @@ class StructureResolver implements StructureResolverInterface
             $created = $document->getCreated();
         }
 
+        $structureContent = null;
+
+        if (method_exists($structure, 'getContent')) {
+            $structureContent = $structure->getContent();
+        }
+
         $type = 'unknown';
-        if (method_exists($structure, 'getContent') && method_exists($structure->getContent(), 'getTemplateType')) {
+        if (\is_object($structureContent) && method_exists($structureContent, 'getTemplateType')) {
             // determine type for structure that is implemented based on the SuluContentBundle
-            $type = $structure->getContent()->getTemplateType();
+            $type = $structureContent->getTemplateType();
         } elseif ($document instanceof StructureBehavior) {
             // determine type for structure that is implemented in the SuluPageBundle or the SuluArticleBundle
             $type = $this->documentInspector->getMetadata($document)->getAlias();

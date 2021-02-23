@@ -13,7 +13,7 @@
         "symfony/http-kernel": "^4.4 || ^5.0"
     },
     "require-dev": {
-        "coduo/php-matcher": "^4.0 || ^5.0 || ^6.0",
+        "coduo/php-matcher": "^5.0 || ^6.0",
         "friendsofphp/php-cs-fixer": "^2.17",
         "handcraftedinthealps/code-coverage-checker": "^0.2.1",
         "handcraftedinthealps/zendsearch": "^2.0",
