@@ -12,6 +12,7 @@
                 "webspaceKey": "sulu_io",
                 "template": "default",
                 "parent": "@uuid@",
+                "path": "@string@.optional()",
                 "url": "\/test-3",
                 "urls": {
                     "de": "\/test-3"
