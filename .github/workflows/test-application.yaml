@@ -9,7 +9,7 @@ on:
 
 jobs:
     test:
-        name: 'PHP ${{ matrix.php-version }} (${{ matrix.dependency-versions }}, Lint ${{ matrix.lint }}, Functional ${{ matrix.functional }})'
+        name: 'PHP ${{ matrix.php-version }} (${{ matrix.dependency-versions }}, Lint ${{ matrix.lint }})'
         runs-on: ubuntu-latest
 
         env:
@@ -24,7 +24,6 @@ jobs:
                     - php-version: '7.3'
                       lint: false
                       coverage: false
-                      functional: false
                       dependency-versions: 'lowest'
                       tools: 'composer:v1'
                       env:
@@ -33,7 +32,6 @@ jobs:
                     - php-version: '7.4'
                       lint: true
                       coverage: true
-                      functional: true
                       dependency-versions: 'highest'
                       tools: 'composer:v2'
                       env:
@@ -42,7 +40,6 @@ jobs:
                     - php-version: '8.0'
                       lint: false
                       coverage: false
-                      functional: true
                       dependency-versions: 'highest'
                       tools: 'composer:v2'
                       composer-options: '--ignore-platform-reqs'
@@ -87,7 +84,6 @@ jobs:
               run: composer test -- Tests/Unit --coverage-php var/coverage.php --coverage-html coverage-report --log-junit var/junit.xml
 
             - name: Execute functional test cases
-              if: ${{ matrix.functional }}
               run: composer test -- Tests/Functional --log-junit var/junit.xml
 
             - name: Check code coverage
