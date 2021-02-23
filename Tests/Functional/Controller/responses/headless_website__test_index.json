@@ -35,7 +35,7 @@
             "categories": [],
             "tags": [],
             "images": [],
-            "segments": [],
+            "segments": "@array@.isEmpty().optional()",
             "icon": [],
             "audience_targeting_groups": []
         }

@@ -9,13 +9,41 @@ on:
 
 jobs:
     test:
-        name: 'PHP 7.4 (highest)'
+        name: 'PHP ${{ matrix.php-version }} (${{ matrix.dependency-versions }}, Lint ${{ matrix.lint }})'
         runs-on: ubuntu-latest
 
         env:
             DATABASE_URL: mysql://root:root@127.0.0.1:3306/su_headless_test?serverVersion=5.7
             DATABASE_CHARSET: utf8mb4
             DATABASE_COLLATE: utf8mb4_unicode_ci
+
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                    - php-version: '7.3'
+                      lint: false
+                      coverage: false
+                      dependency-versions: 'lowest'
+                      tools: 'composer:v1'
+                      env:
+                          SYMFONY_DEPRECATIONS_HELPER: disabled
+
+                    - php-version: '7.4'
+                      lint: true
+                      coverage: true
+                      dependency-versions: 'highest'
+                      tools: 'composer:v2'
+                      env:
+                          SYMFONY_DEPRECATIONS_HELPER: weak
+
+                    - php-version: '8.0'
+                      lint: false
+                      coverage: false
+                      dependency-versions: 'highest'
+                      tools: 'composer:v2'
+                      env:
+                          SYMFONY_DEPRECATIONS_HELPER: weak
 
         services:
             mysql:
@@ -33,20 +61,22 @@ jobs:
             - name: Install and configure PHP
               uses: shivammathur/setup-php@v2
               with:
-                  php-version: '7.4'
+                  php-version: ${{ matrix.php-version }}
                   extensions: ctype, iconv, mysql
                   coverage: pcov
-                  tools: composer
+                  tools: ${{ matrix.tools }}
 
             - name: Install composer dependencies
               uses: ramsey/composer-install@v1
               with:
-                  dependency-versions: 'highest'
+                  dependency-versions: ${{ matrix.dependency-versions }}
+                  composer-options: ${{ matrix.composer-options }}
 
             - name: Bootstrap test environment
               run: composer bootstrap-test-environment
 
             - name: Lint code
+              if: ${{ matrix.lint }}
               run: composer lint
 
             - name: Execute unit test cases
@@ -56,4 +86,5 @@ jobs:
               run: composer test -- Tests/Functional --log-junit var/junit.xml
 
             - name: Check code coverage
+              if: ${{ matrix.coverage }}
               run: php vendor/bin/code-coverage-checker "var/coverage.php" "line" "95" "Content"

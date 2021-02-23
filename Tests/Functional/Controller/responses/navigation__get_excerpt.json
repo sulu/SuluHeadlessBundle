@@ -16,6 +16,7 @@
                 "webspaceKey": "sulu_io",
                 "template": "default",
                 "parent": "@uuid@",
+                "path": "@string@.match(\"/test-1\").optional()",
                 "url": "\/test-1",
                 "urls": {
                     "de": "\/test-1"
@@ -30,7 +31,7 @@
                     "categories": [],
                     "audience_targeting_groups": [],
                     "tags": [],
-                    "segments": [],
+                    "segments": "@array@.isEmpty().optional()",
                     "icon": [],
                     "images": []
                 },
@@ -51,6 +52,7 @@
                 "webspaceKey": "sulu_io",
                 "template": "default",
                 "parent": "@uuid@",
+                "path": "@string@.match(\"/test-2\").optional()",
                 "url": "\/test-2",
                 "urls": {
                     "de": "\/test-2"
@@ -65,7 +67,7 @@
                     "categories": [],
                     "audience_targeting_groups": [],
                     "tags": [],
-                    "segments": [],
+                    "segments": "@array@.isEmpty().optional()",
                     "icon": [
                         {
                             "id": "@integer@",
@@ -105,5 +107,4 @@
         ]
     }
 }
-
 
