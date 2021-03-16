@@ -168,7 +168,7 @@ class BlockResolverTest extends TestCase
 
         $mediaType = $this->prophesize(BlockPropertyType::class);
         $mediaType->getName()->willReturn('media');
-        $mediaType->getSettings()->willReturn(['segments' => [], 'target_groups' => ['customer']]);
+        $mediaType->getSettings()->willReturn(['target_groups' => ['customer']]);
         $mediaType->getChildProperties()->willReturn([$mediaProperty->reveal()]);
 
         $mediaContentView = $this->prophesize(ContentView::class);
