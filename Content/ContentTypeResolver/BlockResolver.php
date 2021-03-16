@@ -70,7 +70,7 @@ class BlockResolver implements ContentTypeResolverInterface
         $content = [];
         $view = [];
         foreach ($blockPropertyTypes as $i => $blockPropertyType) {
-            $content[$i] = ['type' => $blockPropertyType->getName()];
+            $content[$i] = ['type' => $blockPropertyType->getName(), 'settings' => $blockPropertyType->getSettings()];
             $view[$i] = [];
 
             foreach ($blockPropertyType->getChildProperties() as $childProperty) {
