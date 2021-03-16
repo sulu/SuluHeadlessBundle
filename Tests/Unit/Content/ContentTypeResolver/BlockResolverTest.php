@@ -48,6 +48,7 @@ class BlockResolverTest extends TestCase
 
         $titleType = $this->prophesize(BlockPropertyType::class);
         $titleType->getName()->willReturn('title');
+        $titleType->getSettings()->willReturn(['segments' => [], 'target_groups' => ['developer']]);
         $titleType->getChildProperties()->willReturn([$titleProperty->reveal()]);
 
         $titleContentView = $this->prophesize(ContentView::class);
@@ -67,6 +68,7 @@ class BlockResolverTest extends TestCase
 
         $mediaType = $this->prophesize(BlockPropertyType::class);
         $mediaType->getName()->willReturn('media');
+        $mediaType->getSettings()->willReturn(['segments' => [], 'target_groups' => ['customer']]);
         $mediaType->getChildProperties()->willReturn([$mediaProperty->reveal()]);
 
         $mediaContentView = $this->prophesize(ContentView::class);
@@ -83,10 +85,12 @@ class BlockResolverTest extends TestCase
         $data = [
             [
                 'type' => 'title',
+                'settings' => ['segments' => [], 'target_groups' => ['developer']],
                 'title' => 'test-123',
             ],
             [
                 'type' => 'media',
+                'settings' => ['segments' => [], 'target_groups' => ['customer']],
                 'media' => ['ids' => [1, 2, 3]],
             ],
         ];
@@ -108,10 +112,12 @@ class BlockResolverTest extends TestCase
             [
                 [
                     'type' => 'title',
+                    'settings' => ['segments' => [], 'target_groups' => ['developer']],
                     'title' => 'test-123',
                 ],
                 [
                     'type' => 'media',
+                    'settings' => ['segments' => [], 'target_groups' => ['customer']],
                     'media' => ['media1', 'media2', 'media3'],
                 ],
             ],
@@ -142,6 +148,7 @@ class BlockResolverTest extends TestCase
 
         $titleType = $this->prophesize(BlockPropertyType::class);
         $titleType->getName()->willReturn('title');
+        $titleType->getSettings()->willReturn([]);
         $titleType->getChildProperties()->willReturn([$titleProperty->reveal()]);
 
         $titleContentView = $this->prophesize(ContentView::class);
@@ -161,6 +168,7 @@ class BlockResolverTest extends TestCase
 
         $mediaType = $this->prophesize(BlockPropertyType::class);
         $mediaType->getName()->willReturn('media');
+        $mediaType->getSettings()->willReturn(['target_groups' => ['customer']]);
         $mediaType->getChildProperties()->willReturn([$mediaProperty->reveal()]);
 
         $mediaContentView = $this->prophesize(ContentView::class);
@@ -177,10 +185,12 @@ class BlockResolverTest extends TestCase
         $data = [
             [
                 'type' => 'title',
+                'settings' => [],
                 'title' => 'test-123',
             ],
             [
                 'type' => 'media',
+                'settings' => ['target_groups' => ['customer']],
                 'media' => ['ids' => [1, 2, 3]],
             ],
         ];
@@ -209,10 +219,12 @@ class BlockResolverTest extends TestCase
             [
                 [
                     'type' => 'title',
+                    'settings' => [],
                     'title' => 'test-123',
                 ],
                 [
                     'type' => 'media',
+                    'settings' => ['target_groups' => ['customer']],
                     'media' => ['media1', 'media2', 'media3'],
                 ],
             ],
@@ -243,6 +255,7 @@ class BlockResolverTest extends TestCase
 
         $titleType = $this->prophesize(BlockPropertyType::class);
         $titleType->getName()->willReturn('title');
+        $titleType->getSettings()->willReturn(['hidden' => true]);
         $titleType->getChildProperties()->willReturn([$titleProperty->reveal()]);
 
         $titleContentView = $this->prophesize(ContentView::class);
@@ -262,6 +275,7 @@ class BlockResolverTest extends TestCase
 
         $mediaType = $this->prophesize(BlockPropertyType::class);
         $mediaType->getName()->willReturn('media');
+        $mediaType->getSettings()->willReturn(['hidden' => true]);
         $mediaType->getChildProperties()->willReturn([$mediaProperty->reveal()]);
 
         $mediaContentView = $this->prophesize(ContentView::class);
@@ -278,10 +292,12 @@ class BlockResolverTest extends TestCase
         $data = [
             [
                 'type' => 'title',
+                'settings' => ['hidden' => true],
                 'title' => 'test-123',
             ],
             [
                 'type' => 'media',
+                'settings' => ['hidden' => true],
                 'media' => ['ids' => [1, 2, 3]],
             ],
         ];

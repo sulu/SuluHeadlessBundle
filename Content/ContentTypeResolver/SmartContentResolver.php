@@ -21,7 +21,6 @@ use Sulu\Component\Category\Request\CategoryRequestHandlerInterface;
 use Sulu\Component\Content\Compat\PropertyInterface;
 use Sulu\Component\Content\Compat\PropertyParameter;
 use Sulu\Component\SmartContent\DataProviderAliasInterface;
-use Sulu\Component\SmartContent\Exception\PageOutOfBoundsException;
 use Sulu\Component\Tag\Request\TagRequestHandlerInterface;
 use Sulu\Exception\FeatureNotImplementedException;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -150,10 +149,6 @@ class SmartContentResolver implements ContentTypeResolverInterface
                 $page,
                 (int) $pageSize
             );
-
-            if ($page > 1 && 0 === \count($result->getItems())) {
-                throw new PageOutOfBoundsException($page);
-            }
         } else {
             $result = $providerResolver->resolve(
                 $filters,
@@ -225,8 +220,13 @@ class SmartContentResolver implements ContentTypeResolverInterface
         }
 
         $page = $this->requestStack->getCurrentRequest()->get($pageParameter, 1);
-        if ($page < 1 || $page > \PHP_INT_MAX) {
-            throw new PageOutOfBoundsException($page);
+
+        if ($page <= 1) {
+            $page = 1;
+        }
+
+        if ($page > \PHP_INT_MAX) {
+            return \PHP_INT_MAX;
         }
 
         return (int) $page;
