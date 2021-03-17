@@ -22,6 +22,8 @@ use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolver;
 use Sulu\Bundle\PageBundle\Document\HomeDocument;
 use Sulu\Bundle\PageBundle\Document\PageDocument;
+use Sulu\Bundle\WebsiteBundle\ReferenceStore\ReferenceStoreInterface;
+use Sulu\Bundle\WebsiteBundle\ReferenceStore\ReferenceStorePoolInterface;
 use Sulu\Component\Content\Compat\PropertyInterface;
 use Sulu\Component\Content\Compat\Structure\StructureBridge;
 use Sulu\Component\Content\Compat\StructureManagerInterface;
@@ -75,6 +77,16 @@ class StructureResolverTest extends TestCase
     private $documentInspector;
 
     /**
+     * @var ReferenceStorePoolInterface|ObjectProphecy
+     */
+    private $referenceStorePool;
+
+    /**
+     * @var ReferenceStoreInterface|ObjectProphecy
+     */
+    private $referenceStore;
+
+    /**
      * @var StructureResolver
      */
     private $structureResolver;
@@ -102,10 +114,14 @@ class StructureResolverTest extends TestCase
         $this->documentInspector->getMetadata($this->pageDocument->reveal())
             ->willReturn($this->pageMetadata->reveal());
 
+        $this->referenceStorePool = $this->prophesize(ReferenceStorePoolInterface::class);
+        $this->referenceStore = $this->prophesize(ReferenceStoreInterface::class);
+
         $this->structureResolver = new StructureResolver(
             $this->contentResolver->reveal(),
             $this->structureManager->reveal(),
-            $this->documentInspector->reveal()
+            $this->documentInspector->reveal(),
+            $this->referenceStorePool->reveal()
         );
     }
 
@@ -195,6 +211,16 @@ class StructureResolverTest extends TestCase
             ['webspaceKey' => 'sulu_io']
         )->willReturn($contentView2->reveal());
 
+        $this->referenceStorePool->getStore('content')
+            ->willReturn($this->referenceStore->reveal())
+            ->shouldBeCalled();
+
+        $this->referenceStore->add('123-123-123')
+            ->shouldBeCalled();
+
+        // call test function
+        $result = $this->structureResolver->resolve($this->structure->reveal(), 'en');
+
         $this->assertSame(
             [
                 'id' => '123-123-123',
@@ -224,7 +250,7 @@ class StructureResolverTest extends TestCase
                     ],
                 ],
             ],
-            $this->structureResolver->resolve($this->structure->reveal(), 'en')
+            $result
         );
     }
 
@@ -280,6 +306,16 @@ class StructureResolverTest extends TestCase
             ['webspaceKey' => 'sulu_io']
         )->willReturn($contentView2->reveal());
 
+        $this->referenceStorePool->getStore('content')
+            ->willReturn($this->referenceStore->reveal())
+            ->shouldBeCalled();
+
+        $this->referenceStore->add('123-123-123')
+            ->shouldBeCalled();
+
+        // call test function
+        $result = $this->structureResolver->resolve($this->structure->reveal(), 'en');
+
         $this->assertSame(
             [
                 'id' => '123-123-123',
@@ -305,7 +341,7 @@ class StructureResolverTest extends TestCase
                     ],
                 ],
             ],
-            $this->structureResolver->resolve($this->structure->reveal(), 'en')
+            $result
         );
     }
 
@@ -355,6 +391,14 @@ class StructureResolverTest extends TestCase
         $this->contentResolver->resolve('test-123', $titleProperty->reveal(), 'en', ['webspaceKey' => 'sulu_io'])
             ->willReturn($contentView1->reveal());
 
+        $this->referenceStorePool->getStore('content')
+            ->willReturn($this->referenceStore->reveal())
+            ->shouldBeCalled();
+
+        $this->referenceStore->add('123-123-123')
+            ->shouldBeCalled();
+
+        // call test function
         $result = $this->structureResolver->resolveProperties(
             $this->structure->reveal(),
             ['myTitle' => 'title', 'seoDescription' => 'seo.description', 'excerptTitle' => 'excerpt.title'],
@@ -433,6 +477,14 @@ class StructureResolverTest extends TestCase
         $this->contentResolver->resolve('test-123', $titleProperty->reveal(), 'en', ['webspaceKey' => 'sulu_io'])
             ->willReturn($contentView1->reveal());
 
+        $this->referenceStorePool->getStore('content')
+            ->willReturn($this->referenceStore->reveal())
+            ->shouldBeCalled();
+
+        $this->referenceStore->add('123-123-123')
+            ->shouldBeCalled();
+
+        // call test function
         $result = $this->structureResolver->resolveProperties(
             $this->structure->reveal(),
             ['myTitle' => 'title'],

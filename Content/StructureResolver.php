@@ -15,6 +15,8 @@ namespace Sulu\Bundle\HeadlessBundle\Content;
 
 use Sulu\Bundle\DocumentManagerBundle\Bridge\DocumentInspector;
 use Sulu\Bundle\PageBundle\Document\BasePageDocument;
+use Sulu\Bundle\WebsiteBundle\ReferenceStore\ReferenceStoreNotExistsException;
+use Sulu\Bundle\WebsiteBundle\ReferenceStore\ReferenceStorePoolInterface;
 use Sulu\Component\Content\Compat\Structure\StructureBridge;
 use Sulu\Component\Content\Compat\StructureInterface;
 use Sulu\Component\Content\Compat\StructureManagerInterface;
@@ -38,14 +40,21 @@ class StructureResolver implements StructureResolverInterface
      */
     private $documentInspector;
 
+    /**
+     * @var ReferenceStorePoolInterface
+     */
+    private $referenceStorePool;
+
     public function __construct(
         ContentResolverInterface $contentResolver,
         StructureManagerInterface $structureManager,
-        DocumentInspector $documentInspector
+        DocumentInspector $documentInspector,
+        ReferenceStorePoolInterface $referenceStorePool
     ) {
         $this->contentResolver = $contentResolver;
         $this->structureManager = $structureManager;
         $this->documentInspector = $documentInspector;
+        $this->referenceStorePool = $referenceStorePool;
     }
 
     /**
@@ -57,6 +66,9 @@ class StructureResolver implements StructureResolverInterface
         bool $includeExtension = true
     ): array {
         $data = $this->getStructureData($structure);
+
+        /** @var BasePageDocument $document */
+        $document = $structure->getDocument();
 
         if ($includeExtension) {
             $data['extension'] = $this->resolveExtensionData(
@@ -202,6 +214,8 @@ class StructureResolver implements StructureResolverInterface
             }
         }
 
+        $this->addToReferenceStore($structure->getUuid(), $type);
+
         return [
             'id' => $structure->getUuid(),
             'type' => $type,
@@ -288,5 +302,22 @@ class StructureResolver implements StructureResolverInterface
             $locale,
             $attributes
         );
+    }
+
+    private function addToReferenceStore(string $uuid, string $alias): void
+    {
+        if ('page' === $alias) {
+            $alias = 'content'; // the reference store for page sadly is called still content
+        }
+
+        try {
+            $referenceStore = $this->referenceStorePool->getStore($alias);
+        } catch (ReferenceStoreNotExistsException $e) {
+            // @ignoreException do nothing when reference store was not found
+
+            return;
+        }
+
+        $referenceStore->add($uuid);
     }
 }
