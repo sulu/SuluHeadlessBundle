@@ -35,6 +35,7 @@
             <argument type="service" id="sulu_core.array_serializer"/>
             <argument type="service" id="sulu_media.image.converter"/>
             <argument type="service" id="sulu_media.format_cache"/>
+            <argument type="service" id="sulu_media.reference_store.media"/>
         </service>
         <service id="Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializerInterface" alias="sulu_headless.serializer.media"/>
 

@@ -50,9 +50,15 @@ class MediaSelectionResolver implements ContentTypeResolverInterface
             return new ContentView([], ['ids' => []]);
         }
 
-        $medias = $this->mediaManager->getByIds($data['ids'] ?? [], $locale);
+        $ids = $data['ids'] ?? [];
 
-        return new ContentView($this->resolveApiMedias($medias, $locale), array_merge(['ids' => []], $data));
+        $content = [];
+        if (\count($ids)) {
+            $medias = $this->mediaManager->getByIds($ids, $locale);
+            $content = $this->resolveApiMedias($medias, $locale);
+        }
+
+        return new ContentView($content, array_merge(['ids' => []], $data));
     }
 
     /**

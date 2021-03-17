@@ -24,6 +24,7 @@ use Sulu\Bundle\MediaBundle\Entity\MediaInterface;
 use Sulu\Bundle\MediaBundle\Media\FormatCache\FormatCacheInterface;
 use Sulu\Bundle\MediaBundle\Media\ImageConverter\ImageConverterInterface;
 use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
+use Sulu\Bundle\WebsiteBundle\ReferenceStore\ReferenceStoreInterface;
 use Sulu\Component\Serializer\ArraySerializerInterface;
 
 class MediaSerializerTest extends TestCase
@@ -49,6 +50,11 @@ class MediaSerializerTest extends TestCase
     private $formatCache;
 
     /**
+     * @var ReferenceStoreInterface|ObjectProphecy
+     */
+    private $referenceStore;
+
+    /**
      * @var MediaSerializerInterface
      */
     private $mediaSerializer;
@@ -59,32 +65,38 @@ class MediaSerializerTest extends TestCase
         $this->arraySerializer = $this->prophesize(ArraySerializerInterface::class);
         $this->imageConverter = $this->prophesize(ImageConverterInterface::class);
         $this->formatCache = $this->prophesize(FormatCacheInterface::class);
+        $this->referenceStore = $this->prophesize(ReferenceStoreInterface::class);
 
         $this->mediaSerializer = new MediaSerializer(
             $this->mediaManager->reveal(),
             $this->arraySerializer->reveal(),
             $this->imageConverter->reveal(),
-            $this->formatCache->reveal()
+            $this->formatCache->reveal(),
+            $this->referenceStore->reveal()
         );
     }
 
     public function testSerialize(): void
     {
         $locale = 'en';
-
         $media = $this->prophesize(MediaInterface::class);
 
+        // expected and unexpected object calls
         $apiMedia = $this->prophesize(Media::class);
-        $apiMedia->getId()->willReturn(1);
-        $apiMedia->getName()->willReturn('media-1.png');
-        $apiMedia->getMimeType()->willReturn('image/png');
-        $apiMedia->getVersion()->willReturn(1);
-        $apiMedia->getSubVersion()->willReturn(0);
+        $apiMedia->getId()->willReturn(1)->shouldBeCalled();
+        $apiMedia->getName()->willReturn('media-1.png')->shouldBeCalled();
+        $apiMedia->getMimeType()->willReturn('image/png')->shouldBeCalled();
+        $apiMedia->getVersion()->willReturn(1)->shouldBeCalled();
+        $apiMedia->getSubVersion()->willReturn(0)->shouldBeCalled();
 
         $apiMediaArgument = Argument::that(function (Media $apiMedia) use ($media, $locale) {
             return $apiMedia->getEntity() === $media->reveal() && $locale === $apiMedia->getLocale();
         });
-        $this->mediaManager->addFormatsAndUrl($apiMediaArgument)->willReturn($apiMedia->reveal());
+
+        // expected and unexpected service calls
+        $this->mediaManager->addFormatsAndUrl($apiMediaArgument)
+            ->willReturn($apiMedia->reveal())
+            ->shouldBeCalled();
 
         $this->arraySerializer->serialize($apiMedia->reveal(), null)->willReturn([
             'id' => 1,
@@ -94,13 +106,20 @@ class MediaSerializerTest extends TestCase
             'versions' => [],
             'downloadCounter' => [],
             '_hash' => [],
-        ]);
+        ])->shouldBeCalled();
 
-        $this->imageConverter->getSupportedOutputImageFormats('image/png')->willReturn(['jpg']);
+        $this->imageConverter->getSupportedOutputImageFormats('image/png')
+            ->willReturn(['jpg'])
+            ->shouldBeCalled();
 
         $this->formatCache->getMediaUrl(1, 'media-1.jpg', '{format}', 1, 0)
-            ->willReturn('/media/1/{format}/media-1.jpg?v=1-0');
+            ->willReturn('/media/1/{format}/media-1.jpg?v=1-0')
+            ->shouldBeCalled();
 
+        $this->referenceStore->add(1)
+            ->shouldBeCalled();
+
+        // call test function
         $result = $this->mediaSerializer->serialize($media->reveal(), $locale);
 
         $this->assertSame([
@@ -112,20 +131,24 @@ class MediaSerializerTest extends TestCase
     public function testSerializeWithContext(): void
     {
         $locale = 'en';
-
         $media = $this->prophesize(MediaInterface::class);
 
+        // expected and unexpected object calls
         $apiMedia = $this->prophesize(Media::class);
-        $apiMedia->getId()->willReturn(1);
-        $apiMedia->getName()->willReturn('media-1.png');
-        $apiMedia->getMimeType()->willReturn('image/png');
-        $apiMedia->getVersion()->willReturn(1);
-        $apiMedia->getSubVersion()->willReturn(0);
+        $apiMedia->getId()->willReturn(1)->shouldBeCalled();
+        $apiMedia->getName()->willReturn('media-1.png')->shouldBeCalled();
+        $apiMedia->getMimeType()->willReturn('image/png')->shouldBeCalled();
+        $apiMedia->getVersion()->willReturn(1)->shouldBeCalled();
+        $apiMedia->getSubVersion()->willReturn(0)->shouldBeCalled();
 
         $apiMediaArgument = Argument::that(function (Media $apiMedia) use ($media, $locale) {
             return $apiMedia->getEntity() === $media->reveal() && $locale === $apiMedia->getLocale();
         });
-        $this->mediaManager->addFormatsAndUrl($apiMediaArgument)->willReturn($apiMedia->reveal());
+
+        // expected and unexpected service calls
+        $this->mediaManager->addFormatsAndUrl($apiMediaArgument)
+            ->willReturn($apiMedia->reveal())
+            ->shouldBeCalled();
 
         $context = $this->prophesize(SerializationContext::class);
 
@@ -137,13 +160,20 @@ class MediaSerializerTest extends TestCase
             'versions' => [],
             'downloadCounter' => [],
             '_hash' => [],
-        ]);
+        ])->shouldBeCalled();
 
-        $this->imageConverter->getSupportedOutputImageFormats('image/png')->willReturn([]);
+        $this->imageConverter->getSupportedOutputImageFormats('image/png')
+            ->willReturn([])
+            ->shouldBeCalled();
 
         $this->formatCache->getMediaUrl(1, 'media-1.png', '{format}', 1, 0)
-            ->willReturn('/media/1/{format}/media-1.png?v=1-0');
+            ->willReturn('/media/1/{format}/media-1.png?v=1-0')
+            ->shouldBeCalled();
 
+        $this->referenceStore->add(1)
+            ->shouldBeCalled();
+
+        // call test function
         $result = $this->mediaSerializer->serialize($media->reveal(), $locale, $context->reveal());
 
         $this->assertSame([
