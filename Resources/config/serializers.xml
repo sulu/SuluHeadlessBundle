@@ -11,6 +11,7 @@
             <argument type="service" id="sulu_core.array_serializer"/>
             <argument type="service" id="sulu_headless.serializer.media"/>
             <argument type="service" id="sulu_media.media_manager"/>
+            <argument type="service" id="sulu_contact.reference_store.account"/>
         </service>
         <service id="Sulu\Bundle\HeadlessBundle\Content\Serializer\AccountSerializerInterface" alias="sulu_headless.serializer.account"/>
 
