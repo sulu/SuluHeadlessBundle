@@ -15,7 +15,6 @@ namespace Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver;
 
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
-use Sulu\Bundle\WebsiteBundle\ReferenceStore\ReferenceStoreInterface;
 use Sulu\Component\Content\Compat\PropertyInterface;
 use Sulu\Component\Content\Compat\PropertyParameter;
 use Sulu\Component\Content\Mapper\ContentMapperInterface;
@@ -48,22 +47,15 @@ class PageSelectionResolver implements ContentTypeResolverInterface
      */
     private $showDrafts;
 
-    /**
-     * @var ReferenceStoreInterface
-     */
-    private $referenceStore;
-
     public function __construct(
         StructureResolverInterface $structureResolver,
         ContentQueryBuilderInterface $contentQueryBuilder,
         ContentMapperInterface $contentMapper,
-        ReferenceStoreInterface $referenceStore,
         bool $showDrafts
     ) {
         $this->structureResolver = $structureResolver;
         $this->contentQueryBuilder = $contentQueryBuilder;
         $this->contentMapper = $contentMapper;
-        $this->referenceStore = $referenceStore;
         $this->showDrafts = $showDrafts;
     }
 
@@ -106,8 +98,6 @@ class PageSelectionResolver implements ContentTypeResolverInterface
         $pages = [];
         foreach ($pageStructures as $pageStructure) {
             $pages[] = $this->structureResolver->resolveProperties($pageStructure, $propertyMap, $locale);
-
-            $this->referenceStore->add($pageStructure->getUuid());
         }
 
         return new ContentView($pages, ['ids' => $data ?: []]);

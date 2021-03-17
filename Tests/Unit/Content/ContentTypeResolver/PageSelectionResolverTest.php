@@ -19,7 +19,6 @@ use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\PageSelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
-use Sulu\Bundle\WebsiteBundle\ReferenceStore\ReferenceStoreInterface;
 use Sulu\Component\Content\Compat\PropertyInterface;
 use Sulu\Component\Content\Compat\PropertyParameter;
 use Sulu\Component\Content\Compat\StructureInterface;
@@ -44,11 +43,6 @@ class PageSelectionResolverTest extends TestCase
     private $contentMapper;
 
     /**
-     * @var ReferenceStoreInterface|ObjectProphecy
-     */
-    private $referenceStore;
-
-    /**
      * @var PageSelectionResolver
      */
     private $pageSelectionResolver;
@@ -58,13 +52,11 @@ class PageSelectionResolverTest extends TestCase
         $this->structureResolver = $this->prophesize(StructureResolverInterface::class);
         $this->contentQueryBuilder = $this->prophesize(ContentQueryBuilderInterface::class);
         $this->contentMapper = $this->prophesize(ContentMapperInterface::class);
-        $this->referenceStore = $this->prophesize(ReferenceStoreInterface::class);
 
         $this->pageSelectionResolver = new PageSelectionResolver(
             $this->structureResolver->reveal(),
             $this->contentQueryBuilder->reveal(),
             $this->contentMapper->reveal(),
-            $this->referenceStore->reveal(),
             true
         );
     }
@@ -101,13 +93,7 @@ class PageSelectionResolverTest extends TestCase
         $this->contentQueryBuilder->build('webspace-key', ['en'])->willReturn(['page-query-string']);
 
         $pageStructure1 = $this->prophesize(StructureInterface::class);
-        $pageStructure1->getUuid()
-            ->willReturn('page-id-1')
-            ->shouldBeCalled();
         $pageStructure2 = $this->prophesize(StructureInterface::class);
-        $pageStructure2->getUuid()
-            ->willReturn('page-id-2')
-            ->shouldBeCalled();
         $this->contentMapper->loadBySql2(
             'page-query-string',
             'en',
@@ -174,12 +160,6 @@ class PageSelectionResolverTest extends TestCase
             ],
         ])->shouldBeCalledOnce();
 
-        $this->referenceStore->add('page-id-1')
-            ->shouldBeCalled();
-
-        $this->referenceStore->add('page-id-2')
-            ->shouldBeCalled();
-
         // call test function
         $result = $this->pageSelectionResolver->resolve(
             ['page-id-1', 'page-id-2'],
@@ -242,9 +222,6 @@ class PageSelectionResolverTest extends TestCase
         $property = $this->prophesize(PropertyInterface::class);
 
         // expected and unexpected service calls
-        $this->referenceStore->add(Argument::cetera())
-            ->shouldNotBeCalled();
-
         $this->contentQueryBuilder->init(Argument::cetera())
             ->shouldNotBeCalled();
 
@@ -265,9 +242,6 @@ class PageSelectionResolverTest extends TestCase
         $property = $this->prophesize(PropertyInterface::class);
 
         // expected and unexpected service calls
-        $this->referenceStore->add(Argument::any())
-            ->shouldNotBeCalled();
-
         $this->contentQueryBuilder->init(Argument::any())
             ->shouldNotBeCalled();
 

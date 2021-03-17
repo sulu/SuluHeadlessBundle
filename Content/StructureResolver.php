@@ -67,6 +67,9 @@ class StructureResolver implements StructureResolverInterface
     ): array {
         $data = $this->getStructureData($structure);
 
+        /** @var BasePageDocument $document */
+        $document = $structure->getDocument();
+
         if ($includeExtension) {
             $data['extension'] = $this->resolveExtensionData(
                 $this->getExtensionData($structure),
