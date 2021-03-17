@@ -22,6 +22,7 @@ use Sulu\Bundle\ContactBundle\Entity\ContactTitleRepository;
 use Sulu\Bundle\ContactBundle\Entity\Position;
 use Sulu\Bundle\ContactBundle\Entity\PositionRepository;
 use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
+use Sulu\Bundle\WebsiteBundle\ReferenceStore\ReferenceStoreInterface;
 use Sulu\Component\Serializer\ArraySerializerInterface;
 
 class ContactSerializer implements ContactSerializerInterface
@@ -56,13 +57,19 @@ class ContactSerializer implements ContactSerializerInterface
      */
     private $positionRepository;
 
+    /**
+     * @var ReferenceStoreInterface
+     */
+    private $referenceStore;
+
     public function __construct(
         ContactManager $contactManager,
         ArraySerializerInterface $arraySerializer,
         MediaManagerInterface $mediaManager,
         MediaSerializerInterface $mediaSerializer,
         ContactTitleRepository $contactTitleRepository,
-        PositionRepository $positionRepository
+        PositionRepository $positionRepository,
+        ReferenceStoreInterface $referenceStore
     ) {
         $this->contactManager = $contactManager;
         $this->arraySerializer = $arraySerializer;
@@ -70,6 +77,7 @@ class ContactSerializer implements ContactSerializerInterface
         $this->mediaSerializer = $mediaSerializer;
         $this->contactTitleRepository = $contactTitleRepository;
         $this->positionRepository = $positionRepository;
+        $this->referenceStore = $referenceStore;
     }
 
     /**
@@ -110,6 +118,8 @@ class ContactSerializer implements ContactSerializerInterface
             $avatar = $this->mediaManager->getById($avatarData['id'], $locale);
             $contactData['avatar'] = $this->mediaSerializer->serialize($avatar->getEntity(), $locale);
         }
+
+        $this->referenceStore->add($contact->getId());
 
         return $contactData;
     }

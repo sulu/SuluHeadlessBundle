@@ -25,6 +25,7 @@
             <argument type="service" id="sulu_headless.serializer.media"/>
             <argument type="service" id="sulu_contact.contact_title_repository"/>
             <argument type="service" id="sulu_contact.position_repository"/>
+            <argument type="service" id="sulu_contact.reference_store.contact"/>
         </service>
         <service id="Sulu\Bundle\HeadlessBundle\Content\Serializer\ContactSerializerInterface" alias="sulu_headless.serializer.contact"/>
 

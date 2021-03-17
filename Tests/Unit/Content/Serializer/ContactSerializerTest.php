@@ -30,6 +30,7 @@ use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializerInterface;
 use Sulu\Bundle\MediaBundle\Api\Media;
 use Sulu\Bundle\MediaBundle\Entity\MediaInterface;
 use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
+use Sulu\Bundle\WebsiteBundle\ReferenceStore\ReferenceStoreInterface;
 use Sulu\Component\Serializer\ArraySerializerInterface;
 
 class ContactSerializerTest extends TestCase
@@ -65,6 +66,11 @@ class ContactSerializerTest extends TestCase
     private $positionRepository;
 
     /**
+     * @var ReferenceStoreInterface|ObjectProphecy
+     */
+    private $referenceStore;
+
+    /**
      * @var ContactSerializerInterface
      */
     private $contactSerializer;
@@ -77,6 +83,7 @@ class ContactSerializerTest extends TestCase
         $this->mediaSerializer = $this->prophesize(MediaSerializerInterface::class);
         $this->contactTitleRepository = $this->prophesize(ContactTitleRepository::class);
         $this->positionRepository = $this->prophesize(PositionRepository::class);
+        $this->referenceStore = $this->prophesize(ReferenceStoreInterface::class);
 
         $this->contactSerializer = new ContactSerializer(
             $this->contactManager->reveal(),
@@ -84,52 +91,77 @@ class ContactSerializerTest extends TestCase
             $this->mediaManager->reveal(),
             $this->mediaSerializer->reveal(),
             $this->contactTitleRepository->reveal(),
-            $this->positionRepository->reveal()
+            $this->positionRepository->reveal(),
+            $this->referenceStore->reveal()
         );
     }
 
     public function testSerialize(): void
     {
         $locale = 'en';
-
-        $apiContact = $this->prophesize(Contact::class);
-        $apiContact->getNote()->willReturn('test-note');
-        $apiContact->getAvatar()->willReturn([
-            'id' => 2,
-            'url' => '/media/2/download/sulu.png?v=1',
-        ]);
-
         $contact = $this->prophesize(ContactInterface::class);
-        $this->contactManager->getContact($contact->reveal(), $locale)->willReturn($apiContact->reveal());
 
-        $media = $this->prophesize(MediaInterface::class);
-        $apiMedia = $this->prophesize(Media::class);
-        $apiMedia->getEntity()->willReturn($media->reveal());
-
-        $this->arraySerializer->serialize($apiContact, null)->willReturn([
-            'id' => 1,
-            'firstName' => 'John',
-            'lastName' => 'Doe',
-            'fullName' => 'John Doe',
-            'title' => 1,
-            'position' => 1,
-        ]);
-
-        $this->mediaSerializer->serialize($media->reveal(), $locale)->willReturn([
-            'id' => 2,
-            'formatUri' => '/media/2/{format}/media-2.jpg?v=1-0',
-        ]);
-
-        $this->mediaManager->getById(Argument::any(), $locale)->shouldBeCalled()->willReturn($apiMedia->reveal());
+        // expected and unexpected object calls
+        $contact->getId()
+            ->willReturn(1)
+            ->shouldBeCalled();
 
         $contactTitle = $this->prophesize(ContactTitle::class);
         $contactTitle->getTitle()->willReturn('fancyTitle');
-        $this->contactTitleRepository->find(Argument::any())->willReturn($contactTitle->reveal());
 
         $contactPosition = $this->prophesize(Position::class);
         $contactPosition->getPosition()->willReturn('CEO');
-        $this->positionRepository->find(Argument::any())->wilLReturn($contactPosition->reveal());
 
+        $apiContact = $this->prophesize(Contact::class);
+        $apiContact->getNote()->willReturn('test-note')->shouldBeCalled();
+        $apiContact->getAvatar()->willReturn([
+            'id' => 2,
+            'url' => '/media/2/download/sulu.png?v=1',
+        ])->shouldBeCalled();
+
+        $media = $this->prophesize(MediaInterface::class);
+        $apiMedia = $this->prophesize(Media::class);
+        $apiMedia->getEntity()->willReturn($media->reveal())->shouldBeCalled();
+
+        // expected and unexpected service calls
+        $this->contactManager->getContact($contact->reveal(), $locale)
+            ->willReturn($apiContact->reveal())
+            ->shouldBeCalled();
+
+        $this->arraySerializer->serialize($apiContact, null)
+            ->willReturn([
+                'id' => 1,
+                'firstName' => 'John',
+                'lastName' => 'Doe',
+                'fullName' => 'John Doe',
+                'title' => 1,
+                'position' => 1,
+            ])
+            ->shouldBeCalled();
+
+        $this->mediaSerializer->serialize($media->reveal(), $locale)
+            ->willReturn([
+                'id' => 2,
+                'formatUri' => '/media/2/{format}/media-2.jpg?v=1-0',
+            ])
+            ->shouldBeCalled();
+
+        $this->mediaManager->getById(Argument::any(), $locale)
+            ->willReturn($apiMedia->reveal())
+            ->shouldBeCalled();
+
+        $this->contactTitleRepository->find(Argument::any())
+            ->willReturn($contactTitle->reveal())
+            ->shouldBeCalled();
+
+        $this->positionRepository->find(Argument::any())
+            ->willReturn($contactPosition->reveal())
+            ->shouldBeCalled();
+
+        $this->referenceStore->add(1)
+            ->shouldBeCalled();
+
+        // call test function
         $result = $this->contactSerializer->serialize($contact->reveal(), $locale, null);
 
         $this->assertSame([
@@ -150,6 +182,13 @@ class ContactSerializerTest extends TestCase
     public function testSerializeWithContext(): void
     {
         $locale = 'en';
+        $contact = $this->prophesize(ContactInterface::class);
+        $context = $this->prophesize(SerializationContext::class);
+
+        // expected and unexpected object calls
+        $contact->getId()
+            ->willReturn(1)
+            ->shouldBeCalled();
 
         $apiContact = $this->prophesize(Contact::class);
         $apiContact->getNote()->willReturn(null);
@@ -158,14 +197,18 @@ class ContactSerializerTest extends TestCase
             'url' => '/media/2/download/sulu.png?v=1',
         ]);
 
-        $contact = $this->prophesize(ContactInterface::class);
-        $this->contactManager->getContact($contact->reveal(), $locale)->willReturn($apiContact->reveal());
-
         $media = $this->prophesize(MediaInterface::class);
         $apiMedia = $this->prophesize(Media::class);
         $apiMedia->getEntity()->willReturn($media->reveal());
 
-        $context = $this->prophesize(SerializationContext::class);
+        $contactTitle = $this->prophesize(ContactTitle::class);
+        $contactTitle->getTitle()->willReturn('fancyTitle');
+
+        $contactPosition = $this->prophesize(Position::class);
+        $contactPosition->getPosition()->willReturn('CEO');
+
+        // expected and unexpected service calls
+        $this->contactManager->getContact($contact->reveal(), $locale)->willReturn($apiContact->reveal());
 
         $this->arraySerializer->serialize($apiContact, $context)->willReturn([
             'id' => 1,
@@ -183,14 +226,14 @@ class ContactSerializerTest extends TestCase
 
         $this->mediaManager->getById(Argument::any(), $locale)->shouldBeCalled()->willReturn($apiMedia->reveal());
 
-        $contactTitle = $this->prophesize(ContactTitle::class);
-        $contactTitle->getTitle()->willReturn('fancyTitle');
         $this->contactTitleRepository->find(Argument::any())->willReturn($contactTitle->reveal());
 
-        $contactPosition = $this->prophesize(Position::class);
-        $contactPosition->getPosition()->willReturn('CEO');
         $this->positionRepository->find(Argument::any())->wilLReturn($contactPosition->reveal());
 
+        $this->referenceStore->add(1)
+            ->shouldBeCalled();
+
+        // call test function
         $result = $this->contactSerializer->serialize($contact->reveal(), $locale, $context->reveal());
 
         $this->assertSame([
@@ -210,15 +253,20 @@ class ContactSerializerTest extends TestCase
     public function testSerializeWithoutAvatarAndTitleAndPosition(): void
     {
         $locale = 'en';
+        $contact = $this->prophesize(ContactInterface::class);
+        $context = $this->prophesize(SerializationContext::class);
+
+        // expected and unexpected object calls
+        $contact->getId()
+            ->willReturn(1)
+            ->shouldBeCalled();
 
         $apiContact = $this->prophesize(Contact::class);
         $apiContact->getNote()->willReturn(null);
         $apiContact->getAvatar()->willReturn(null);
 
-        $contact = $this->prophesize(ContactInterface::class);
+        // expected and unexpected service calls
         $this->contactManager->getContact($contact->reveal(), $locale)->willReturn($apiContact->reveal());
-
-        $context = $this->prophesize(SerializationContext::class);
 
         $this->arraySerializer->serialize($apiContact, $context)->willReturn([
             'id' => 1,
@@ -227,6 +275,10 @@ class ContactSerializerTest extends TestCase
             'fullName' => 'John Doe',
         ]);
 
+        $this->referenceStore->add(1)
+            ->shouldBeCalled();
+
+        // call test function
         $result = $this->contactSerializer->serialize($contact->reveal(), $locale, $context->reveal());
 
         $this->assertSame([
