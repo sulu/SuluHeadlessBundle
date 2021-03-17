@@ -14,9 +14,11 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\DataProviderResolver;
 
 use PHPUnit\Framework\TestCase;
+use Prophecy\Argument;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver\PageDataProviderResolver;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
+use Sulu\Bundle\WebsiteBundle\ReferenceStore\ReferenceStoreInterface;
 use Sulu\Component\Content\Compat\PropertyParameter;
 use Sulu\Component\Content\Compat\StructureInterface;
 use Sulu\Component\Content\Mapper\ContentMapperInterface;
@@ -49,6 +51,11 @@ class PageDataProviderResolverTest extends TestCase
     private $contentMapper;
 
     /**
+     * @var ReferenceStoreInterface|ObjectProphecy
+     */
+    private $referenceStore;
+
+    /**
      * @var PageDataProviderResolver
      */
     private $pageDataProviderResolver;
@@ -59,12 +66,14 @@ class PageDataProviderResolverTest extends TestCase
         $this->structureResolver = $this->prophesize(StructureResolverInterface::class);
         $this->contentQueryBuilder = $this->prophesize(ContentQueryBuilderInterface::class);
         $this->contentMapper = $this->prophesize(ContentMapperInterface::class);
+        $this->referenceStore = $this->prophesize(ReferenceStoreInterface::class);
 
         $this->pageDataProviderResolver = new PageDataProviderResolver(
             $this->pageDataProvider->reveal(),
             $this->structureResolver->reveal(),
             $this->contentQueryBuilder->reveal(),
             $this->contentMapper->reveal(),
+            $this->referenceStore->reveal(),
             true
         );
     }
@@ -127,7 +136,13 @@ class PageDataProviderResolverTest extends TestCase
         $this->contentQueryBuilder->build('webspace-key', ['en'])->willReturn(['page-query-string']);
 
         $pageStructure1 = $this->prophesize(StructureInterface::class);
+        $pageStructure1->getUuid()
+            ->willReturn('page-id-1')
+            ->shouldBeCalled();
         $pageStructure2 = $this->prophesize(StructureInterface::class);
+        $pageStructure2->getUuid()
+            ->willReturn('page-id-2')
+            ->shouldBeCalled();
         $this->contentMapper->loadBySql2(
             'page-query-string',
             'en',
@@ -188,6 +203,12 @@ class PageDataProviderResolverTest extends TestCase
                 'excerptTitle' => [],
             ],
         ])->shouldBeCalledOnce();
+
+        $this->referenceStore->add('page-id-1')
+            ->shouldBeCalled();
+
+        $this->referenceStore->add('page-id-2')
+            ->shouldBeCalled();
 
         // call test function
         $result = $this->pageDataProviderResolver->resolve(
@@ -262,6 +283,9 @@ class PageDataProviderResolverTest extends TestCase
             5
         )->willReturn($providerResult->reveal())
             ->shouldBeCalledOnce();
+
+        $this->referenceStore->add(Argument::any())
+            ->shouldNotBeCalled();
 
         // call test function
         $result = $this->pageDataProviderResolver->resolve(
