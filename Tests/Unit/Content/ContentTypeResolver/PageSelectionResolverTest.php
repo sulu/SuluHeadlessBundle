@@ -14,10 +14,12 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
 
 use PHPUnit\Framework\TestCase;
+use Prophecy\Argument;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\PageSelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
+use Sulu\Bundle\WebsiteBundle\ReferenceStore\ReferenceStoreInterface;
 use Sulu\Component\Content\Compat\PropertyInterface;
 use Sulu\Component\Content\Compat\PropertyParameter;
 use Sulu\Component\Content\Compat\StructureInterface;
@@ -42,6 +44,11 @@ class PageSelectionResolverTest extends TestCase
     private $contentMapper;
 
     /**
+     * @var ReferenceStoreInterface|ObjectProphecy
+     */
+    private $referenceStore;
+
+    /**
      * @var PageSelectionResolver
      */
     private $pageSelectionResolver;
@@ -51,11 +58,13 @@ class PageSelectionResolverTest extends TestCase
         $this->structureResolver = $this->prophesize(StructureResolverInterface::class);
         $this->contentQueryBuilder = $this->prophesize(ContentQueryBuilderInterface::class);
         $this->contentMapper = $this->prophesize(ContentMapperInterface::class);
+        $this->referenceStore = $this->prophesize(ReferenceStoreInterface::class);
 
         $this->pageSelectionResolver = new PageSelectionResolver(
             $this->structureResolver->reveal(),
             $this->contentQueryBuilder->reveal(),
             $this->contentMapper->reveal(),
+            $this->referenceStore->reveal(),
             true
         );
     }
@@ -83,6 +92,7 @@ class PageSelectionResolverTest extends TestCase
         $property->getParams()->willReturn($params);
         $property->getStructure()->willReturn($structure->reveal());
 
+        // expected and unexpected service calls
         $this->contentQueryBuilder->init([
             'ids' => ['page-id-1', 'page-id-2'],
             'properties' => $params['properties']->getValue(),
@@ -91,7 +101,13 @@ class PageSelectionResolverTest extends TestCase
         $this->contentQueryBuilder->build('webspace-key', ['en'])->willReturn(['page-query-string']);
 
         $pageStructure1 = $this->prophesize(StructureInterface::class);
+        $pageStructure1->getUuid()
+            ->willReturn('page-id-1')
+            ->shouldBeCalled();
         $pageStructure2 = $this->prophesize(StructureInterface::class);
+        $pageStructure2->getUuid()
+            ->willReturn('page-id-2')
+            ->shouldBeCalled();
         $this->contentMapper->loadBySql2(
             'page-query-string',
             'en',
@@ -158,6 +174,13 @@ class PageSelectionResolverTest extends TestCase
             ],
         ])->shouldBeCalledOnce();
 
+        $this->referenceStore->add('page-id-1')
+            ->shouldBeCalled();
+
+        $this->referenceStore->add('page-id-2')
+            ->shouldBeCalled();
+
+        // call test function
         $result = $this->pageSelectionResolver->resolve(
             ['page-id-1', 'page-id-2'],
             $property->reveal(),
@@ -206,6 +229,7 @@ class PageSelectionResolverTest extends TestCase
             ],
             $result->getContent()
         );
+
         $this->assertSame(
             ['ids' => ['page-id-1', 'page-id-2']],
             $result->getView()
@@ -217,6 +241,17 @@ class PageSelectionResolverTest extends TestCase
         $locale = 'en';
         $property = $this->prophesize(PropertyInterface::class);
 
+        // expected and unexpected service calls
+        $this->referenceStore->add(Argument::cetera())
+            ->shouldNotBeCalled();
+
+        $this->contentQueryBuilder->init(Argument::cetera())
+            ->shouldNotBeCalled();
+
+        $this->structureResolver->resolve(Argument::cetera())
+            ->shouldNotBeCalled();
+
+        // call test function
         $result = $this->pageSelectionResolver->resolve(null, $property->reveal(), $locale);
 
         $this->assertSame([], $result->getContent());
@@ -229,6 +264,17 @@ class PageSelectionResolverTest extends TestCase
         $locale = 'en';
         $property = $this->prophesize(PropertyInterface::class);
 
+        // expected and unexpected service calls
+        $this->referenceStore->add(Argument::any())
+            ->shouldNotBeCalled();
+
+        $this->contentQueryBuilder->init(Argument::any())
+            ->shouldNotBeCalled();
+
+        $this->structureResolver->resolve(Argument::any())
+            ->shouldNotBeCalled();
+
+        // call test function
         $result = $this->pageSelectionResolver->resolve([], $property->reveal(), $locale);
 
         $this->assertSame([], $result->getContent());

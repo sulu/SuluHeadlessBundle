@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver;
 
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
+use Sulu\Bundle\WebsiteBundle\ReferenceStore\ReferenceStoreInterface;
 use Sulu\Component\Content\Compat\PropertyParameter;
 use Sulu\Component\Content\Compat\StructureInterface;
 use Sulu\Component\Content\Mapper\ContentMapperInterface;
@@ -49,6 +50,11 @@ class PageDataProviderResolver implements DataProviderResolverInterface
     private $contentMapper;
 
     /**
+     * @var ReferenceStoreInterface
+     */
+    private $referenceStore;
+
+    /**
      * @var bool
      */
     private $showDrafts;
@@ -58,12 +64,14 @@ class PageDataProviderResolver implements DataProviderResolverInterface
         StructureResolverInterface $structureResolver,
         ContentQueryBuilderInterface $contentQueryBuilder,
         ContentMapperInterface $contentMapper,
+        ReferenceStoreInterface $referenceStore,
         bool $showDrafts
     ) {
         $this->pageDataProvider = $pageDataProvider;
         $this->structureResolver = $structureResolver;
         $this->contentQueryBuilder = $contentQueryBuilder;
         $this->contentMapper = $contentMapper;
+        $this->referenceStore = $referenceStore;
         $this->showDrafts = $showDrafts;
     }
 
@@ -132,6 +140,8 @@ class PageDataProviderResolver implements DataProviderResolverInterface
         $resolvedPages = [];
         foreach ($pageStructures as $pageStructure) {
             $resolvedPages[] = $this->structureResolver->resolveProperties($pageStructure, $propertyMap, $options['locale']);
+
+            $this->referenceStore->add($pageStructure->getUuid());
         }
 
         return new DataProviderResult($resolvedPages, $providerResult->getHasNextPage());

@@ -14,9 +14,11 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\DataProviderResolver;
 
 use PHPUnit\Framework\TestCase;
+use Prophecy\Argument;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver\PageDataProviderResolver;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
+use Sulu\Bundle\WebsiteBundle\ReferenceStore\ReferenceStoreInterface;
 use Sulu\Component\Content\Compat\PropertyParameter;
 use Sulu\Component\Content\Compat\StructureInterface;
 use Sulu\Component\Content\Mapper\ContentMapperInterface;
@@ -49,9 +51,14 @@ class PageDataProviderResolverTest extends TestCase
     private $contentMapper;
 
     /**
+     * @var ReferenceStoreInterface|ObjectProphecy
+     */
+    private $referenceStore;
+
+    /**
      * @var PageDataProviderResolver
      */
-    private $pageResolver;
+    private $pageDataProviderResolver;
 
     protected function setUp(): void
     {
@@ -59,19 +66,21 @@ class PageDataProviderResolverTest extends TestCase
         $this->structureResolver = $this->prophesize(StructureResolverInterface::class);
         $this->contentQueryBuilder = $this->prophesize(ContentQueryBuilderInterface::class);
         $this->contentMapper = $this->prophesize(ContentMapperInterface::class);
+        $this->referenceStore = $this->prophesize(ReferenceStoreInterface::class);
 
-        $this->pageResolver = new PageDataProviderResolver(
+        $this->pageDataProviderResolver = new PageDataProviderResolver(
             $this->pageDataProvider->reveal(),
             $this->structureResolver->reveal(),
             $this->contentQueryBuilder->reveal(),
             $this->contentMapper->reveal(),
+            $this->referenceStore->reveal(),
             true
         );
     }
 
     public function testGetDataProvider(): void
     {
-        self::assertSame('pages', $this->pageResolver::getDataProvider());
+        self::assertSame('pages', $this->pageDataProviderResolver::getDataProvider());
     }
 
     public function testGetProviderConfiguration(): void
@@ -79,7 +88,7 @@ class PageDataProviderResolverTest extends TestCase
         $configuration = $this->prophesize(ProviderConfigurationInterface::class);
         $this->pageDataProvider->getConfiguration()->willReturn($configuration->reveal());
 
-        $this->assertSame($configuration->reveal(), $this->pageResolver->getProviderConfiguration());
+        $this->assertSame($configuration->reveal(), $this->pageDataProviderResolver->getProviderConfiguration());
     }
 
     public function testGetProviderDefaultParams(): void
@@ -87,7 +96,7 @@ class PageDataProviderResolverTest extends TestCase
         $propertyParameter = $this->prophesize(PropertyParameter::class);
         $this->pageDataProvider->getDefaultPropertyParameter()->willReturn(['test' => $propertyParameter->reveal()]);
 
-        $this->assertSame(['test' => $propertyParameter->reveal()], $this->pageResolver->getProviderDefaultParams());
+        $this->assertSame(['test' => $propertyParameter->reveal()], $this->pageDataProviderResolver->getProviderDefaultParams());
     }
 
     public function testResolve(): void
@@ -109,6 +118,7 @@ class PageDataProviderResolverTest extends TestCase
             ]),
         ];
 
+        // expected and unexpected service calls
         $this->pageDataProvider->resolveResourceItems(
             ['filter-key' => 'filter-value'],
             $propertyParameters,
@@ -126,7 +136,13 @@ class PageDataProviderResolverTest extends TestCase
         $this->contentQueryBuilder->build('webspace-key', ['en'])->willReturn(['page-query-string']);
 
         $pageStructure1 = $this->prophesize(StructureInterface::class);
+        $pageStructure1->getUuid()
+            ->willReturn('page-id-1')
+            ->shouldBeCalled();
         $pageStructure2 = $this->prophesize(StructureInterface::class);
+        $pageStructure2->getUuid()
+            ->willReturn('page-id-2')
+            ->shouldBeCalled();
         $this->contentMapper->loadBySql2(
             'page-query-string',
             'en',
@@ -188,7 +204,14 @@ class PageDataProviderResolverTest extends TestCase
             ],
         ])->shouldBeCalledOnce();
 
-        $result = $this->pageResolver->resolve(
+        $this->referenceStore->add('page-id-1')
+            ->shouldBeCalled();
+
+        $this->referenceStore->add('page-id-2')
+            ->shouldBeCalled();
+
+        // call test function
+        $result = $this->pageDataProviderResolver->resolve(
             ['filter-key' => 'filter-value'],
             $propertyParameters,
             ['webspaceKey' => 'webspace-key', 'locale' => 'en'],
@@ -250,6 +273,7 @@ class PageDataProviderResolverTest extends TestCase
             ]),
         ];
 
+        // expected and unexpected service calls
         $this->pageDataProvider->resolveResourceItems(
             ['filter-key' => 'filter-value'],
             $propertyParameters,
@@ -257,9 +281,14 @@ class PageDataProviderResolverTest extends TestCase
             10,
             1,
             5
-        )->willReturn($providerResult->reveal())->shouldBeCalledOnce();
+        )->willReturn($providerResult->reveal())
+            ->shouldBeCalledOnce();
 
-        $result = $this->pageResolver->resolve(
+        $this->referenceStore->add(Argument::any())
+            ->shouldNotBeCalled();
+
+        // call test function
+        $result = $this->pageDataProviderResolver->resolve(
             ['filter-key' => 'filter-value'],
             $propertyParameters,
             ['webspaceKey' => 'webspace-key', 'locale' => 'en'],
