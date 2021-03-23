@@ -67,9 +67,6 @@ class StructureResolver implements StructureResolverInterface
     ): array {
         $data = $this->getStructureData($structure);
 
-        /** @var BasePageDocument $document */
-        $document = $structure->getDocument();
-
         if ($includeExtension) {
             $data['extension'] = $this->resolveExtensionData(
                 $this->getExtensionData($structure),
@@ -307,7 +304,8 @@ class StructureResolver implements StructureResolverInterface
     private function addToReferenceStore(string $uuid, string $alias): void
     {
         if ('page' === $alias) {
-            $alias = 'content'; // the reference store for page sadly is called still content
+            // unfortunately the reference store for pages was not adjusted and still uses the content as alias
+            $alias = 'content';
         }
 
         try {
