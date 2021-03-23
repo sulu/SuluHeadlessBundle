@@ -197,16 +197,6 @@ class StructureResolverTest extends TestCase
         // call test function
         $result = $this->structureResolver->resolve($structure->reveal(), 'en');
 
-        $this->referenceStorePool->getStore('content')
-            ->willReturn($this->referenceStore->reveal())
-            ->shouldBeCalled();
-
-        $this->referenceStore->add('123-123-123')
-            ->shouldBeCalled();
-
-        // call test function
-        $result = $this->structureResolver->resolve($this->structure->reveal(), 'en');
-
         $this->assertSame(
             [
                 'id' => '123-123-123',
@@ -315,16 +305,6 @@ class StructureResolverTest extends TestCase
 
         // call test function
         $result = $this->structureResolver->resolve($structure->reveal(), 'en');
-
-        $this->referenceStorePool->getStore('content')
-            ->willReturn($this->referenceStore->reveal())
-            ->shouldBeCalled();
-
-        $this->referenceStore->add('123-123-123')
-            ->shouldBeCalled();
-
-        // call test function
-        $result = $this->structureResolver->resolve($this->structure->reveal(), 'en');
 
         $this->assertSame(
             [
