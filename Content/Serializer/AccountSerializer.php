@@ -19,6 +19,7 @@ use Sulu\Bundle\ContactBundle\Contact\AccountManager;
 use Sulu\Bundle\ContactBundle\Entity\Account as EntityAccount;
 use Sulu\Bundle\ContactBundle\Entity\AccountInterface;
 use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
+use Sulu\Bundle\WebsiteBundle\ReferenceStore\ReferenceStoreInterface;
 use Sulu\Component\Serializer\ArraySerializerInterface;
 
 class AccountSerializer implements AccountSerializerInterface
@@ -43,16 +44,23 @@ class AccountSerializer implements AccountSerializerInterface
      */
     private $mediaManager;
 
+    /**
+     * @var ReferenceStoreInterface
+     */
+    private $referenceStore;
+
     public function __construct(
         AccountManager $accountManager,
         ArraySerializerInterface $arraySerializer,
         MediaSerializerInterface $mediaSerializer,
-        MediaManagerInterface $mediaManager
+        MediaManagerInterface $mediaManager,
+        ReferenceStoreInterface $referenceStore
     ) {
         $this->accountManager = $accountManager;
         $this->arraySerializer = $arraySerializer;
         $this->mediaSerializer = $mediaSerializer;
         $this->mediaManager = $mediaManager;
+        $this->referenceStore = $referenceStore;
     }
 
     /**
@@ -79,6 +87,8 @@ class AccountSerializer implements AccountSerializerInterface
             $logo = $this->mediaManager->getById($logoData['id'], $locale);
             $accountData['logo'] = $this->mediaSerializer->serialize($logo->getEntity(), $locale);
         }
+
+        $this->referenceStore->add($account->getId());
 
         return $accountData;
     }

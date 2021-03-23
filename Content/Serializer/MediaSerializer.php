@@ -19,6 +19,7 @@ use Sulu\Bundle\MediaBundle\Entity\MediaInterface;
 use Sulu\Bundle\MediaBundle\Media\FormatCache\FormatCacheInterface;
 use Sulu\Bundle\MediaBundle\Media\ImageConverter\ImageConverterInterface;
 use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
+use Sulu\Bundle\WebsiteBundle\ReferenceStore\ReferenceStoreInterface;
 use Sulu\Component\Serializer\ArraySerializerInterface;
 
 class MediaSerializer implements MediaSerializerInterface
@@ -43,16 +44,23 @@ class MediaSerializer implements MediaSerializerInterface
      */
     private $formatCache;
 
+    /**
+     * @var ReferenceStoreInterface
+     */
+    private $referenceStore;
+
     public function __construct(
         MediaManagerInterface $mediaManager,
         ArraySerializerInterface $arraySerializer,
         ImageConverterInterface $imageConverter,
-        FormatCacheInterface $formatCache
+        FormatCacheInterface $formatCache,
+        ReferenceStoreInterface $referenceStore
     ) {
         $this->mediaManager = $mediaManager;
         $this->arraySerializer = $arraySerializer;
         $this->imageConverter = $imageConverter;
         $this->formatCache = $formatCache;
+        $this->referenceStore = $referenceStore;
     }
 
     /**
@@ -88,6 +96,8 @@ class MediaSerializer implements MediaSerializerInterface
             $apiMedia->getVersion(),
             $apiMedia->getSubVersion()
         );
+
+        $this->referenceStore->add($apiMedia->getId());
 
         return $mediaData;
     }

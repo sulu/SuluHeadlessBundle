@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
 
 use PHPUnit\Framework\TestCase;
+use Prophecy\Argument;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\MediaSelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
@@ -59,29 +60,37 @@ class MediaSelectionResolverTest extends TestCase
     public function testResolve(): void
     {
         $locale = 'en';
+        $data = ['ids' => [1, 2]];
+        $property = $this->prophesize(PropertyInterface::class);
 
+        // expected and unexpected service calls
         $media1 = $this->prophesize(MediaInterface::class);
         $apiMedia1 = $this->prophesize(Media::class);
-        $apiMedia1->getEntity()->willReturn($media1->reveal());
+        $apiMedia1->getEntity()
+            ->willReturn($media1->reveal())
+            ->shouldBeCalled();
 
         $media2 = $this->prophesize(MediaInterface::class);
         $apiMedia2 = $this->prophesize(Media::class);
-        $apiMedia2->getEntity()->willReturn($media2->reveal());
+        $apiMedia2->getEntity()
+            ->willReturn($media2->reveal())
+            ->shouldBeCalled();
 
-        $this->mediaManager->getByIds([1, 2], 'en')->willReturn([$apiMedia1->reveal(), $apiMedia2->reveal()]);
+        $this->mediaManager->getByIds([1, 2], 'en')
+            ->willReturn([$apiMedia1->reveal(), $apiMedia2->reveal()])
+            ->shouldBeCalled();
 
         $this->mediaSerializer->serialize($media1->reveal(), $locale)->willReturn([
             'id' => 1,
             'formatUri' => '/media/1/{format}/media-1.jpg?v=1-0',
-        ]);
+        ])->shouldBeCalled();
         $this->mediaSerializer->serialize($media2->reveal(), $locale)->willReturn([
             'id' => 2,
             'formatUri' => '/media/2/{format}/media-2.jpg?v=1-0',
-        ]);
+        ])->shouldBeCalled();
 
-        $property = $this->prophesize(PropertyInterface::class);
-
-        $result = $this->mediaResolver->resolve(['ids' => [1, 2]], $property->reveal(), $locale);
+        // call test function
+        $result = $this->mediaResolver->resolve($data, $property->reveal(), $locale);
 
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame(
@@ -107,10 +116,18 @@ class MediaSelectionResolverTest extends TestCase
 
     public function testResolveDataIsNull(): void
     {
+        $data = null;
         $locale = 'en';
         $property = $this->prophesize(PropertyInterface::class);
 
-        $result = $this->mediaResolver->resolve(null, $property->reveal(), $locale);
+        // expected and unexpected service calls
+        $this->mediaManager->getByIds(Argument::cetera())
+            ->shouldNotBeCalled();
+        $this->mediaSerializer->serialize(Argument::cetera())
+            ->shouldNotBeCalled();
+
+        // call test function
+        $result = $this->mediaResolver->resolve($data, $property->reveal(), $locale);
 
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame([], $result->getContent());
@@ -119,10 +136,18 @@ class MediaSelectionResolverTest extends TestCase
 
     public function testResolveDataIsEmptyArray(): void
     {
+        $data = [];
         $locale = 'en';
         $property = $this->prophesize(PropertyInterface::class);
 
-        $result = $this->mediaResolver->resolve([], $property->reveal(), $locale);
+        // expected and unexpected service calls
+        $this->mediaManager->getByIds(Argument::cetera())
+            ->shouldNotBeCalled();
+        $this->mediaSerializer->serialize(Argument::cetera())
+            ->shouldNotBeCalled();
+
+        // call test function
+        $result = $this->mediaResolver->resolve($data, $property->reveal(), $locale);
 
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame([], $result->getContent());
@@ -131,12 +156,17 @@ class MediaSelectionResolverTest extends TestCase
 
     public function testResolveDataWithoutIds(): void
     {
+        $dataWithoutIdsKey = ['unrelatedKey' => 'unrelatedValue'];
         $locale = 'en';
         $property = $this->prophesize(PropertyInterface::class);
 
-        $this->mediaManager->getByIds([], 'en')->willReturn([]);
+        // expected and unexpected service calls
+        $this->mediaManager->getByIds(Argument::cetera())
+            ->shouldNotBeCalled();
+        $this->mediaSerializer->serialize(Argument::cetera())
+            ->shouldNotBeCalled();
 
-        $dataWithoutIdsKey = ['unrelatedKey' => 'unrelatedValue'];
+        // call test function
         $result = $this->mediaResolver->resolve($dataWithoutIdsKey, $property->reveal(), $locale);
 
         $this->assertInstanceOf(ContentView::class, $result);
