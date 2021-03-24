@@ -304,7 +304,7 @@ class StructureResolver implements StructureResolverInterface
     private function addToReferenceStore(string $uuid, string $alias): void
     {
         if ('page' === $alias) {
-            // unfortunately the reference store for pages was not adjusted and still uses the content as alias
+            // unfortunately the reference store for pages was not adjusted and still uses content as alias
             $alias = 'content';
         }
 
