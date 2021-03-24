@@ -51,7 +51,7 @@ class PageDataProviderResolverTest extends TestCase
     /**
      * @var PageDataProviderResolver
      */
-    private $pageResolver;
+    private $pageDataProviderResolver;
 
     protected function setUp(): void
     {
@@ -60,7 +60,7 @@ class PageDataProviderResolverTest extends TestCase
         $this->contentQueryBuilder = $this->prophesize(ContentQueryBuilderInterface::class);
         $this->contentMapper = $this->prophesize(ContentMapperInterface::class);
 
-        $this->pageResolver = new PageDataProviderResolver(
+        $this->pageDataProviderResolver = new PageDataProviderResolver(
             $this->pageDataProvider->reveal(),
             $this->structureResolver->reveal(),
             $this->contentQueryBuilder->reveal(),
@@ -71,7 +71,7 @@ class PageDataProviderResolverTest extends TestCase
 
     public function testGetDataProvider(): void
     {
-        self::assertSame('pages', $this->pageResolver::getDataProvider());
+        self::assertSame('pages', $this->pageDataProviderResolver::getDataProvider());
     }
 
     public function testGetProviderConfiguration(): void
@@ -79,7 +79,7 @@ class PageDataProviderResolverTest extends TestCase
         $configuration = $this->prophesize(ProviderConfigurationInterface::class);
         $this->pageDataProvider->getConfiguration()->willReturn($configuration->reveal());
 
-        $this->assertSame($configuration->reveal(), $this->pageResolver->getProviderConfiguration());
+        $this->assertSame($configuration->reveal(), $this->pageDataProviderResolver->getProviderConfiguration());
     }
 
     public function testGetProviderDefaultParams(): void
@@ -87,7 +87,7 @@ class PageDataProviderResolverTest extends TestCase
         $propertyParameter = $this->prophesize(PropertyParameter::class);
         $this->pageDataProvider->getDefaultPropertyParameter()->willReturn(['test' => $propertyParameter->reveal()]);
 
-        $this->assertSame(['test' => $propertyParameter->reveal()], $this->pageResolver->getProviderDefaultParams());
+        $this->assertSame(['test' => $propertyParameter->reveal()], $this->pageDataProviderResolver->getProviderDefaultParams());
     }
 
     public function testResolve(): void
@@ -109,6 +109,7 @@ class PageDataProviderResolverTest extends TestCase
             ]),
         ];
 
+        // expected and unexpected service calls
         $this->pageDataProvider->resolveResourceItems(
             ['filter-key' => 'filter-value'],
             $propertyParameters,
@@ -188,7 +189,8 @@ class PageDataProviderResolverTest extends TestCase
             ],
         ])->shouldBeCalledOnce();
 
-        $result = $this->pageResolver->resolve(
+        // call test function
+        $result = $this->pageDataProviderResolver->resolve(
             ['filter-key' => 'filter-value'],
             $propertyParameters,
             ['webspaceKey' => 'webspace-key', 'locale' => 'en'],
@@ -250,6 +252,7 @@ class PageDataProviderResolverTest extends TestCase
             ]),
         ];
 
+        // expected and unexpected service calls
         $this->pageDataProvider->resolveResourceItems(
             ['filter-key' => 'filter-value'],
             $propertyParameters,
@@ -257,9 +260,11 @@ class PageDataProviderResolverTest extends TestCase
             10,
             1,
             5
-        )->willReturn($providerResult->reveal())->shouldBeCalledOnce();
+        )->willReturn($providerResult->reveal())
+            ->shouldBeCalledOnce();
 
-        $result = $this->pageResolver->resolve(
+        // call test function
+        $result = $this->pageDataProviderResolver->resolve(
             ['filter-key' => 'filter-value'],
             $propertyParameters,
             ['webspaceKey' => 'webspace-key', 'locale' => 'en'],

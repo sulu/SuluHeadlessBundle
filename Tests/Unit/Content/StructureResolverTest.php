@@ -22,6 +22,9 @@ use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolver;
 use Sulu\Bundle\PageBundle\Document\HomeDocument;
 use Sulu\Bundle\PageBundle\Document\PageDocument;
+use Sulu\Bundle\SnippetBundle\Document\SnippetDocument;
+use Sulu\Bundle\WebsiteBundle\ReferenceStore\ReferenceStoreInterface;
+use Sulu\Bundle\WebsiteBundle\ReferenceStore\ReferenceStorePoolInterface;
 use Sulu\Component\Content\Compat\PropertyInterface;
 use Sulu\Component\Content\Compat\Structure\StructureBridge;
 use Sulu\Component\Content\Compat\StructureManagerInterface;
@@ -32,32 +35,7 @@ class StructureResolverTest extends TestCase
     /**
      * @var StructureBridge|ObjectProphecy
      */
-    private $structure;
-
-    /**
-     * @var StructureBridge|ObjectProphecy
-     */
     private $excerpt;
-
-    /**
-     * @var PageDocument|ObjectProphecy
-     */
-    private $pageDocument;
-
-    /**
-     * @var HomeDocument|ObjectProphecy
-     */
-    private $homepageDocument;
-
-    /**
-     * @var Metadata|ObjectProphecy
-     */
-    private $homepageMetadata;
-
-    /**
-     * @var Metadata|ObjectProphecy
-     */
-    private $pageMetadata;
 
     /**
      * @var ContentResolverInterface|ObjectProphecy
@@ -75,16 +53,17 @@ class StructureResolverTest extends TestCase
     private $documentInspector;
 
     /**
+     * @var ReferenceStorePoolInterface|ObjectProphecy
+     */
+    private $referenceStorePool;
+
+    /**
      * @var StructureResolver
      */
     private $structureResolver;
 
     protected function setUp(): void
     {
-        $this->structure = $this->prophesize(StructureBridge::class);
-        $this->pageDocument = $this->prophesize(PageDocument::class);
-        $this->homepageDocument = $this->prophesize(HomeDocument::class);
-
         $this->contentResolver = $this->prophesize(ContentResolverInterface::class);
         $this->structureManager = $this->prophesize(StructureManagerInterface::class);
         $this->documentInspector = $this->prophesize(DocumentInspector::class);
@@ -92,20 +71,13 @@ class StructureResolverTest extends TestCase
         $this->excerpt = $this->prophesizeExcerpt();
         $this->structureManager->getStructure('excerpt')->willReturn($this->excerpt->reveal());
 
-        $this->homepageMetadata = $this->prophesize(Metadata::class);
-        $this->homepageMetadata->getAlias()->willReturn('home');
-        $this->documentInspector->getMetadata($this->homepageDocument->reveal())
-            ->willReturn($this->homepageMetadata->reveal());
-
-        $this->pageMetadata = $this->prophesize(Metadata::class);
-        $this->pageMetadata->getAlias()->willReturn('page');
-        $this->documentInspector->getMetadata($this->pageDocument->reveal())
-            ->willReturn($this->pageMetadata->reveal());
+        $this->referenceStorePool = $this->prophesize(ReferenceStorePoolInterface::class);
 
         $this->structureResolver = new StructureResolver(
             $this->contentResolver->reveal(),
             $this->structureManager->reveal(),
-            $this->documentInspector->reveal()
+            $this->documentInspector->reveal(),
+            $this->referenceStorePool->reveal()
         );
     }
 
@@ -123,7 +95,7 @@ class StructureResolverTest extends TestCase
         $excerpt->getProperties(true)->willReturn([$titleProperty->reveal()]);
         $excerpt->getProperty('title')->willReturn($titleProperty->reveal());
 
-        $this->contentResolver->resolve(Argument::cetera())->will(
+        $this->contentResolver->resolve(Argument::any(), $titleProperty->reveal(), Argument::cetera())->will(
             function ($arguments) {
                 return new ContentView($arguments[0]);
             }
@@ -134,34 +106,46 @@ class StructureResolverTest extends TestCase
 
     public function testResolvePage(): void
     {
-        $this->structure->getDocument()->willReturn($this->pageDocument->reveal());
+        $structure = $this->prophesize(StructureBridge::class);
+        $pageDocument = $this->prophesize(PageDocument::class);
+        $pageMetadata = $this->prophesize(Metadata::class);
+
+        // expected object calls
+        $structure->getUuid()->willReturn('123-123-123')->shouldBeCalled();
+        $structure->getWebspaceKey()->willReturn('sulu_io')->shouldBeCalled();
 
         $now = new \DateTimeImmutable();
 
-        $this->structure->getUuid()->willReturn('123-123-123');
-        $this->structure->getWebspaceKey()->willReturn('sulu_io');
-        $this->structure->getLanguageCode()->willReturn('en');
+        $pageDocument->getStructureType()->willReturn('default')->shouldBeCalled();
+        $pageDocument->getAuthored()->willReturn($now)->shouldBeCalled();
+        $pageDocument->getAuthor()->willReturn(1)->shouldBeCalled();
+        $pageDocument->getCreated()->willReturn($now)->shouldBeCalled();
+        $pageDocument->getCreator()->willReturn(2)->shouldBeCalled();
+        $pageDocument->getChanged()->willReturn($now)->shouldBeCalled();
+        $pageDocument->getChanger()->willReturn(3)->shouldBeCalled();
+        $pageDocument->getExtensionsData()
+            ->willReturn([
+                'seo' => [
+                    'title' => 'seo-title',
+                    'noIndex' => false,
+                ],
+                'excerpt' => [
+                    'title' => 'excerpt-title',
+                    'categories' => [1, 2, 3],
+                    'tags' => [1, 2, 3],
+                    'icon' => [1, 2, 3],
+                    'images' => [1, 2, 3],
+                ],
+            ])
+            ->shouldBeCalled();
 
-        $this->pageDocument->getStructureType()->willReturn('default');
-        $this->pageDocument->getAuthored()->willReturn($now);
-        $this->pageDocument->getAuthor()->willReturn(1);
-        $this->pageDocument->getCreated()->willReturn($now);
-        $this->pageDocument->getCreator()->willReturn(2);
-        $this->pageDocument->getChanged()->willReturn($now);
-        $this->pageDocument->getChanger()->willReturn(3);
-        $this->pageDocument->getExtensionsData()->willReturn([
-            'seo' => [
-                'title' => 'seo-title',
-                'noIndex' => false,
-            ],
-            'excerpt' => [
-                'title' => 'excerpt-title',
-                'categories' => [1, 2, 3],
-                'tags' => [1, 2, 3],
-                'icon' => [1, 2, 3],
-                'images' => [1, 2, 3],
-            ],
-        ]);
+        $pageMetadata->getAlias()
+            ->willReturn('page')
+            ->shouldBeCalled();
+
+        $structure->getDocument()
+            ->willReturn($pageDocument->reveal())
+            ->shouldBeCalled();
 
         $titleProperty = $this->prophesize(PropertyInterface::class);
         $titleProperty->getName()->willReturn('title');
@@ -170,30 +154,48 @@ class StructureResolverTest extends TestCase
         $mediaProperty->getName()->willReturn('media');
         $mediaProperty->getValue()->willReturn(['ids' => [1, 2, 3]]);
 
-        $this->structure->getProperties(true)->willReturn(
+        $structure->getProperties(true)->willReturn(
             [
                 $titleProperty->reveal(),
                 $mediaProperty->reveal(),
             ]
         );
 
-        $contentView1 = $this->prophesize(ContentView::class);
-        $contentView1->getContent()->willReturn('test-123');
-        $contentView1->getView()->willReturn([]);
+        $titleContentView = $this->prophesize(ContentView::class);
+        $titleContentView->getContent()->willReturn('test-123');
+        $titleContentView->getView()->willReturn([]);
+
+        $mediaContentView = $this->prophesize(ContentView::class);
+        $mediaContentView->getContent()->willReturn(['media1', 'media2', 'media3']);
+        $mediaContentView->getView()->willReturn(['ids' => [1, 2, 3]]);
+
+        // expected service calls
+        $this->documentInspector->getMetadata($pageDocument->reveal())
+            ->willReturn($pageMetadata->reveal())
+            ->shouldBeCalled();
 
         $this->contentResolver->resolve('test-123', $titleProperty->reveal(), 'en', ['webspaceKey' => 'sulu_io'])
-            ->willReturn($contentView1->reveal());
-
-        $contentView2 = $this->prophesize(ContentView::class);
-        $contentView2->getContent()->willReturn(['media1', 'media2', 'media3']);
-        $contentView2->getView()->willReturn(['ids' => [1, 2, 3]]);
+            ->willReturn($titleContentView->reveal())
+            ->shouldBeCalled();
 
         $this->contentResolver->resolve(
             ['ids' => [1, 2, 3]],
             $mediaProperty->reveal(),
             'en',
             ['webspaceKey' => 'sulu_io']
-        )->willReturn($contentView2->reveal());
+        )->willReturn($mediaContentView->reveal())
+            ->shouldBeCalled();
+
+        $referenceStore = $this->prophesize(ReferenceStoreInterface::class);
+        $referenceStore->add('123-123-123')
+            ->shouldBeCalled();
+
+        $this->referenceStorePool->getStore('content')
+            ->willReturn($referenceStore->reveal())
+            ->shouldBeCalled();
+
+        // call test function
+        $result = $this->structureResolver->resolve($structure->reveal(), 'en');
 
         $this->assertSame(
             [
@@ -224,61 +226,85 @@ class StructureResolverTest extends TestCase
                     ],
                 ],
             ],
-            $this->structureResolver->resolve($this->structure->reveal(), 'en')
+            $result
         );
     }
 
     public function testResolveHomepage(): void
     {
-        $this->structure->getDocument()->willReturn($this->homepageDocument->reveal());
+        $structure = $this->prophesize(StructureBridge::class);
+        $homepageDocument = $this->prophesize(HomeDocument::class);
+        $homepageMetadata = $this->prophesize(Metadata::class);
+
+        // expected object calls
+        $structure->getUuid()->willReturn('123-123-123')->shouldBeCalled();
+        $structure->getWebspaceKey()->willReturn('sulu_io')->shouldBeCalled();
+
+        $structure->getDocument()->willReturn($homepageDocument->reveal())->shouldBeCalled();
 
         $now = new \DateTimeImmutable();
 
-        $this->structure->getUuid()->willReturn('123-123-123');
-        $this->structure->getParent()->shouldNotBeCalled();
-        $this->structure->getWebspaceKey()->willReturn('sulu_io');
-        $this->structure->getLanguageCode()->willReturn('en');
+        $homepageDocument->getStructureType()->willReturn('default')->shouldBeCalled();
+        $homepageDocument->getAuthored()->willReturn($now)->shouldBeCalled();
+        $homepageDocument->getAuthor()->willReturn(1)->shouldBeCalled();
+        $homepageDocument->getCreated()->willReturn($now)->shouldBeCalled();
+        $homepageDocument->getCreator()->willReturn(2)->shouldBeCalled();
+        $homepageDocument->getChanged()->willReturn($now)->shouldBeCalled();
+        $homepageDocument->getChanger()->willReturn(3)->shouldBeCalled();
+        $homepageDocument->getExtensionsData()->willReturn([])->shouldBeCalled();
 
-        $this->homepageDocument->getStructureType()->willReturn('default');
-        $this->homepageDocument->getAuthored()->willReturn($now);
-        $this->homepageDocument->getAuthor()->willReturn(1);
-        $this->homepageDocument->getCreated()->willReturn($now);
-        $this->homepageDocument->getCreator()->willReturn(2);
-        $this->homepageDocument->getChanged()->willReturn($now);
-        $this->homepageDocument->getChanger()->willReturn(3);
-        $this->homepageDocument->getExtensionsData()->willReturn([]);
+        $homepageMetadata->getAlias()->willReturn('home')->shouldBeCalled();
 
         $titleProperty = $this->prophesize(PropertyInterface::class);
-        $titleProperty->getName()->willReturn('title');
-        $titleProperty->getValue()->willReturn('test-123');
-        $mediaProperty = $this->prophesize(PropertyInterface::class);
-        $mediaProperty->getName()->willReturn('media');
-        $mediaProperty->getValue()->willReturn(['ids' => [1, 2, 3]]);
+        $titleProperty->getName()->willReturn('title')->shouldBeCalled();
+        $titleProperty->getValue()->willReturn('test-123')->shouldBeCalled();
 
-        $this->structure->getProperties(true)->willReturn(
+        $mediaProperty = $this->prophesize(PropertyInterface::class);
+        $mediaProperty->getName()->willReturn('media')->shouldBeCalled();
+        $mediaProperty->getValue()->willReturn(['ids' => [1, 2, 3]])->shouldBeCalled();
+
+        $structure->getProperties(true)->willReturn(
             [
                 $titleProperty->reveal(),
                 $mediaProperty->reveal(),
             ]
-        );
+        )->shouldBeCalled();
 
-        $contentView1 = $this->prophesize(ContentView::class);
-        $contentView1->getContent()->willReturn('test-123');
-        $contentView1->getView()->willReturn([]);
+        $titleContentView = $this->prophesize(ContentView::class);
+        $titleContentView->getContent()->willReturn('test-123')->shouldBeCalled();
+        $titleContentView->getView()->willReturn([]);
+
+        $mediaContentView = $this->prophesize(ContentView::class);
+        $mediaContentView->getContent()->willReturn(['media1', 'media2', 'media3']);
+        $mediaContentView->getView()->willReturn(['ids' => [1, 2, 3]]);
+
+        // expected service calls
+        $this->documentInspector->getMetadata($homepageDocument->reveal())
+            ->willReturn($homepageMetadata->reveal())
+            ->shouldBeCalled();
 
         $this->contentResolver->resolve('test-123', $titleProperty->reveal(), 'en', ['webspaceKey' => 'sulu_io'])
-            ->willReturn($contentView1->reveal());
-
-        $contentView2 = $this->prophesize(ContentView::class);
-        $contentView2->getContent()->willReturn(['media1', 'media2', 'media3']);
-        $contentView2->getView()->willReturn(['ids' => [1, 2, 3]]);
+            ->willReturn($titleContentView->reveal())
+            ->shouldBeCalled();
 
         $this->contentResolver->resolve(
             ['ids' => [1, 2, 3]],
             $mediaProperty->reveal(),
             'en',
             ['webspaceKey' => 'sulu_io']
-        )->willReturn($contentView2->reveal());
+        )->willReturn($mediaContentView->reveal())
+            ->shouldBeCalled();
+
+        $referenceStore = $this->prophesize(ReferenceStoreInterface::class);
+        $referenceStore->add('123-123-123')
+            ->shouldBeCalled();
+
+        $this->referenceStorePool->getStore('content')
+            ->willReturn($referenceStore->reveal())
+            ->shouldBeCalled();
+
+        // call test function
+        $result = $this->structureResolver->resolve($structure->reveal(), 'en');
 
         $this->assertSame(
             [
@@ -305,58 +331,187 @@ class StructureResolverTest extends TestCase
                     ],
                 ],
             ],
-            $this->structureResolver->resolve($this->structure->reveal(), 'en')
+            $result
+        );
+    }
+
+    public function testResolveSnippet(): void
+    {
+        $structure = $this->prophesize(StructureBridge::class);
+        $snippetDocument = $this->prophesize(SnippetDocument::class);
+        $snippetMetadata = $this->prophesize(Metadata::class);
+
+        // expected object calls
+        $structure->getUuid()->willReturn('123-123-123')->shouldBeCalled();
+        $structure->getWebspaceKey()->willReturn('sulu_io')->shouldBeCalled();
+
+        $structure->getDocument()->willReturn($snippetDocument->reveal())->shouldBeCalled();
+
+        $now = new \DateTimeImmutable();
+
+        $snippetDocument->getStructureType()->willReturn('default')->shouldBeCalled();
+        $snippetDocument->getCreated()->willReturn($now)->shouldBeCalled();
+        $snippetDocument->getCreator()->willReturn(2)->shouldBeCalled();
+        $snippetDocument->getChanged()->willReturn($now)->shouldBeCalled();
+        $snippetDocument->getChanger()->willReturn(3)->shouldBeCalled();
+        $snippetDocument->getExtensionsData()->willReturn([])->shouldBeCalled();
+
+        $snippetMetadata->getAlias()->willReturn('snippet')->shouldBeCalled();
+
+        $titleProperty = $this->prophesize(PropertyInterface::class);
+        $titleProperty->getName()->willReturn('title')->shouldBeCalled();
+        $titleProperty->getValue()->willReturn('test-123')->shouldBeCalled();
+
+        $mediaProperty = $this->prophesize(PropertyInterface::class);
+        $mediaProperty->getName()->willReturn('media')->shouldBeCalled();
+        $mediaProperty->getValue()->willReturn(['ids' => [1, 2, 3]])->shouldBeCalled();
+
+        $structure->getProperties(true)->willReturn(
+            [
+                $titleProperty->reveal(),
+                $mediaProperty->reveal(),
+            ]
+        )->shouldBeCalled();
+
+        $titleContentView = $this->prophesize(ContentView::class);
+        $titleContentView->getContent()->willReturn('test-123');
+        $titleContentView->getView()->willReturn([]);
+
+        $mediaContentView = $this->prophesize(ContentView::class);
+        $mediaContentView->getContent()->willReturn(['media1', 'media2', 'media3']);
+        $mediaContentView->getView()->willReturn(['ids' => [1, 2, 3]]);
+
+        // expected service calls
+        $this->documentInspector->getMetadata($snippetDocument->reveal())
+            ->willReturn($snippetMetadata->reveal())
+            ->shouldBeCalled();
+
+        $this->contentResolver->resolve('test-123', $titleProperty->reveal(), 'en', ['webspaceKey' => 'sulu_io'])
+            ->willReturn($titleContentView->reveal())
+            ->shouldBeCalled();
+
+        $this->contentResolver->resolve(
+            ['ids' => [1, 2, 3]],
+            $mediaProperty->reveal(),
+            'en',
+            ['webspaceKey' => 'sulu_io']
+        )->willReturn($mediaContentView->reveal())
+            ->shouldBeCalled();
+
+        $referenceStore = $this->prophesize(ReferenceStoreInterface::class);
+        $referenceStore->add('123-123-123')
+            ->shouldBeCalled();
+
+        $this->referenceStorePool->getStore('snippet')
+            ->willReturn($referenceStore->reveal())
+            ->shouldBeCalled();
+
+        // call test function
+        $result = $this->structureResolver->resolve($structure->reveal(), 'en');
+
+        $this->assertSame(
+            [
+                'id' => '123-123-123',
+                'type' => 'snippet',
+                'template' => 'default',
+                'content' => [
+                    'title' => 'test-123',
+                    'media' => ['media1', 'media2', 'media3'],
+                ],
+                'view' => [
+                    'title' => [],
+                    'media' => ['ids' => [1, 2, 3]],
+                ],
+                'author' => null,
+                'authored' => null,
+                'changer' => 3,
+                'changed' => $now->format(\DateTimeImmutable::ISO8601),
+                'creator' => 2,
+                'created' => $now->format(\DateTimeImmutable::ISO8601),
+                'extension' => [
+                    'excerpt' => [
+                        'title' => null,
+                    ],
+                ],
+            ],
+            $result
         );
     }
 
     public function testResolveProperties(): void
     {
-        $this->structure->getDocument()->willReturn($this->pageDocument->reveal());
+        $structure = $this->prophesize(StructureBridge::class);
+        $pageDocument = $this->prophesize(PageDocument::class);
+        $pageMetadata = $this->prophesize(Metadata::class);
+
+        // expected object calls
+        $structure->getUuid()->willReturn('123-123-123')->shouldBeCalled();
+        $structure->getWebspaceKey()->willReturn('sulu_io')->shouldBeCalled();
 
         $now = new \DateTimeImmutable();
 
-        $this->structure->getUuid()->willReturn('123-123-123');
-        $this->structure->getWebspaceKey()->willReturn('sulu_io');
-        $this->structure->getLanguageCode()->willReturn('en');
+        $pageDocument->getStructureType()->willReturn('default')->shouldBeCalled();
+        $pageDocument->getAuthored()->willReturn($now)->shouldBeCalled();
+        $pageDocument->getAuthor()->willReturn(1)->shouldBeCalled();
+        $pageDocument->getCreated()->willReturn($now)->shouldBeCalled();
+        $pageDocument->getCreator()->willReturn(2)->shouldBeCalled();
+        $pageDocument->getChanged()->willReturn($now)->shouldBeCalled();
+        $pageDocument->getChanger()->willReturn(3)->shouldBeCalled();
+        $pageDocument->getExtensionsData()
+            ->willReturn([
+                'seo' => [
+                    'title' => 'seo-title',
+                    'description' => 'seo-description',
+                    'noIndex' => false,
+                ],
+                'excerpt' => [
+                    'title' => 'excerpt-title',
+                    'categories' => [1, 2, 3],
+                    'tags' => [1, 2, 3],
+                    'icon' => [1, 2, 3],
+                    'images' => [1, 2, 3],
+                ],
+            ])
+            ->shouldBeCalled();
 
-        $this->pageDocument->getStructureType()->willReturn('default');
-        $this->pageDocument->getAuthored()->willReturn($now);
-        $this->pageDocument->getAuthor()->willReturn(1);
-        $this->pageDocument->getCreated()->willReturn($now);
-        $this->pageDocument->getCreator()->willReturn(2);
-        $this->pageDocument->getChanged()->willReturn($now);
-        $this->pageDocument->getChanger()->willReturn(3);
-        $this->pageDocument->getExtensionsData()->willReturn([
-            'seo' => [
-                'title' => 'seo-title',
-                'description' => 'seo-description',
-                'noIndex' => false,
-            ],
-            'excerpt' => [
-                'title' => 'excerpt-title',
-                'categories' => [1, 2, 3],
-                'tags' => [1, 2, 3],
-                'icon' => [1, 2, 3],
-                'images' => [1, 2, 3],
-            ],
-        ]);
+        $pageMetadata->getAlias()
+            ->willReturn('page')
+            ->shouldBeCalled();
+
+        $structure->getDocument()
+            ->willReturn($pageDocument->reveal())
+            ->shouldBeCalled();
 
         $titleProperty = $this->prophesize(PropertyInterface::class);
         $titleProperty->getName()->willReturn('title');
         $titleProperty->getValue()->willReturn('test-123');
         $titleProperty->setValue('test-123')->shouldBeCalled();
 
-        $this->structure->getProperty('title')->willReturn($titleProperty->reveal());
+        $structure->getProperty('title')->willReturn($titleProperty->reveal());
 
-        $contentView1 = $this->prophesize(ContentView::class);
-        $contentView1->getContent()->willReturn('test-123');
-        $contentView1->getView()->willReturn([]);
+        $titleContentView = $this->prophesize(ContentView::class);
+        $titleContentView->getContent()->willReturn('test-123');
+        $titleContentView->getView()->willReturn([]);
+
+        // expected service calls
+        $this->documentInspector->getMetadata($pageDocument->reveal())
+            ->willReturn($pageMetadata->reveal())
+            ->shouldBeCalled();
 
         $this->contentResolver->resolve('test-123', $titleProperty->reveal(), 'en', ['webspaceKey' => 'sulu_io'])
-            ->willReturn($contentView1->reveal());
+            ->willReturn($titleContentView->reveal());
 
+        $referenceStore = $this->prophesize(ReferenceStoreInterface::class);
+        $referenceStore->add('123-123-123')
+            ->shouldBeCalled();
+
+        $this->referenceStorePool->getStore('content')
+            ->willReturn($referenceStore->reveal())
+            ->shouldBeCalled();
+
+        // call test function
         $result = $this->structureResolver->resolveProperties(
-            $this->structure->reveal(),
+            $structure->reveal(),
             ['myTitle' => 'title', 'seoDescription' => 'seo.description', 'excerptTitle' => 'excerpt.title'],
             'en'
         );
@@ -389,52 +544,78 @@ class StructureResolverTest extends TestCase
 
     public function testResolvePropertiesIncludeExtension(): void
     {
-        $this->structure->getDocument()->willReturn($this->pageDocument->reveal());
+        $structure = $this->prophesize(StructureBridge::class);
+        $pageDocument = $this->prophesize(PageDocument::class);
+        $pageMetadata = $this->prophesize(Metadata::class);
+
+        // expected object calls
+        $structure->getUuid()->willReturn('123-123-123')->shouldBeCalled();
+        $structure->getWebspaceKey()->willReturn('sulu_io')->shouldBeCalled();
 
         $now = new \DateTimeImmutable();
 
-        $this->structure->getUuid()->willReturn('123-123-123');
-        $this->structure->getWebspaceKey()->willReturn('sulu_io');
-        $this->structure->getLanguageCode()->willReturn('en');
+        $pageDocument->getStructureType()->willReturn('default')->shouldBeCalled();
+        $pageDocument->getAuthored()->willReturn($now)->shouldBeCalled();
+        $pageDocument->getAuthor()->willReturn(1)->shouldBeCalled();
+        $pageDocument->getCreated()->willReturn($now)->shouldBeCalled();
+        $pageDocument->getCreator()->willReturn(2)->shouldBeCalled();
+        $pageDocument->getChanged()->willReturn($now)->shouldBeCalled();
+        $pageDocument->getChanger()->willReturn(3)->shouldBeCalled();
+        $pageDocument->getExtensionsData()
+            ->willReturn([
+                'seo' => [
+                    'title' => 'seo-title',
+                    'description' => 'seo-description',
+                    'noIndex' => false,
+                ],
+                'excerpt' => [
+                    'title' => 'excerpt-title',
+                    'categories' => [1, 2, 3],
+                    'tags' => [1, 2, 3],
+                    'icon' => [1, 2, 3],
+                    'images' => [1, 2, 3],
+                ],
+            ])
+            ->shouldBeCalled();
 
-        $this->pageDocument->getStructureType()->willReturn('default');
-        $this->pageDocument->getAuthored()->willReturn($now);
-        $this->pageDocument->getAuthor()->willReturn(1);
-        $this->pageDocument->getCreated()->willReturn($now);
-        $this->pageDocument->getCreator()->willReturn(2);
-        $this->pageDocument->getChanged()->willReturn($now);
-        $this->pageDocument->getChanger()->willReturn(3);
-        $this->pageDocument->getExtensionsData()->willReturn([
-            'seo' => [
-                'title' => 'seo-title',
-                'description' => 'seo-description',
-                'noIndex' => false,
-            ],
-            'excerpt' => [
-                'title' => 'excerpt-title',
-                'categories' => [1, 2, 3],
-                'tags' => [1, 2, 3],
-                'icon' => [1, 2, 3],
-                'images' => [1, 2, 3],
-            ],
-        ]);
+        $pageMetadata->getAlias()
+            ->willReturn('page')
+            ->shouldBeCalled();
+
+        $structure->getDocument()
+            ->willReturn($pageDocument->reveal())
+            ->shouldBeCalled();
 
         $titleProperty = $this->prophesize(PropertyInterface::class);
         $titleProperty->getName()->willReturn('title');
         $titleProperty->getValue()->willReturn('test-123');
         $titleProperty->setValue('test-123')->shouldBeCalled();
 
-        $this->structure->getProperty('title')->willReturn($titleProperty->reveal());
+        $structure->getProperty('title')->willReturn($titleProperty->reveal());
 
-        $contentView1 = $this->prophesize(ContentView::class);
-        $contentView1->getContent()->willReturn('test-123');
-        $contentView1->getView()->willReturn([]);
+        $titleContentView = $this->prophesize(ContentView::class);
+        $titleContentView->getContent()->willReturn('test-123');
+        $titleContentView->getView()->willReturn([]);
+
+        // expected service calls
+        $this->documentInspector->getMetadata($pageDocument->reveal())
+            ->willReturn($pageMetadata->reveal())
+            ->shouldBeCalled();
 
         $this->contentResolver->resolve('test-123', $titleProperty->reveal(), 'en', ['webspaceKey' => 'sulu_io'])
-            ->willReturn($contentView1->reveal());
+            ->willReturn($titleContentView->reveal());
 
+        $referenceStore = $this->prophesize(ReferenceStoreInterface::class);
+        $referenceStore->add('123-123-123')
+            ->shouldBeCalled();
+
+        $this->referenceStorePool->getStore('content')
+            ->willReturn($referenceStore->reveal())
+            ->shouldBeCalled();
+
+        // call test function
         $result = $this->structureResolver->resolveProperties(
-            $this->structure->reveal(),
+            $structure->reveal(),
             ['myTitle' => 'title'],
             'en',
             true

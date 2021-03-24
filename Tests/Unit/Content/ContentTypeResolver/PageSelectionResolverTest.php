@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
 
 use PHPUnit\Framework\TestCase;
+use Prophecy\Argument;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\PageSelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
@@ -83,6 +84,7 @@ class PageSelectionResolverTest extends TestCase
         $property->getParams()->willReturn($params);
         $property->getStructure()->willReturn($structure->reveal());
 
+        // expected and unexpected service calls
         $this->contentQueryBuilder->init([
             'ids' => ['page-id-1', 'page-id-2'],
             'properties' => $params['properties']->getValue(),
@@ -158,6 +160,7 @@ class PageSelectionResolverTest extends TestCase
             ],
         ])->shouldBeCalledOnce();
 
+        // call test function
         $result = $this->pageSelectionResolver->resolve(
             ['page-id-1', 'page-id-2'],
             $property->reveal(),
@@ -206,6 +209,7 @@ class PageSelectionResolverTest extends TestCase
             ],
             $result->getContent()
         );
+
         $this->assertSame(
             ['ids' => ['page-id-1', 'page-id-2']],
             $result->getView()
@@ -217,6 +221,14 @@ class PageSelectionResolverTest extends TestCase
         $locale = 'en';
         $property = $this->prophesize(PropertyInterface::class);
 
+        // expected and unexpected service calls
+        $this->contentQueryBuilder->init(Argument::cetera())
+            ->shouldNotBeCalled();
+
+        $this->structureResolver->resolve(Argument::cetera())
+            ->shouldNotBeCalled();
+
+        // call test function
         $result = $this->pageSelectionResolver->resolve(null, $property->reveal(), $locale);
 
         $this->assertSame([], $result->getContent());
@@ -229,6 +241,14 @@ class PageSelectionResolverTest extends TestCase
         $locale = 'en';
         $property = $this->prophesize(PropertyInterface::class);
 
+        // expected and unexpected service calls
+        $this->contentQueryBuilder->init(Argument::any())
+            ->shouldNotBeCalled();
+
+        $this->structureResolver->resolve(Argument::any())
+            ->shouldNotBeCalled();
+
+        // call test function
         $result = $this->pageSelectionResolver->resolve([], $property->reveal(), $locale);
 
         $this->assertSame([], $result->getContent());

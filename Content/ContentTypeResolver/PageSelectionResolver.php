@@ -75,6 +75,7 @@ class PageSelectionResolver implements ContentTypeResolverInterface
             'properties' => $propertiesParamValue,
             'published' => !$this->showDrafts,
         ]);
+
         list($pagesQuery) = $this->contentQueryBuilder->build($property->getStructure()->getWebspaceKey(), [$locale]);
 
         $pageStructures = $this->contentMapper->loadBySql2(
