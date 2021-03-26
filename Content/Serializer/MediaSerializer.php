@@ -81,8 +81,10 @@ class MediaSerializer implements MediaSerializerInterface
         unset($mediaData['_hash']);
 
         $formatMediaApi = $apiMedia;
-        if($media->getPreviewImage()) {
-            $formatMediaApi = new Media($media->getPreviewImage(), $locale);
+        /** @var Media|null $previewImage */
+        $previewImage = $media->getPreviewImage();
+        if($previewImage) {
+            $formatMediaApi = new Media($previewImage, $locale);
         }
 
         /** @var string $fileName */
