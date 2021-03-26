@@ -80,21 +80,28 @@ class MediaSerializer implements MediaSerializerInterface
         unset($mediaData['adminUrl']);
         unset($mediaData['_hash']);
 
+        $formatMediaApi = $apiMedia;
+        /** @var MediaInterface|null $previewImage */
+        $previewImage = $media->getPreviewImage();
+        if ($previewImage) {
+            $formatMediaApi = new Media($previewImage, $locale);
+        }
+
         /** @var string $fileName */
-        $fileName = $apiMedia->getName();
+        $fileName = $formatMediaApi->getName();
 
         // replace extension of filename with preferred media extension if possible
-        $preferredExtension = $this->imageConverter->getSupportedOutputImageFormats($apiMedia->getMimeType())[0] ?? null;
+        $preferredExtension = $this->imageConverter->getSupportedOutputImageFormats($formatMediaApi->getMimeType())[0] ?? null;
         if ($preferredExtension) {
             $fileName = pathinfo($fileName)['filename'] . '.' . $preferredExtension;
         }
 
         $mediaData['formatUri'] = $this->formatCache->getMediaUrl(
-            $apiMedia->getId(),
+            $formatMediaApi->getId(),
             $fileName,
             '{format}',
-            $apiMedia->getVersion(),
-            $apiMedia->getSubVersion()
+            $formatMediaApi->getVersion(),
+            $formatMediaApi->getSubVersion()
         );
 
         $this->referenceStore->add($apiMedia->getId());
