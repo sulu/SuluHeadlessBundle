@@ -83,7 +83,7 @@ class MediaSerializer implements MediaSerializerInterface
         $formatMediaApi = $apiMedia;
         /** @var MediaInterface|null $previewImage */
         $previewImage = $media->getPreviewImage();
-        if($previewImage) {
+        if ($previewImage) {
             $formatMediaApi = new Media($previewImage, $locale);
         }
 
