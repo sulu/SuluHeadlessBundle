@@ -184,7 +184,7 @@ class TeaserSerializerTest extends TestCase
 
         $teaser = $this->prophesize(Teaser::class);
         $teaser->getId()->willReturn('bb03b2f1-135f-4fcf-b27a-b2cf5f36be66');
-        $teaser->getType()->willReturn('articles');
+        $teaser->getType()->willReturn('other');
         $teaser->getMediaId()->willReturn(null);
 
         $this->arraySerializer->serialize($teaser, $context)->willReturn([
