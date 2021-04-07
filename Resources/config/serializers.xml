@@ -50,5 +50,16 @@
             <argument type="service" id="sulu_headless.serializer.media"/>
         </service>
         <service id="Sulu\Bundle\HeadlessBundle\Content\Serializer\CategorySerializerInterface" alias="sulu_headless.serializer.category"/>
+
+        <service
+            id="sulu_headless.serializer.teaser"
+            class="Sulu\Bundle\HeadlessBundle\Content\Serializer\TeaserSerializer"
+        >
+            <argument type="service" id="sulu_core.array_serializer"/>
+            <argument type="service" id="sulu_headless.serializer.media"/>
+            <argument type="service" id="sulu_media.media_manager"/>
+            <argument type="service" id="sulu_website.reference_store_pool"/>
+        </service>
+        <service id="Sulu\Bundle\HeadlessBundle\Content\Serializer\TeaserSerializerInterface" alias="sulu_headless.serializer.teaser"/>
     </services>
 </container>

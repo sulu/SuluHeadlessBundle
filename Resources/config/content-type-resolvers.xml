@@ -172,6 +172,17 @@
         </service>
 
         <service
+            id="sulu_headless.content_resolver.teaser_selection"
+            class="Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\TeaserSelectionResolver"
+            lazy="true"
+        >
+            <argument type="service" id="sulu_page.teaser.manager"/>
+            <argument type="service" id="sulu_headless.serializer.teaser"/>
+
+            <tag name="sulu_headless.content_type_resolver"/>
+        </service>
+
+        <service
             id="sulu_headless.content_resolver.text_editor"
             class="Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\TextEditorResolver"
         >
