@@ -16,7 +16,6 @@ namespace Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\TeaserSerializerInterface;
 use Sulu\Bundle\PageBundle\Teaser\Teaser;
-use Sulu\Bundle\PageBundle\Teaser\TeaserContentType;
 use Sulu\Bundle\PageBundle\Teaser\TeaserManagerInterface;
 use Sulu\Component\Content\Compat\PropertyInterface;
 
@@ -45,48 +44,27 @@ class TeaserSelectionResolver implements ContentTypeResolverInterface
 
     public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView
     {
-        $value = $this->getValue($property);
-        $items = $this->getItems($property);
+        $value = array_merge(
+            [
+                'presentAs' => null,
+                'items' => [],
+            ],
+            \is_array($data) ? $data : []
+        );
+        $items = $value['items'] ?? [];
 
-        if (empty($items)) {
+        if (!\is_array($items) || 0 === \count($items)) {
             return new ContentView([], $value);
         }
 
         $teasers = $this->teaserManager->find($items, $locale);
-        $teasers = array_map(function (Teaser $teaser) use ($locale) {
-            return $this->teaserSerializer->serialize($teaser, $locale);
-        }, $teasers);
+        $teasers = array_map(
+            function (Teaser $teaser) use ($locale) {
+                return $this->teaserSerializer->serialize($teaser, $locale);
+            },
+            $teasers
+        );
 
         return new ContentView($teasers, $value);
-    }
-
-    /**
-     * @see TeaserContentType::getValue()
-     *
-     * @return array<string, mixed>
-     */
-    private function getValue(PropertyInterface $property): array
-    {
-        $default = ['presentAs' => null, 'items' => []];
-        if (!\is_array($property->getValue())) {
-            return $default;
-        }
-
-        return array_merge($default, $property->getValue());
-    }
-
-    /**
-     * @see TeaserContentType::getItems()
-     *
-     * @return mixed[]
-     */
-    private function getItems(PropertyInterface $property): array
-    {
-        $value = $this->getValue($property);
-        if (!\is_array($value['items']) || 0 === \count($value['items'])) {
-            return [];
-        }
-
-        return $value['items'];
     }
 }

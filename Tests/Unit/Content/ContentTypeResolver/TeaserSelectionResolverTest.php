@@ -79,7 +79,6 @@ class TeaserSelectionResolverTest extends TestCase
 
         /** @var PropertyInterface|ObjectProphecy $property */
         $property = $this->prophesize(PropertyInterface::class);
-        $property->getValue()->willReturn($value);
 
         $pageTeaser = $this->prophesize(Teaser::class);
         $articleTeaser = $this->prophesize(Teaser::class);
@@ -190,7 +189,6 @@ class TeaserSelectionResolverTest extends TestCase
 
         /** @var PropertyInterface|ObjectProphecy $property */
         $property = $this->prophesize(PropertyInterface::class);
-        $property->getValue()->willReturn($value);
 
         $this->teaserManager->find(Argument::any())->shouldNotBeCalled();
         $this->teaserSerializer->serialize(Argument::any())->shouldNotBeCalled();
