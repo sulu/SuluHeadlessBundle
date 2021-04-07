@@ -49,7 +49,7 @@ class TeaserSelectionResolver implements ContentTypeResolverInterface
         $items = $this->getItems($property);
 
         if (empty($items)) {
-            return new ContentView([], []);
+            return new ContentView([], $value);
         }
 
         $teasers = $this->teaserManager->find($items, $locale);

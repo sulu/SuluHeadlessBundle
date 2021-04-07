@@ -16,6 +16,8 @@ namespace Sulu\Bundle\HeadlessBundle\Content\Serializer;
 use JMS\Serializer\SerializationContext;
 use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
 use Sulu\Bundle\PageBundle\Teaser\Teaser;
+use Sulu\Bundle\WebsiteBundle\ReferenceStore\ReferenceStoreNotExistsException;
+use Sulu\Bundle\WebsiteBundle\ReferenceStore\ReferenceStorePoolInterface;
 use Sulu\Component\Serializer\ArraySerializerInterface;
 
 class TeaserSerializer implements TeaserSerializerInterface
@@ -35,14 +37,21 @@ class TeaserSerializer implements TeaserSerializerInterface
      */
     private $mediaManager;
 
+    /**
+     * @var ReferenceStorePoolInterface
+     */
+    private $referenceStorePool;
+
     public function __construct(
         ArraySerializerInterface $arraySerializer,
         MediaSerializerInterface $mediaSerializer,
-        MediaManagerInterface $mediaManager
+        MediaManagerInterface $mediaManager,
+        ReferenceStorePoolInterface $referenceStorePool
     ) {
         $this->arraySerializer = $arraySerializer;
         $this->mediaSerializer = $mediaSerializer;
         $this->mediaManager = $mediaManager;
+        $this->referenceStorePool = $referenceStorePool;
     }
 
     /**
@@ -54,11 +63,38 @@ class TeaserSerializer implements TeaserSerializerInterface
         unset($teaserData['mediaId']);
 
         $mediaId = $teaser->getMediaId();
+        $mediaData = null;
         if ($mediaId) {
             $media = $this->mediaManager->getEntityById($mediaId);
-            $teaserData['media'] = $this->mediaSerializer->serialize($media, $locale, $context);
+            $mediaData = $this->mediaSerializer->serialize($media, $locale);
         }
 
+        $teaserData['media'] = $mediaData;
+
+        $this->addToReferenceStore($teaser->getId(), $teaser->getType());
+
         return $teaserData;
+    }
+
+    private function addToReferenceStore(string $uuid, string $alias): void
+    {
+        if ('pages' === $alias) {
+            // unfortunately the reference store for pages was not adjusted and still uses content as alias
+            $alias = 'content';
+        }
+
+        if ('articles' === $alias) {
+            $alias = 'article';
+        }
+
+        try {
+            $referenceStore = $this->referenceStorePool->getStore($alias);
+        } catch (ReferenceStoreNotExistsException $e) {
+            // @ignoreException do nothing when reference store was not found
+
+            return;
+        }
+
+        $referenceStore->add($uuid);
     }
 }
