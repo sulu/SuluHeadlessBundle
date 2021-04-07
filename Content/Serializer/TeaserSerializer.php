@@ -76,7 +76,10 @@ class TeaserSerializer implements TeaserSerializerInterface
         return $teaserData;
     }
 
-    private function addToReferenceStore(string $uuid, string $alias): void
+    /**
+     * @param int|string $id
+     */
+    private function addToReferenceStore($id, string $alias): void
     {
         if ('pages' === $alias) {
             // unfortunately the reference store for pages was not adjusted and still uses content as alias
@@ -95,6 +98,6 @@ class TeaserSerializer implements TeaserSerializerInterface
             return;
         }
 
-        $referenceStore->add($uuid);
+        $referenceStore->add($id);
     }
 }

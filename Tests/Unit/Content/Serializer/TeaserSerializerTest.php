@@ -46,14 +46,14 @@ class TeaserSerializerTest extends TestCase
     private $mediaManager;
 
     /**
+     * @var ReferenceStorePoolInterface|ObjectProphecy
+     */
+    private $referenceStorePool;
+
+    /**
      * @var TeaserSerializerInterface
      */
     private $teaserSerializer;
-
-    /**
-     * @var ReferenceStorePoolInterface
-     */
-    private $referenceStorePool;
 
     protected function setUp(): void
     {
@@ -159,7 +159,7 @@ class TeaserSerializerTest extends TestCase
         $this->referenceStorePool->getStore('article')->willReturn($referenceStore->reveal());
         $referenceStore->add('5524447a-1afd-4d08-bb25-d34f46e3621c')->shouldBeCalled();
 
-        $result = $this->teaserSerializer->serialize($teaser->reveal(), $locale, $context->reveal());
+        $result = $this->teaserSerializer->serialize($teaser->reveal(), $locale);
 
         $this->assertSame([
             'id' => '5524447a-1afd-4d08-bb25-d34f46e3621c',
@@ -198,9 +198,7 @@ class TeaserSerializerTest extends TestCase
             'url' => '/my-thing',
         ]);
 
-        $referenceStore = $this->prophesize(ReferenceStoreInterface::class);
         $this->referenceStorePool->getStore('other')->willThrow(ReferenceStoreNotExistsException::class);
-        $referenceStore->add('bb03b2f1-135f-4fcf-b27a-b2cf5f36be66')->shouldNotBeCalled();
 
         $result = $this->teaserSerializer->serialize($teaser->reveal(), $locale, $context->reveal());
 
