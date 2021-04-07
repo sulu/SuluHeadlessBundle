@@ -177,7 +177,7 @@
             lazy="true"
         >
             <argument type="service" id="sulu_page.teaser.manager"/>
-            <argument type="service" id="jms_serializer.serializer"/>
+            <argument type="service" id="sulu_headless.serializer.teaser"/>
 
             <tag name="sulu_headless.content_type_resolver"/>
         </service>

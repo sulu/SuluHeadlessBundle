@@ -13,8 +13,9 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver;
 
-use JMS\Serializer\ArrayTransformerInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
+use Sulu\Bundle\HeadlessBundle\Content\Serializer\TeaserSerializerInterface;
+use Sulu\Bundle\PageBundle\Teaser\Teaser;
 use Sulu\Bundle\PageBundle\Teaser\TeaserContentType;
 use Sulu\Bundle\PageBundle\Teaser\TeaserManagerInterface;
 use Sulu\Component\Content\Compat\PropertyInterface;
@@ -32,14 +33,14 @@ class TeaserSelectionResolver implements ContentTypeResolverInterface
     private $teaserManager;
 
     /**
-     * @var ArrayTransformerInterface
+     * @var TeaserSerializerInterface
      */
-    private $arrayTransformer;
+    private $teaserSerializer;
 
-    public function __construct(TeaserManagerInterface $teaserManager, ArrayTransformerInterface $arrayTransformer)
+    public function __construct(TeaserManagerInterface $teaserManager, TeaserSerializerInterface $teaserSerializer)
     {
         $this->teaserManager = $teaserManager;
-        $this->arrayTransformer = $arrayTransformer;
+        $this->teaserSerializer = $teaserSerializer;
     }
 
     public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView
@@ -52,7 +53,9 @@ class TeaserSelectionResolver implements ContentTypeResolverInterface
         }
 
         $teasers = $this->teaserManager->find($items, $locale);
-        $teasers = $this->arrayTransformer->toArray($teasers);
+        $teasers = array_map(function (Teaser $teaser) use ($locale) {
+            return $this->teaserSerializer->serialize($teaser, $locale);
+        }, $teasers);
 
         return new ContentView($teasers, $value);
     }
