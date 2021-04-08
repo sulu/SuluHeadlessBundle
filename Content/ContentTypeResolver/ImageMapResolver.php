@@ -34,7 +34,7 @@ class ImageMapResolver implements ContentTypeResolverInterface
     /**
      * @var ContentResolverInterface
      */
-    private $resolver;
+    private $contentResolver;
 
     public static function getContentType(): string
     {
@@ -44,11 +44,11 @@ class ImageMapResolver implements ContentTypeResolverInterface
     public function __construct(
         MediaManagerInterface $mediaManager,
         MediaSerializerInterface $mediaSerializer,
-        ContentResolverInterface $resolver
+        ContentResolverInterface $contentResolver
     ) {
         $this->mediaManager = $mediaManager;
         $this->mediaSerializer = $mediaSerializer;
-        $this->resolver = $resolver;
+        $this->contentResolver = $contentResolver;
     }
 
     public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView
@@ -72,7 +72,7 @@ class ImageMapResolver implements ContentTypeResolverInterface
                 $key = $childProperty->getName();
 
                 $childProperty->setValue($hotspot[$key] ?? null);
-                $result = $this->resolver->resolve($childProperty->getValue(), $childProperty, $locale, $attributes);
+                $result = $this->contentResolver->resolve($childProperty->getValue(), $childProperty, $locale, $attributes);
                 $hotspot[$key] = $result->getContent();
                 $hotspotView[$key] = $result->getView();
             }
