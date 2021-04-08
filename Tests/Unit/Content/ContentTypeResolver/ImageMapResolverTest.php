@@ -75,11 +75,11 @@ class ImageMapResolverTest extends TestCase
                 [
                     'type' => 'basic',
                     'hotspot' => [
-                            'type' => 'point',
-                            'left' => 1,
-                            'top' => 1,
-                            'radius' => 0,
-                        ],
+                        'type' => 'point',
+                        'left' => 1,
+                        'top' => 1,
+                        'radius' => 0,
+                    ],
                     'title' => 'Test Point',
                     'description' => 'Test Point description',
                 ],
@@ -99,9 +99,9 @@ class ImageMapResolverTest extends TestCase
                         [
                             'type' => 'text-with-image',
                             'image' => [
-                                    'displayOption' => null,
-                                    'id' => 1,
-                                ],
+                                'displayOption' => null,
+                                'id' => 1,
+                            ],
                             'title' => 'Example title',
                         ],
                     ],
