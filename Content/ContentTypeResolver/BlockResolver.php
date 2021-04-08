@@ -29,7 +29,7 @@ class BlockResolver implements ContentTypeResolverInterface
     /**
      * @var ContentResolverInterface
      */
-    private $resolver;
+    private $contentResolver;
 
     /**
      * @var \Traversable<BlockVisitorInterface>
@@ -41,7 +41,7 @@ class BlockResolver implements ContentTypeResolverInterface
      */
     public function __construct(ContentResolverInterface $contentResolver, \Traversable $blockVisitors)
     {
-        $this->resolver = $contentResolver;
+        $this->contentResolver = $contentResolver;
         $this->blockVisitors = $blockVisitors;
     }
 
@@ -74,7 +74,7 @@ class BlockResolver implements ContentTypeResolverInterface
             $view[$i] = [];
 
             foreach ($blockPropertyType->getChildProperties() as $childProperty) {
-                $contentView = $this->resolver->resolve($childProperty->getValue(), $childProperty, $locale, $attributes);
+                $contentView = $this->contentResolver->resolve($childProperty->getValue(), $childProperty, $locale, $attributes);
 
                 $content[$i][$childProperty->getName()] = $contentView->getContent();
                 $view[$i][$childProperty->getName()] = $contentView->getView();

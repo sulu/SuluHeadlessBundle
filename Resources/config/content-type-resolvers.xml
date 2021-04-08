@@ -190,5 +190,17 @@
 
             <tag name="sulu_headless.content_type_resolver"/>
         </service>
+
+        <service
+            id="sulu_headless.content_resolver.image_map"
+            class="Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\ImageMapResolver"
+            lazy="true"
+        >
+            <argument type="service" id="sulu_media.media_manager"/>
+            <argument type="service" id="sulu_headless.serializer.media"/>
+            <argument type="service" id="sulu_headless.content_resolver"/>
+
+            <tag name="sulu_headless.content_type_resolver"/>
+        </service>
     </services>
 </container>
