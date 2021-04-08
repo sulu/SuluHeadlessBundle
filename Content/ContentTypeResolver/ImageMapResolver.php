@@ -13,13 +13,10 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver;
 
-use Sulu\Bundle\HeadlessBundle\Content\ContentResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentResolverInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializerInterface;
-use Sulu\Bundle\MediaBundle\Api\Media;
 use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
-use Sulu\Component\Content\Compat\Block\BlockPropertyInterface;
 use Sulu\Component\Content\Compat\PropertyInterface;
 
 class ImageMapResolver implements ContentTypeResolverInterface
@@ -48,8 +45,7 @@ class ImageMapResolver implements ContentTypeResolverInterface
         MediaManagerInterface $mediaManager,
         MediaSerializerInterface $mediaSerializer,
         ContentResolverInterface $resolver
-    )
-    {
+    ) {
         $this->mediaManager = $mediaManager;
         $this->mediaSerializer = $mediaSerializer;
         $this->resolver = $resolver;
@@ -58,7 +54,7 @@ class ImageMapResolver implements ContentTypeResolverInterface
     public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView
     {
         $imageId = $data['imageId'] ?? null;
-        $hotspots = $data['hotspots'] ?? null;
+        $hotspots = $data['hotspots'] ?? [];
 
         $content = [];
         $view = [];
