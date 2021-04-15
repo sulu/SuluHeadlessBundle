@@ -16,6 +16,7 @@ namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\SingleSnippetSelectionResolver;
+use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\SnippetSelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
 use Sulu\Bundle\SnippetBundle\Snippet\DefaultSnippetManagerInterface;
@@ -43,9 +44,14 @@ class SingleSnippetSelectionResolverTest extends TestCase
     private $defaultSnippetManager;
 
     /**
-     * @var SingleSnippetSelectionResolver
+     * @var SnippetSelectionResolver
      */
     private $snippetSelectionResolver;
+
+    /**
+     * @var SingleSnippetSelectionResolver
+     */
+    private $singleSnippetSelectionResolver;
 
     protected function setUp(): void
     {
@@ -53,16 +59,20 @@ class SingleSnippetSelectionResolverTest extends TestCase
         $this->structureResolver = $this->prophesize(StructureResolverInterface::class);
         $this->defaultSnippetManager = $this->prophesize(DefaultSnippetManagerInterface::class);
 
-        $this->snippetSelectionResolver = new SingleSnippetSelectionResolver(
+        $this->snippetSelectionResolver = new SnippetSelectionResolver(
             $this->contentMapper->reveal(),
             $this->structureResolver->reveal(),
             $this->defaultSnippetManager->reveal()
+        );
+
+        $this->singleSnippetSelectionResolver = new SingleSnippetSelectionResolver(
+            $this->snippetSelectionResolver
         );
     }
 
     public function testGetContentType(): void
     {
-        self::assertSame('single_snippet_selection', $this->snippetSelectionResolver::getContentType());
+        self::assertSame('single_snippet_selection', $this->singleSnippetSelectionResolver::getContentType());
     }
 
     public function testResolveWithExcerpt(): void
@@ -90,7 +100,7 @@ class SingleSnippetSelectionResolverTest extends TestCase
             'view' => [],
         ]);
 
-        $result = $this->snippetSelectionResolver->resolve('snippet-1', $property->reveal(), 'en', []);
+        $result = $this->singleSnippetSelectionResolver->resolve('snippet-1', $property->reveal(), 'en', []);
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame(
             [
@@ -132,7 +142,7 @@ class SingleSnippetSelectionResolverTest extends TestCase
             'view' => [],
         ]);
 
-        $result = $this->snippetSelectionResolver->resolve('snippet-1', $property->reveal(), 'en', []);
+        $result = $this->singleSnippetSelectionResolver->resolve('snippet-1', $property->reveal(), 'en', []);
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame(
             [
@@ -177,7 +187,7 @@ class SingleSnippetSelectionResolverTest extends TestCase
             'view' => [],
         ]);
 
-        $result = $this->snippetSelectionResolver->resolve('snippet-1', $property->reveal(), 'en', []);
+        $result = $this->singleSnippetSelectionResolver->resolve('snippet-1', $property->reveal(), 'en', []);
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame(
             [
@@ -205,7 +215,7 @@ class SingleSnippetSelectionResolverTest extends TestCase
         $property->getStructure()->willReturn($structure->reveal());
         $property->getParams()->willReturn([]);
 
-        $result = $this->snippetSelectionResolver->resolve(null, $property->reveal(), 'en', []);
+        $result = $this->singleSnippetSelectionResolver->resolve(null, $property->reveal(), 'en', []);
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertNull(
             $result->getContent()
@@ -245,7 +255,7 @@ class SingleSnippetSelectionResolverTest extends TestCase
             'view' => [],
         ]);
 
-        $result = $this->snippetSelectionResolver->resolve(null, $property->reveal(), 'en', []);
+        $result = $this->singleSnippetSelectionResolver->resolve(null, $property->reveal(), 'en', []);
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame(
             [
@@ -258,7 +268,7 @@ class SingleSnippetSelectionResolverTest extends TestCase
         );
 
         $this->assertSame(
-            ['id' => null],
+            ['id' => 'default-snippet-1'],
             $result->getView()
         );
     }

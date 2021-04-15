@@ -329,7 +329,7 @@ class SnippetSelectionResolverTest extends TestCase
         );
 
         $this->assertSame(
-            ['ids' => []],
+            ['ids' => ['default-snippet-1']],
             $result->getView()
         );
     }
