@@ -42,12 +42,12 @@ class HeadlessBundleKernelBrowser extends KernelBrowser
     ): Crawler {
         // Based on https://github.com/symfony/symfony/blob/v5.2.0/src/Symfony/Component/HttpFoundation/Request.php#L388-L404
         // the logic in symfony/http-foundation we convert parameters to json content.
-        switch (\strtoupper($method)) {
+        switch (strtoupper($method)) {
             case 'POST':
             case 'PUT':
             case 'DELETE':
             case 'PATCH':
-                $content = \json_encode($parameters, \defined('JSON_THROW_ON_ERROR') ? \JSON_THROW_ON_ERROR : 0);
+                $content = json_encode($parameters, \defined('JSON_THROW_ON_ERROR') ? \JSON_THROW_ON_ERROR : 0) ?: null;
                 $query = [];
                 break;
             default:
