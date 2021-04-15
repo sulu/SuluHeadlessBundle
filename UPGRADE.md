@@ -1,17 +1,5 @@
 # Upgrade
 
-## 0.x
-
-### Change constructor arguments of SnippetSelectionResolver
-
-The first two constructor arguments of the `SnippetSelectionResolver` (`$contentMapper` and `$structureResolver`) have been removed.
-A new argument `$snippetResolver` has been added instead. It accepts an instance of `SnippetResolverInterface`.
-
-### Change constructor arguments of SingleSnippetSelectionResolver
-
-The first two constructor arguments of the `SingleSnippetSelectionResolver` (`$contentMapper` and `$structureResolver`) have been removed.
-A new argument `$snippetResolver` has been added instead. It accepts an instance of `SnippetResolverInterface`.
-
 ## 0.4.0
 
 ### Increased mimimum PHP version to 7.3
