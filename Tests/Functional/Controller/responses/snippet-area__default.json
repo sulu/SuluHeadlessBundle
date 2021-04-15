@@ -1,0 +1,19 @@
+{
+    "author": null,
+    "authored": null,
+    "changed": "@string@.isDateTime()",
+    "changer": null,
+    "content": {
+        "description": "Description of my snippet",
+        "title": "My Snippet"
+    },
+    "created": "@string@.isDateTime()",
+    "creator": null,
+    "id": "@uuid@",
+    "template": "default",
+    "type": "snippet",
+    "view": {
+        "description": [],
+        "title": []
+    }
+}

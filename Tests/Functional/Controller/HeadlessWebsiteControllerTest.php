@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Tests\Functional\Controller;
 
+use Sulu\Bundle\HeadlessBundle\Tests\Application\Testing\HeadlessBundleKernelBrowser;
 use Sulu\Bundle\HeadlessBundle\Tests\Functional\BaseTestCase;
 use Sulu\Bundle\HeadlessBundle\Tests\Traits\CreatePageTrait;
-use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\HttpFoundation\Response;
 
 class HeadlessWebsiteControllerTest extends BaseTestCase
@@ -23,7 +23,7 @@ class HeadlessWebsiteControllerTest extends BaseTestCase
     use CreatePageTrait;
 
     /**
-     * @var KernelBrowser
+     * @var HeadlessBundleKernelBrowser
      */
     private $websiteClient;
 
@@ -47,12 +47,15 @@ class HeadlessWebsiteControllerTest extends BaseTestCase
 
     protected function setUp(): void
     {
-        $this->websiteClient = $this->createWebsiteClient();
+        /** @var HeadlessBundleKernelBrowser $websiteClient */
+        $websiteClient = $this->createWebsiteClient();
+
+        $this->websiteClient = $websiteClient;
     }
 
     public function testIndexAction(): void
     {
-        $this->websiteClient->request('GET', '/test.json');
+        $this->websiteClient->jsonRequest('GET', '/test.json');
 
         $response = $this->websiteClient->getResponse();
 

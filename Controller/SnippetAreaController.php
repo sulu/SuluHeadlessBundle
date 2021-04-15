@@ -15,11 +15,13 @@ namespace Sulu\Bundle\HeadlessBundle\Controller;
 
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
-use Sulu\Bundle\HeadlessBundle\Content\SnippetResolverInterface;
+use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
 use Sulu\Bundle\SnippetBundle\Snippet\DefaultSnippetManagerInterface;
+use Sulu\Component\Content\Mapper\ContentMapperInterface;
 use Sulu\Component\Rest\RequestParametersTrait;
 use Sulu\Component\Webspace\Analyzer\Attributes\RequestAttributes;
 use Sulu\Component\Webspace\Webspace;
+use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -34,9 +36,14 @@ class SnippetAreaController
     private $defaultSnippetManager;
 
     /**
-     * @var SnippetResolverInterface
+     * @var ContentMapperInterface
      */
-    private $snippetResolver;
+    private $contentMapper;
+
+    /**
+     * @var StructureResolverInterface
+     */
+    private $structureResolver;
 
     /**
      * @var SerializerInterface
@@ -45,11 +52,13 @@ class SnippetAreaController
 
     public function __construct(
         DefaultSnippetManagerInterface $defaultSnippetManager,
-        SnippetResolverInterface $snippetResolver,
+        ContentMapperInterface $contentMapper,
+        StructureResolverInterface $structureResolver,
         SerializerInterface $serializer
     ) {
         $this->defaultSnippetManager = $defaultSnippetManager;
-        $this->snippetResolver = $snippetResolver;
+        $this->contentMapper = $contentMapper;
+        $this->structureResolver = $structureResolver;
         $this->serializer = $serializer;
     }
 
@@ -63,20 +72,34 @@ class SnippetAreaController
         $webspaceKey = $webspace->getKey();
         $locale = $request->getLocale();
 
-        $loadExcerpt = (bool) $this->getRequestParameter($request, 'loadExcerpt', true, false);
+        $includeExtension = $this->getBooleanRequestParameter($request, 'includeExtension', true, false);
 
-        $snippet = $this->defaultSnippetManager->load($webspaceKey, $area, $locale);
+        try {
+            $snippetId = $this->defaultSnippetManager->loadIdentifier($webspaceKey, $area);
+        } catch (ParameterNotFoundException $e) {
+            if ($e->getMessage() !== sprintf('You have requested a non-existent parameter "%s".', $area)) {
+                throw $e;
+            }
 
-        if (null === $snippet) {
-            throw new NotFoundHttpException(sprintf('No snippet found for area "%s"', $area));
+            throw new NotFoundHttpException(sprintf('Snippet area "%s" does not exist', $area));
         }
 
-        $resolvedSnippet = $this->snippetResolver->resolve(
-            $snippet->getUuid(),
-            $webspaceKey,
+        if (!$snippetId) {
+            throw new NotFoundHttpException(sprintf('No snippet found for snippet area "%s"', $area));
+        }
+
+        /** @var string $webspaceKey */
+        $webspaceKey = null;
+        $snippet = $this->contentMapper->load($snippetId, $webspaceKey, $locale);
+
+        if (!$snippet->getHasTranslation()) {
+            throw new NotFoundHttpException(sprintf('Snippet for snippet area "%s" does not exist in locale "%s"', $area, $locale));
+        }
+
+        $resolvedSnippet = $this->structureResolver->resolve(
+            $snippet,
             $locale,
-            null,
-            $loadExcerpt
+            $includeExtension
         );
 
         return new Response(
