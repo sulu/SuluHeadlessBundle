@@ -18,7 +18,10 @@
             "images": [],
             "more": "",
             "segments": [],
-            "tags": [],
+            "tags": [
+                "tag1",
+                "tag2"
+            ],
             "title": ""
         },
         "seo": {
@@ -39,3 +42,4 @@
         "title": []
     }
 }
+

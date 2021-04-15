@@ -34,12 +34,10 @@ class SnippetAreaControllerTest extends BaseTestCase
         $snippet = self::createSnippet([
             'title' => 'My Snippet',
             'description' => 'Description of my snippet',
-            'ext' => [
-                'excerpt' => [
-                    'tags' => [
-                        'tag1',
-                        'tag2',
-                    ],
+            'excerpt' => [
+                'tags' => [
+                    'tag1',
+                    'tag2',
                 ],
             ],
             'template' => 'default',
