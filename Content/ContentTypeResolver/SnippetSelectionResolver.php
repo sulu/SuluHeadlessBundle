@@ -14,40 +14,31 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver;
 
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
-use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
+use Sulu\Bundle\HeadlessBundle\Content\SnippetResolverInterface;
 use Sulu\Bundle\SnippetBundle\Document\SnippetDocument;
 use Sulu\Bundle\SnippetBundle\Snippet\DefaultSnippetManagerInterface;
 use Sulu\Bundle\SnippetBundle\Snippet\WrongSnippetTypeException;
 use Sulu\Component\Content\Compat\PropertyInterface;
-use Sulu\Component\Content\Compat\Structure\SnippetBridge;
 use Sulu\Component\Content\Compat\Structure\StructureBridge;
-use Sulu\Component\Content\Mapper\ContentMapperInterface;
 
 class SnippetSelectionResolver implements ContentTypeResolverInterface
 {
-    /**
-     * @var StructureResolverInterface
-     */
-    private $structureResolver;
-
-    /**
-     * @var ContentMapperInterface
-     */
-    private $contentMapper;
-
     /**
      * @var DefaultSnippetManagerInterface
      */
     private $defaultSnippetManager;
 
+    /**
+     * @var SnippetResolverInterface
+     */
+    private $snippetResolver;
+
     public function __construct(
-        ContentMapperInterface $contentMapper,
-        StructureResolverInterface $structureResolver,
-        DefaultSnippetManagerInterface $defaultSnippetManager
+        DefaultSnippetManagerInterface $defaultSnippetManager,
+        SnippetResolverInterface $snippetResolver
     ) {
-        $this->contentMapper = $contentMapper;
-        $this->structureResolver = $structureResolver;
         $this->defaultSnippetManager = $defaultSnippetManager;
+        $this->snippetResolver = $snippetResolver;
     }
 
     public static function getContentType(): string
@@ -79,18 +70,13 @@ class SnippetSelectionResolver implements ContentTypeResolverInterface
 
         $snippets = [];
         foreach ($snippetIds as $snippetId) {
-            /** @var SnippetBridge $snippet */
-            $snippet = $this->contentMapper->load($snippetId, $webspaceKey, $locale);
-
-            if (!$snippet->getHasTranslation() && null !== $shadowLocale) {
-                /** @var SnippetBridge $snippet */
-                $snippet = $this->contentMapper->load($snippetId, $webspaceKey, $shadowLocale);
-            }
-
-            $snippet->setIsShadow(null !== $shadowLocale);
-            $snippet->setShadowBaseLanguage($shadowLocale);
-
-            $snippets[] = $this->structureResolver->resolve($snippet, $locale, $loadExcerpt);
+            $snippets[] = $this->snippetResolver->resolve(
+                $snippetId,
+                $webspaceKey,
+                $locale,
+                $shadowLocale,
+                $loadExcerpt
+            );
         }
 
         return new ContentView($snippets, ['ids' => $data ?: []]);

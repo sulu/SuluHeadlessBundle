@@ -7,3 +7,8 @@ sulu_headless.api.search:
     path: /api/search
     defaults:
         _controller: sulu_headless.controller.search:getAction
+
+sulu_headless.api.snippet_area:
+    path: /api/snippet/{area}
+    defaults:
+        _controller: sulu_headless.controller.snippet_area:getAction

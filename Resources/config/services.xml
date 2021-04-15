@@ -33,5 +33,15 @@
             <argument type="tagged" tag="sulu_headless.content_type_resolver" default-index-method="getContentType" index-by="type"/>
         </service>
         <service id="Sulu\Bundle\HeadlessBundle\Content\ContentResolverInterface" alias="sulu_headless.content_resolver"/>
+
+        <service
+            id="sulu_headless.snippet_resolver"
+            class="Sulu\Bundle\HeadlessBundle\Content\SnippetResolver"
+            public="true"
+        >
+            <argument type="service" id="sulu.content.mapper"/>
+            <argument type="service" id="sulu_headless.structure_resolver"/>
+        </service>
+        <service id="Sulu\Bundle\HeadlessBundle\Content\SnippetResolverInterface" alias="sulu_headless.snippet_resolver"/>
     </services>
 </container>
