@@ -13,12 +13,12 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Tests\Functional\Controller;
 
-use Sulu\Bundle\HeadlessBundle\Tests\Application\Testing\HeadlessBundleKernelBrowser;
 use Sulu\Bundle\HeadlessBundle\Tests\Functional\BaseTestCase;
 use Sulu\Bundle\HeadlessBundle\Tests\Traits\CreateMediaTrait;
 use Sulu\Bundle\HeadlessBundle\Tests\Traits\CreatePageTrait;
 use Sulu\Bundle\MediaBundle\DataFixtures\ORM\LoadCollectionTypes;
 use Sulu\Bundle\MediaBundle\DataFixtures\ORM\LoadMediaTypes;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\HttpFoundation\Response;
 
 class NavigationControllerTest extends BaseTestCase
@@ -27,7 +27,7 @@ class NavigationControllerTest extends BaseTestCase
     use CreatePageTrait;
 
     /**
-     * @var HeadlessBundleKernelBrowser
+     * @var KernelBrowser
      */
     private $websiteClient;
 
@@ -104,10 +104,7 @@ class NavigationControllerTest extends BaseTestCase
 
     protected function setUp(): void
     {
-        /** @var HeadlessBundleKernelBrowser $websiteClient */
-        $websiteClient = $this->createWebsiteClient();
-
-        $this->websiteClient = $websiteClient;
+        $this->websiteClient = $this->createWebsiteClient();
     }
 
     /**
@@ -173,7 +170,7 @@ class NavigationControllerTest extends BaseTestCase
             $context = $filters['context'];
         }
 
-        $this->websiteClient->jsonRequest('GET', '/api/navigations/' . $context . '?' . http_build_query($filters));
+        $this->websiteClient->request('GET', '/api/navigations/' . $context . '?' . http_build_query($filters));
 
         $response = $this->websiteClient->getResponse();
         $this->assertInstanceOf(Response::class, $response);

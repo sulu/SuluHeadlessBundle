@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Tests\Functional\Controller;
 
-use Sulu\Bundle\HeadlessBundle\Tests\Application\Testing\HeadlessBundleKernelBrowser;
 use Sulu\Bundle\HeadlessBundle\Tests\Functional\BaseTestCase;
 use Sulu\Bundle\HeadlessBundle\Tests\Traits\CreatePageTrait;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\HttpFoundation\Response;
 
 class SearchControllerTest extends BaseTestCase
@@ -23,7 +23,7 @@ class SearchControllerTest extends BaseTestCase
     use CreatePageTrait;
 
     /**
-     * @var HeadlessBundleKernelBrowser
+     * @var KernelBrowser
      */
     private $websiteClient;
 
@@ -56,10 +56,7 @@ class SearchControllerTest extends BaseTestCase
 
     protected function setUp(): void
     {
-        /** @var HeadlessBundleKernelBrowser $websiteClient */
-        $websiteClient = $this->createWebsiteClient();
-
-        $this->websiteClient = $websiteClient;
+        $this->websiteClient = $this->createWebsiteClient();
     }
 
     /**
@@ -87,7 +84,7 @@ class SearchControllerTest extends BaseTestCase
      */
     public function testGetAction(string $query, array $indices, string $expectedPatternFile): void
     {
-        $this->websiteClient->jsonRequest('GET', '/api/search?q=' . $query . '&indices=' . implode(',', $indices));
+        $this->websiteClient->request('GET', '/api/search?q=' . $query . '&indices=' . implode(',', $indices));
 
         $response = $this->websiteClient->getResponse();
         $this->assertInstanceOf(Response::class, $response);

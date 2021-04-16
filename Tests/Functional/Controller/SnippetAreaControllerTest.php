@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Tests\Functional\Controller;
 
-use Sulu\Bundle\HeadlessBundle\Tests\Application\Testing\HeadlessBundleKernelBrowser;
 use Sulu\Bundle\HeadlessBundle\Tests\Functional\BaseTestCase;
 use Sulu\Bundle\HeadlessBundle\Tests\Traits\CreateSnippetTrait;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\HttpFoundation\Response;
 
 class SnippetAreaControllerTest extends BaseTestCase
@@ -23,7 +23,7 @@ class SnippetAreaControllerTest extends BaseTestCase
     use CreateSnippetTrait;
 
     /**
-     * @var HeadlessBundleKernelBrowser
+     * @var KernelBrowser
      */
     private $websiteClient;
 
@@ -61,10 +61,7 @@ class SnippetAreaControllerTest extends BaseTestCase
 
     protected function setUp(): void
     {
-        /** @var HeadlessBundleKernelBrowser $websiteClient */
-        $websiteClient = $this->createWebsiteClient();
-
-        $this->websiteClient = $websiteClient;
+        $this->websiteClient = $this->createWebsiteClient();
     }
 
     /**
@@ -121,7 +118,7 @@ class SnippetAreaControllerTest extends BaseTestCase
         ?string $expectedPatternFile = null,
         ?string $errorMessage = null
     ): void {
-        $this->websiteClient->jsonRequest('GET', $url);
+        $this->websiteClient->request('GET', $url);
 
         $response = $this->websiteClient->getResponse();
         self::assertInstanceOf(Response::class, $response);
