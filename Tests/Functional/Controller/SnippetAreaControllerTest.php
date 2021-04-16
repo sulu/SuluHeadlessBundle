@@ -73,41 +73,39 @@ class SnippetAreaControllerTest extends BaseTestCase
     public function provideAttributes(): \Generator
     {
         yield [
-            'default',
-            [],
+            '/api/snippet-areas/default',
             Response::HTTP_OK,
             'snippet-area__default.json',
         ];
 
         yield [
-            'default',
-            [
-                'includeExtension' => 'true',
-            ],
+            '/api/snippet-areas/default?includeExtension=true',
             Response::HTTP_OK,
             'snippet-area__default_include-extension.json',
         ];
 
         yield [
-            'default',
-            [
-                'includeExtension' => 'false',
-            ],
+            '/api/snippet-areas/default?includeExtension=false',
             Response::HTTP_OK,
             'snippet-area__default.json',
         ];
 
         yield [
-            'other',
-            [],
+            '/en/api/snippet-areas/default',
+            Response::HTTP_NOT_FOUND,
+            null,
+            'Snippet for snippet area "default" does not exist in locale "en"',
+        ];
+
+        yield [
+            '/api/snippet-areas/other',
             Response::HTTP_NOT_FOUND,
             null,
             'No snippet found for snippet area "other"',
         ];
 
         yield [
-            'invalid',
-            [],
+            '/api/snippet-areas/invalid',
             Response::HTTP_NOT_FOUND,
             null,
             'Snippet area "invalid" does not exist',
@@ -115,24 +113,21 @@ class SnippetAreaControllerTest extends BaseTestCase
     }
 
     /**
-     * @param mixed[] $filters
-     *
      * @dataProvider provideAttributes
      */
     public function testGetAction(
-        string $area,
-        array $filters = [],
+        string $url,
         int $statusCode = Response::HTTP_OK,
         ?string $expectedPatternFile = null,
         ?string $errorMessage = null
     ): void {
-        $this->websiteClient->jsonRequest('GET', '/api/snippet-areas/' . $area . '?' . http_build_query($filters));
+        $this->websiteClient->jsonRequest('GET', $url);
 
         $response = $this->websiteClient->getResponse();
-        $this->assertInstanceOf(Response::class, $response);
+        self::assertInstanceOf(Response::class, $response);
 
         if (null !== $expectedPatternFile) {
-            $this->assertResponseContent(
+            self::assertResponseContent(
                 $expectedPatternFile,
                 $response,
                 $statusCode
@@ -140,11 +135,16 @@ class SnippetAreaControllerTest extends BaseTestCase
         }
 
         if (null !== $errorMessage) {
-            $this->assertSame($statusCode, $response->getStatusCode());
+            self::assertSame($statusCode, $response->getStatusCode());
 
-            $responseObject = json_decode($response->getContent() ?: '{}');
-            $this->assertObjectHasAttribute('message', $responseObject);
-            $this->assertSame($errorMessage, $responseObject->message);
+            $content = $response->getContent();
+            self::assertIsString($content);
+
+            $responseObject = json_decode($content);
+            self::assertNotFalse($responseObject);
+
+            self::assertObjectHasAttribute('message', $responseObject);
+            self::assertSame($errorMessage, $responseObject->message);
         }
     }
 }
