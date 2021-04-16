@@ -18,7 +18,6 @@ use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\SnippetSelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
-use Sulu\Bundle\SnippetBundle\Document\SnippetDocument;
 use Sulu\Bundle\SnippetBundle\Snippet\DefaultSnippetManagerInterface;
 use Sulu\Component\Content\Compat\PropertyInterface;
 use Sulu\Component\Content\Compat\PropertyParameter;
@@ -299,10 +298,8 @@ class SnippetSelectionResolverTest extends TestCase
             'default' => new PropertyParameter('default', 'test-snippet-area'),
         ]);
 
-        $defaultSnippetDocument = $this->prophesize(SnippetDocument::class);
-        $defaultSnippetDocument->getUuid()->willReturn('default-snippet-1');
-        $this->defaultSnippetManager->load('webspace-key', 'test-snippet-area', 'en')
-            ->willReturn($defaultSnippetDocument->reveal());
+        $this->defaultSnippetManager->loadIdentifier('webspace-key', 'test-snippet-area')
+            ->willReturn('default-snippet-1');
 
         $defaultSnippet = $this->prophesize(SnippetBridge::class);
         $defaultSnippet->getHasTranslation()->willReturn(true);
@@ -332,7 +329,7 @@ class SnippetSelectionResolverTest extends TestCase
         );
 
         $this->assertSame(
-            ['ids' => []],
+            ['ids' => ['default-snippet-1']],
             $result->getView()
         );
     }

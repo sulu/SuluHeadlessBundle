@@ -16,6 +16,19 @@
                  alias="sulu_headless.controller.navigation" public="true"/>
 
         <service
+            id="sulu_headless.controller.snippet_area"
+            class="Sulu\Bundle\HeadlessBundle\Controller\SnippetAreaController"
+            public="true"
+        >
+            <argument type="service" id="sulu_snippet.default_snippet.manager"/>
+            <argument type="service" id="sulu.content.mapper"/>
+            <argument type="service" id="sulu_headless.structure_resolver"/>
+            <argument type="service" id="jms_serializer.serializer"/>
+        </service>
+        <service id="Sulu\Bundle\HeadlessBundle\Controller\SnippetAreaController"
+                 alias="sulu_headless.controller.snippet_area" public="true"/>
+
+        <service
             id="sulu_headless.controller.search"
             class="Sulu\Bundle\HeadlessBundle\Controller\SearchController"
             public="true"

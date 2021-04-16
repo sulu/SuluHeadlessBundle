@@ -15,9 +15,7 @@ namespace Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver;
 
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
-use Sulu\Bundle\SnippetBundle\Document\SnippetDocument;
 use Sulu\Bundle\SnippetBundle\Snippet\DefaultSnippetManagerInterface;
-use Sulu\Bundle\SnippetBundle\Snippet\WrongSnippetTypeException;
 use Sulu\Component\Content\Compat\PropertyInterface;
 use Sulu\Component\Content\Compat\Structure\SnippetBridge;
 use Sulu\Component\Content\Compat\Structure\StructureBridge;
@@ -66,14 +64,14 @@ class SnippetSelectionResolver implements ContentTypeResolverInterface
         $shadowLocale = $structure->getIsShadow() ? $structure->getShadowBaseLanguage() : null;
 
         $params = $property->getParams();
-        /** @var bool $loadExcerpt */
-        $loadExcerpt = isset($params['loadExcerpt']) ? $params['loadExcerpt']->getValue() : false;
+        /** @var bool $includeExtension */
+        $includeExtension = isset($params['loadExcerpt']) ? $params['loadExcerpt']->getValue() : false;
         /** @var string $defaultArea */
         $defaultArea = isset($params['default']) ? $params['default']->getValue() : null;
 
         $snippetIds = $data ?? [];
         if (empty($snippetIds) && $defaultArea) {
-            $defaultSnippetId = $this->getDefaultSnippetId($webspaceKey, $defaultArea, $locale);
+            $defaultSnippetId = $this->defaultSnippetManager->loadIdentifier($webspaceKey, $defaultArea);
             $snippetIds = $defaultSnippetId ? [$defaultSnippetId] : [];
         }
 
@@ -88,27 +86,13 @@ class SnippetSelectionResolver implements ContentTypeResolverInterface
             }
 
             $snippet->setIsShadow(null !== $shadowLocale);
-            $snippet->setShadowBaseLanguage($shadowLocale);
+            /** @var string $shadowBaseLanguage */
+            $shadowBaseLanguage = $shadowLocale;
+            $snippet->setShadowBaseLanguage($shadowBaseLanguage);
 
-            $snippets[] = $this->structureResolver->resolve($snippet, $locale, $loadExcerpt);
+            $snippets[] = $this->structureResolver->resolve($snippet, $locale, $includeExtension);
         }
 
-        return new ContentView($snippets, ['ids' => $data ?: []]);
-    }
-
-    private function getDefaultSnippetId(string $webspaceKey, string $snippetArea, string $locale): ?string
-    {
-        try {
-            /** @var SnippetDocument|null $snippet */
-            $snippet = $this->defaultSnippetManager->load($webspaceKey, $snippetArea, $locale);
-        } catch (WrongSnippetTypeException $exception) {
-            return null;
-        }
-
-        if (!$snippet) {
-            return null;
-        }
-
-        return $snippet->getUuid();
+        return new ContentView($snippets, ['ids' => $snippetIds ?: []]);
     }
 }
