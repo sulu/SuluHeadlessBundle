@@ -72,7 +72,7 @@ class SnippetAreaController
         $webspaceKey = $webspace->getKey();
         $locale = $request->getLocale();
 
-        $includeExtension = $this->getBooleanRequestParameter($request, 'includeExtension', true, false);
+        $includeExtension = $this->getBooleanRequestParameter($request, 'includeExtension', false, false);
 
         try {
             $snippetId = $this->defaultSnippetManager->loadIdentifier($webspaceKey, $area);

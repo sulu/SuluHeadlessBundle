@@ -23,8 +23,8 @@ The **SuluHeadlessBundle** provides controllers and services for using the [Sulu
 management system in a headless way. 
 
 To achieve this, the bundle includes a controller that allows to retrieve the 
-content of a **Sulu page as plain JSON content**. Furthermore, the bundle provides APIs for accessing the managed
-**navigation contexts** and the **search functionality** of Sulu via AJAX requests. Finally, the bundle includes
+content of a **Sulu page as plain JSON content**. Furthermore, the bundle provides APIs for accessing features that are 
+available via Twig extensions in traditional templates such as navigation contexts and snippet areas. Finally, the bundle includes
 an optional **single page application setup** that is built upon React and MobX and utilizes the functionality of 
 the bundle.
 
@@ -67,9 +67,6 @@ sulu_headless:
     type: portal
     resource: "@SuluHeadlessBundle/Resources/config/routing_website.yml"
 ```
-
-This will enable a JSON API to access the **search functionality** of Sulu via `{host}/api/search` and a JSON API for 
-retrieving the **navigation contexts** of the project via `{host}/api/navigations/{contextKey}`.
 
 ### Set the controller of you template
 
@@ -180,10 +177,42 @@ The Sulu content management system comes with various services and Twig extensio
 rendering complex websites. This functionality is not available when serving the content of the website in a headless 
 way, therefore the SuluHeadlessBundle includes controllers to **provide JSON APIs for accessing these features**.
 
-- Sulu navigation contexts of the application can be retrieved as JSON object via `{host}/api/navigations/{contextKey}`. 
-Similar to the Twig extension, the API respects the following query parameters `depth`, `flat` and `excerpt`.
+The APIs are registered as portal URLs and therefore their path is prefixed with the URL of the webspace.
+If you have configured a language-specific URL for your webspace, the API URL will look something like this:
 
-- The search functionality of SULU is accessible as JSON API via via `{host}/api/search?q={searchTerm}`.
+ - `https://example.org/en/api/...`
+
+#### Navigation
+
+`/api/navigations/{contextKey}`
+
+| Parameter        | Type    | Default Value | Description
+|------------------|---------|---------------|---------------------------------------
+| depth            | integer | `1`           | Maximum depth of the navigation tree that is loaded.
+| flat             | boolean | `false`       | Return navigation as flat list instead of tree.
+| excerpt          | boolean | `false`       | Include excerpt data in the returned navigation.
+
+Example: `/api/navigations/main?depth=2&flat=false&excerpt=true`
+
+#### Search
+
+`/api/search?q={searchTerm}`
+
+| Parameter        | Type    | Default Value | Description
+|------------------|---------|---------------|---------------------------------------
+| q                | string  |               | The text you want to search for.
+
+Example: `/api/search?q=CMS`
+
+#### Snippet Areas
+
+`/api/snippet-areas/{area}`
+
+| Parameter        | Type    | Default Value | Description
+|------------------|---------|---------------|---------------------------------------------------
+| includeExtension | boolean | `false`       | Include extension data (e.g. excerpt) in the returned result.
+
+Example: `/api/snippet-areas/settings?includeExtension=true`
 
 ### Reference single page application implementation
 
