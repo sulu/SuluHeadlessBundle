@@ -181,8 +181,8 @@ way, therefore the SuluHeadlessBundle includes controllers to **provide JSON API
  - [Search](#search)
  - [Snippet areas](#snippet-areas)
 
-By default the APIs are registered as portal urls and are so prefixed with your webspace url.
-This means if you have language specific urls the API will have the same e.g.:
+The APIs are registered as portal URLs and therefore their path is prefixed with the URL of the webspace.
+If you have configured a language-specific URL for your webspace, the API URL will look something like this:
 
  - `https://example.org/en/api/...`
 
@@ -192,9 +192,9 @@ This means if you have language specific urls the API will have the same e.g.:
 
 | Parameter        | Type    | Default Value | Description
 |------------------|---------|---------------|---------------------------------------
-| depth            | integer | `1`           | How depth the page tree is loaded.
-| flat             | boolean | `false`       | Return a flat list else a tree.
-| excerpt          | boolean | `false`       | Returns also the excerpt data.
+| depth            | integer | `1`           | Maximum depth of the navigation tree that is loaded.
+| flat             | boolean | `false`       | Return navigation as flat list instead of tree.
+| excerpt          | boolean | `false`       | Include excerpt data in the returned navigation.
 
 Example: `/api/navigations/main?depth=2&flat=false&excerpt=true`
 
