@@ -210,7 +210,7 @@ Example: `/api/search?q=CMS`
 
 | Parameter        | Type    | Default Value | Description
 |------------------|---------|---------------|---------------------------------------------------
-| includeExtension | boolean | `false`       | Returns also the snippet extensions like excerpt.
+| includeExtension | boolean | `false`       | Include extension data (e.g. excerpt) in the returned result.
 
 Example: `/api/snippet-areas/settings?includeExtension=true`
 
