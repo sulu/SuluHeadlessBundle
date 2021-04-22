@@ -23,8 +23,8 @@ The **SuluHeadlessBundle** provides controllers and services for using the [Sulu
 management system in a headless way. 
 
 To achieve this, the bundle includes a controller that allows to retrieve the 
-content of a **Sulu page as plain JSON content**. Furthermore, the bundle provides APIs for accessing other functionality
-over APIs (navigation contexts, snippet areas, ...) which normally are only available over twig extensions. Finally, the bundle includes
+content of a **Sulu page as plain JSON content**. Furthermore, the bundle provides APIs for accessing features that are 
+available via Twig extensions in traditional templates such as navigation contexts and snippet areas. Finally, the bundle includes
 an optional **single page application setup** that is built upon React and MobX and utilizes the functionality of 
 the bundle.
 
@@ -176,10 +176,6 @@ adding a `sulu_headless.content_type_resolver` tag to the service.
 The Sulu content management system comes with various services and Twig extensions to simplify the development and the
 rendering complex websites. This functionality is not available when serving the content of the website in a headless 
 way, therefore the SuluHeadlessBundle includes controllers to **provide JSON APIs for accessing these features**.
-
- - [Navigation](#navigation)
- - [Search](#search)
- - [Snippet areas](#snippet-areas)
 
 The APIs are registered as portal URLs and therefore their path is prefixed with the URL of the webspace.
 If you have configured a language-specific URL for your webspace, the API URL will look something like this:
