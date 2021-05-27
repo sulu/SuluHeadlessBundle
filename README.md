@@ -30,7 +30,7 @@ the bundle.
 
 
 The SuluHeadlessBundle is compatible with Sulu **starting from version 2.0**. Have a look at the `require` section in 
-the [composer.json](https://github.com/sulu/SuluHeadlessBundle/blob/0.x/composer.json) to find an 
+the [composer.json](composer.json) to find an 
 **up-to-date list of the requirements** of the bundle.
 Please be aware that this bundle is **still under development** and might not cover every use-case yet.
 Depending on the feedback of the community, future versions of the bundle might contain breaking changes.
