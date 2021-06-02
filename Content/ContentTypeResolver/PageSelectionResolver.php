@@ -76,12 +76,14 @@ class PageSelectionResolver implements ContentTypeResolverInterface
             'published' => !$this->showDrafts,
         ]);
 
-        list($pagesQuery) = $this->contentQueryBuilder->build($property->getStructure()->getWebspaceKey(), [$locale]);
+        $webspaceKey = $property->getStructure() ? $property->getStructure()->getWebspaceKey() : null;
+
+        list($pagesQuery) = $this->contentQueryBuilder->build($webspaceKey, [$locale]);
 
         $pageStructures = $this->contentMapper->loadBySql2(
             $pagesQuery,
             $locale,
-            $property->getStructure()->getWebspaceKey()
+            $webspaceKey
         );
 
         $propertyMap = [
@@ -103,3 +105,4 @@ class PageSelectionResolver implements ContentTypeResolverInterface
         return new ContentView($pages, ['ids' => $data ?: []]);
     }
 }
+

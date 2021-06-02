@@ -129,13 +129,14 @@ class StructureResolver implements StructureResolverInterface
                     );
                 }
             } else {
-                $property = $structure->getProperty($sourceProperty);
+                $value = $structure->hasProperty($sourceProperty) ? $structure->getPropertyValue($sourceProperty) : null;
+
                 $contentView = $this->resolveProperty(
                     $structure,
                     $sourceProperty,
                     $locale,
                     $attributes,
-                    $property->getValue()
+                    $value
                 );
             }
 
@@ -290,8 +291,13 @@ class StructureResolver implements StructureResolverInterface
         array $attributes,
         $value
     ): ContentView {
-        $property = $structure->getProperty($name);
-        $property->setValue($value);
+        $property = $structure->hasProperty($name) ? $structure->getProperty($name) : null;
+
+        if ($property) {
+            $property->setValue($value);
+        } else {
+            return new ContentView(null, []);
+        }
 
         return $this->contentResolver->resolve(
             $value,
@@ -319,3 +325,4 @@ class StructureResolver implements StructureResolverInterface
         $referenceStore->add($uuid);
     }
 }
+
