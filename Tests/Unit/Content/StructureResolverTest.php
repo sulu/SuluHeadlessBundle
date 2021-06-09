@@ -487,7 +487,9 @@ class StructureResolverTest extends TestCase
         $titleProperty->getValue()->willReturn('test-123');
         $titleProperty->setValue('test-123')->shouldBeCalled();
 
+        $structure->hasProperty('title')->willReturn(true);
         $structure->getProperty('title')->willReturn($titleProperty->reveal());
+        $structure->hasProperty('notExist')->willReturn(false);
 
         $titleContentView = $this->prophesize(ContentView::class);
         $titleContentView->getContent()->willReturn('test-123');
@@ -512,7 +514,13 @@ class StructureResolverTest extends TestCase
         // call test function
         $result = $this->structureResolver->resolveProperties(
             $structure->reveal(),
-            ['myTitle' => 'title', 'seoDescription' => 'seo.description', 'excerptTitle' => 'excerpt.title'],
+            [
+                'myTitle' => 'title',
+                'seoDescription' => 'seo.description',
+                'excerptTitle' => 'excerpt.title',
+                'notExist' => 'notExist',
+                'excerptNotExist' => 'excerpt.notExist',
+            ],
             'en'
         );
 
@@ -591,6 +599,7 @@ class StructureResolverTest extends TestCase
         $titleProperty->getValue()->willReturn('test-123');
         $titleProperty->setValue('test-123')->shouldBeCalled();
 
+        $structure->hasProperty('title')->willReturn(true);
         $structure->getProperty('title')->willReturn($titleProperty->reveal());
 
         $titleContentView = $this->prophesize(ContentView::class);

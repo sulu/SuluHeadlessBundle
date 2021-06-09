@@ -62,6 +62,7 @@ class NavigationController
         $webspace = $attributes->getAttribute('webspace');
         $locale = $request->getLocale();
 
+        /** @var string $uuid */
         $uuid = $request->query->get('uuid');
         $depth = (int) $this->getRequestParameter($request, 'depth', false, 1);
         $flat = $this->getBooleanRequestParameter($request, 'flat', false, false);

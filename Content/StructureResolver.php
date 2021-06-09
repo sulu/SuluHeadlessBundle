@@ -118,7 +118,11 @@ class StructureResolver implements StructureResolverInterface
             if (false !== strpos($sourceProperty, '.')) {
                 [$extensionName, $propertyName] = explode('.', $sourceProperty);
 
-                $contentView = new ContentView($unresolvedExtensionData[$extensionName][$propertyName] ?? null);
+                if (!isset($unresolvedExtensionData[$extensionName][$propertyName])) {
+                    continue;
+                }
+
+                $contentView = new ContentView($unresolvedExtensionData[$extensionName][$propertyName]);
                 if ('excerpt' === $extensionName) {
                     $contentView = $this->resolveProperty(
                         $excerptStructure,
@@ -129,7 +133,12 @@ class StructureResolver implements StructureResolverInterface
                     );
                 }
             } else {
+                if (!$structure->hasProperty($sourceProperty)) {
+                    continue;
+                }
+
                 $property = $structure->getProperty($sourceProperty);
+
                 $contentView = $this->resolveProperty(
                     $structure,
                     $sourceProperty,
