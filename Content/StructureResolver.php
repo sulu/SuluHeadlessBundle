@@ -118,7 +118,11 @@ class StructureResolver implements StructureResolverInterface
             if (false !== strpos($sourceProperty, '.')) {
                 [$extensionName, $propertyName] = explode('.', $sourceProperty);
 
-                $contentView = new ContentView($unresolvedExtensionData[$extensionName][$propertyName] ?? null);
+                if (!isset($unresolvedExtensionData[$extensionName][$propertyName])) {
+                    continue;
+                }
+
+                $contentView = new ContentView($unresolvedExtensionData[$extensionName][$propertyName]);
                 if ('excerpt' === $extensionName) {
                     $contentView = $this->resolveProperty(
                         $excerptStructure,
@@ -129,14 +133,18 @@ class StructureResolver implements StructureResolverInterface
                     );
                 }
             } else {
-                $value = $structure->hasProperty($sourceProperty) ? $structure->getPropertyValue($sourceProperty) : null;
+                if (!$structure->hasProperty($sourceProperty)) {
+                    continue;
+                }
+
+                $property = $structure->getProperty($sourceProperty);
 
                 $contentView = $this->resolveProperty(
                     $structure,
                     $sourceProperty,
                     $locale,
                     $attributes,
-                    $value
+                    $property->getValue()
                 );
             }
 
@@ -291,13 +299,8 @@ class StructureResolver implements StructureResolverInterface
         array $attributes,
         $value
     ): ContentView {
-        $property = $structure->hasProperty($name) ? $structure->getProperty($name) : null;
-
-        if ($property) {
-            $property->setValue($value);
-        } else {
-            return new ContentView(null, []);
-        }
+        $property = $structure->getProperty($name);
+        $property->setValue($value);
 
         return $this->contentResolver->resolve(
             $value,
@@ -325,4 +328,3 @@ class StructureResolver implements StructureResolverInterface
         $referenceStore->add($uuid);
     }
 }
-
