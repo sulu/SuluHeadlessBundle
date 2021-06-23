@@ -200,5 +200,13 @@
 
             <tag name="sulu_headless.content_type_resolver"/>
         </service>
+
+        <service
+            id="sulu_headless.content_resolver.resource_locator"
+            class="Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\ResourceLocatorResolver"
+            lazy="true"
+        >
+            <tag name="sulu_headless.content_type_resolver"/>
+        </service>
     </services>
 </container>
