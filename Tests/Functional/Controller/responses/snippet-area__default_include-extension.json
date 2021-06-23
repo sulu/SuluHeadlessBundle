@@ -35,6 +35,7 @@
         }
     },
     "id": "@uuid@",
+    "nodeType": 1,
     "template": "default",
     "type": "snippet",
     "view": {
