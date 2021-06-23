@@ -388,13 +388,17 @@ class StructureResolver implements StructureResolverInterface
     {
         $document = $structure->getDocument();
 
-        if ($document instanceof RedirectTypeBehavior
+        while ($document instanceof RedirectTypeBehavior
             && RedirectType::INTERNAL === $document->getRedirectType()) {
             $redirectTargetDocument = $document->getRedirectTarget();
 
             if ($redirectTargetDocument instanceof StructureBehavior) {
-                return $this->documentToStructure($redirectTargetDocument);
+                $document = $redirectTargetDocument;
             }
+        }
+
+        if ($document !== $structure->getDocument() && $document instanceof StructureBehavior) {
+            return $this->documentToStructure($document);
         }
 
         return $structure;

@@ -248,6 +248,7 @@ class StructureResolverTest extends TestCase
         $structure->getNodeType()->willReturn(2);
         $pageDocument->getRedirectType()->willReturn(2);
         $pageDocument->getRedirectTarget()->willReturn($targetPageDocument->reveal());
+        $targetPageDocument->getRedirectType()->willReturn(1);
 
         $targetStructure->setDocument($targetPageDocument->reveal())->shouldBeCalled();
 
@@ -752,6 +753,7 @@ class StructureResolverTest extends TestCase
         $structure->getNodeType()->willReturn(2);
         $pageDocument->getRedirectType()->willReturn(2);
         $pageDocument->getRedirectTarget()->willReturn($targetPageDocument->reveal());
+        $targetPageDocument->getRedirectType()->willReturn(1);
 
         $targetStructure->setDocument($targetPageDocument->reveal())->shouldBeCalled();
 
