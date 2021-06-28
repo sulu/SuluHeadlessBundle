@@ -154,11 +154,17 @@ class StructureResolverTest extends TestCase
         $titleProperty = $this->prophesize(PropertyInterface::class);
         $titleProperty->getName()->willReturn('title');
         $titleProperty->getValue()->willReturn('test-123');
+        $titleProperty->getStructure()->willReturn($structure->reveal());
+
         $mediaProperty = $this->prophesize(PropertyInterface::class);
         $mediaProperty->getName()->willReturn('media');
         $mediaProperty->getValue()->willReturn(['ids' => [1, 2, 3]]);
+        $mediaProperty->getStructure()->willReturn($structure->reveal());
 
+        $structure->hasProperty('title')->willReturn(true);
         $structure->getProperty('title')->willReturn($titleProperty->reveal());
+        $structure->hasProperty('media')->willReturn(true);
+        $structure->getProperty('media')->willReturn($mediaProperty->reveal());
         $structure->getProperties(true)->willReturn(
             [
                 $titleProperty->reveal(),
@@ -299,16 +305,22 @@ class StructureResolverTest extends TestCase
         $titleProperty = $this->prophesize(PropertyInterface::class);
         $titleProperty->getName()->willReturn('title');
         $titleProperty->getValue()->willReturn('test-123');
+        $titleProperty->getStructure()->willReturn($structure->reveal());
 
         $targetTitleProperty = $this->prophesize(PropertyInterface::class);
         $targetTitleProperty->getName()->willReturn('title');
         $targetTitleProperty->getValue()->willReturn('test-456');
+        $targetTitleProperty->getStructure()->willReturn($targetStructure->reveal());
 
         $mediaProperty = $this->prophesize(PropertyInterface::class);
         $mediaProperty->getName()->willReturn('media');
         $mediaProperty->getValue()->willReturn(['ids' => [1, 2, 3]]);
+        $mediaProperty->getStructure()->willReturn($targetStructure->reveal());
 
+        $structure->hasProperty('title')->willReturn(true);
         $structure->getProperty('title')->willReturn($titleProperty->reveal());
+        $targetStructure->hasProperty('media')->willReturn(true);
+        $targetStructure->getProperty('media')->willReturn($mediaProperty->reveal());
         $targetStructure->getProperties(true)->willReturn(
             [
                 $targetTitleProperty->reveal(),
@@ -350,8 +362,7 @@ class StructureResolverTest extends TestCase
             ->shouldBeCalled();
 
         $this->contentResolver->resolve('test-456', $targetTitleProperty->reveal(), 'en', ['webspaceKey' => 'sulu_io'])
-            ->willReturn($targetTitleContentView->reveal())
-            ->shouldBeCalled();
+            ->shouldNotBeCalled();
 
         $this->contentResolver->resolve(
             ['ids' => [1, 2, 3]],
@@ -439,12 +450,17 @@ class StructureResolverTest extends TestCase
         $titleProperty = $this->prophesize(PropertyInterface::class);
         $titleProperty->getName()->willReturn('title')->shouldBeCalled();
         $titleProperty->getValue()->willReturn('test-123')->shouldBeCalled();
+        $titleProperty->getStructure()->willReturn($structure->reveal());
 
         $mediaProperty = $this->prophesize(PropertyInterface::class);
         $mediaProperty->getName()->willReturn('media')->shouldBeCalled();
         $mediaProperty->getValue()->willReturn(['ids' => [1, 2, 3]])->shouldBeCalled();
+        $mediaProperty->getStructure()->willReturn($structure->reveal());
 
+        $structure->hasProperty('title')->willReturn(true);
         $structure->getProperty('title')->willReturn($titleProperty->reveal());
+        $structure->hasProperty('media')->willReturn(true);
+        $structure->getProperty('media')->willReturn($mediaProperty->reveal());
         $structure->getProperties(true)->willReturn(
             [
                 $titleProperty->reveal(),
@@ -546,12 +562,17 @@ class StructureResolverTest extends TestCase
         $titleProperty = $this->prophesize(PropertyInterface::class);
         $titleProperty->getName()->willReturn('title')->shouldBeCalled();
         $titleProperty->getValue()->willReturn('test-123')->shouldBeCalled();
+        $titleProperty->getStructure()->willReturn($structure->reveal());
 
         $mediaProperty = $this->prophesize(PropertyInterface::class);
         $mediaProperty->getName()->willReturn('media')->shouldBeCalled();
         $mediaProperty->getValue()->willReturn(['ids' => [1, 2, 3]])->shouldBeCalled();
+        $mediaProperty->getStructure()->willReturn($structure->reveal());
 
+        $structure->hasProperty('title')->willReturn(true);
         $structure->getProperty('title')->willReturn($titleProperty->reveal());
+        $structure->hasProperty('media')->willReturn(true);
+        $structure->getProperty('media')->willReturn($mediaProperty->reveal());
         $structure->getProperties(true)->willReturn(
             [
                 $titleProperty->reveal(),
@@ -676,6 +697,7 @@ class StructureResolverTest extends TestCase
         $titleProperty->getName()->willReturn('title');
         $titleProperty->getValue()->willReturn('test-123');
         $titleProperty->setValue('test-123')->shouldBeCalled();
+        $titleProperty->getStructure()->willReturn($structure->reveal());
 
         $structure->hasProperty('title')->willReturn(true);
         $structure->getProperty('title')->willReturn($titleProperty->reveal());
@@ -759,7 +781,7 @@ class StructureResolverTest extends TestCase
 
         // expected object calls
         $structure->getUuid()->willReturn('123-123-123')->shouldBeCalled();
-        $structure->getWebspaceKey()->shouldNotBeCalled();
+        $structure->getWebspaceKey()->willReturn('sulu_io')->shouldBeCalled();
 
         $targetStructure->getUuid()->willReturn('456-456-456')->shouldBeCalled();
         $targetStructure->getWebspaceKey()->willReturn('sulu_io')->shouldBeCalled();
@@ -806,6 +828,7 @@ class StructureResolverTest extends TestCase
         $titleProperty->getName()->willReturn('title');
         $titleProperty->getValue()->willReturn('test-123');
         $titleProperty->setValue('test-123')->shouldBeCalled();
+        $titleProperty->getStructure()->willReturn($structure->reveal());
 
         $structure->hasProperty('title')->willReturn(true);
         $structure->getProperty('title')->willReturn($titleProperty->reveal());
@@ -941,6 +964,7 @@ class StructureResolverTest extends TestCase
         $titleProperty->getName()->willReturn('title');
         $titleProperty->getValue()->willReturn('test-123');
         $titleProperty->setValue('test-123')->shouldBeCalled();
+        $titleProperty->getStructure()->willReturn($structure->reveal());
 
         $structure->hasProperty('title')->willReturn(true);
         $structure->getProperty('title')->willReturn($titleProperty->reveal());

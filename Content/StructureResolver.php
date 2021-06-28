@@ -18,6 +18,7 @@ use Sulu\Bundle\PageBundle\Document\BasePageDocument;
 use Sulu\Bundle\PageBundle\Preview\PageRouteDefaultsProvider;
 use Sulu\Bundle\WebsiteBundle\ReferenceStore\ReferenceStoreNotExistsException;
 use Sulu\Bundle\WebsiteBundle\ReferenceStore\ReferenceStorePoolInterface;
+use Sulu\Component\Content\Compat\PropertyInterface;
 use Sulu\Component\Content\Compat\Structure\StructureBridge;
 use Sulu\Component\Content\Compat\StructureInterface;
 use Sulu\Component\Content\Compat\StructureManagerInterface;
@@ -69,42 +70,30 @@ class StructureResolver implements StructureResolverInterface
         string $locale,
         bool $includeExtension = true
     ): array {
-        $originalStructure = $structure;
-        $structure = $this->getMostSpecificStructure($originalStructure);
+        $requestedStructure = $structure;
+        $targetStructure = $this->getTargetStructure($requestedStructure);
 
-        $data = $this->getStructureData($structure, $originalStructure);
+        $data = $this->getStructureData($targetStructure, $requestedStructure);
 
         if ($includeExtension) {
             $data['extension'] = $this->resolveExtensionData(
-                $this->getExtensionData($structure),
+                $this->getExtensionData($targetStructure),
                 $locale,
-                ['webspaceKey' => $structure->getWebspaceKey()]
+                ['webspaceKey' => $targetStructure->getWebspaceKey()]
             );
         }
 
-        foreach ($structure->getProperties(true) as $property) {
+        foreach ($this->getProperties($targetStructure, $requestedStructure) as $property) {
             $contentView = $this->contentResolver->resolve(
                 $property->getValue(),
                 $property,
                 $locale,
-                ['webspaceKey' => $structure->getWebspaceKey()]
+                ['webspaceKey' => $property->getStructure()->getWebspaceKey()]
             );
 
             $data['content'][$property->getName()] = $contentView->getContent();
             $data['view'][$property->getName()] = $contentView->getView();
         }
-
-        $titleProperty = $originalStructure->getProperty('title');
-
-        $contentView = $this->contentResolver->resolve(
-            $titleProperty->getValue(),
-            $titleProperty,
-            $locale,
-            ['webspaceKey' => $originalStructure->getWebspaceKey()]
-        );
-
-        $data['content'][$titleProperty->getName()] = $contentView->getContent();
-        $data['view'][$titleProperty->getName()] = $contentView->getView();
 
         return $data;
     }
@@ -118,14 +107,14 @@ class StructureResolver implements StructureResolverInterface
         string $locale,
         bool $includeExtension = false
     ): array {
-        $originalStructure = $structure;
-        $structure = $this->getMostSpecificStructure($originalStructure);
+        $requestedStructure = $structure;
+        $targetStructure = $this->getTargetStructure($requestedStructure);
 
-        $data = $this->getStructureData($structure, $originalStructure);
+        $data = $this->getStructureData($targetStructure, $requestedStructure);
 
-        $unresolvedExtensionData = $this->getExtensionData($structure);
+        $unresolvedExtensionData = $this->getExtensionData($targetStructure);
 
-        $attributes = ['webspaceKey' => $structure->getWebspaceKey()];
+        $attributes = ['webspaceKey' => $targetStructure->getWebspaceKey()];
         $excerptStructure = $this->structureManager->getStructure('excerpt');
 
         if ($includeExtension) {
@@ -156,22 +145,17 @@ class StructureResolver implements StructureResolverInterface
                     );
                 }
             } else {
-                $propertyStructure = $structure;
-                if ('title' === $sourceProperty) {
-                    $propertyStructure = $originalStructure;
-                }
+                $property = $this->getProperty($sourceProperty, $targetStructure, $requestedStructure);
 
-                if (!$propertyStructure->hasProperty($sourceProperty)) {
+                if (null === $property) {
                     continue;
                 }
 
-                $property = $propertyStructure->getProperty($sourceProperty);
-
                 $contentView = $this->resolveProperty(
-                    $propertyStructure,
+                    $property->getStructure(),
                     $sourceProperty,
                     $locale,
-                    $attributes,
+                    ['webspaceKey' => $property->getStructure()->getWebspaceKey()],
                     $property->getValue()
                 );
             }
@@ -184,72 +168,117 @@ class StructureResolver implements StructureResolverInterface
     }
 
     /**
-     * @param StructureBridge $structure
-     * @param StructureBridge $originalStructure
+     * @param StructureBridge $targetStructure
+     * @param StructureBridge $requestedStructure
+     */
+    private function getProperty(
+        string $name,
+        StructureInterface $targetStructure,
+        StructureInterface $requestedStructure
+    ): ?PropertyInterface {
+        if ('title' === $name && $requestedStructure->hasProperty('title')) {
+            return $requestedStructure->getProperty('title');
+        }
+
+        if ($targetStructure->hasProperty($name)) {
+            return $targetStructure->getProperty($name);
+        }
+
+        return null;
+    }
+
+    /**
+     * @param StructureBridge $targetStructure
+     * @param StructureBridge $requestedStructure
+     *
+     * @return array<string, PropertyInterface>
+     */
+    private function getProperties(StructureInterface $targetStructure, StructureInterface $requestedStructure): array
+    {
+        $properties = [];
+
+        foreach ($targetStructure->getProperties(true) as $property) {
+            $property = $this->getProperty(
+                $property->getName(),
+                $targetStructure,
+                $requestedStructure
+            );
+
+            if (null !== $property) {
+                $properties[$property->getName()] = $property;
+            }
+        }
+
+        return $properties;
+    }
+
+    /**
+     * @param StructureBridge $targetStructure
+     * @param StructureBridge $requestedStructure
      *
      * @return mixed[]
      */
-    private function getStructureData(StructureInterface $structure, StructureInterface $originalStructure): array
+    private function getStructureData(StructureInterface $targetStructure, StructureInterface $requestedStructure): array
     {
-        $document = $structure->getDocument();
-        $originalDocument = $originalStructure->getDocument();
+        $targetDocument = $targetStructure->getDocument();
+        $requestedDocument = $requestedStructure->getDocument();
 
-        /** @var string|null $structureType */
-        $structureType = null;
-        if (method_exists($document, 'getStructureType')) {
-            $structureType = $document->getStructureType();
+        /** @var string|null $templateKey */
+        $templateKey = null;
+        if (method_exists($targetDocument, 'getStructureType')) {
+            $templateKey = $targetDocument->getStructureType();
         }
 
         /** @var int|null $author */
         $author = null;
-        if (method_exists($document, 'getAuthor')) {
-            $author = $document->getAuthor();
+        if (method_exists($targetDocument, 'getAuthor')) {
+            $author = $targetDocument->getAuthor();
         }
 
         /** @var \DateTimeInterface|null $authored */
         $authored = null;
-        if (method_exists($document, 'getAuthored')) {
+        if (method_exists($targetDocument, 'getAuthored')) {
             /** @var \DateTimeInterface|null $authored typehint in sulu is wrong */
-            $authored = $document->getAuthored();
+            $authored = $targetDocument->getAuthored();
         }
 
         /** @var int|null $changer */
         $changer = null;
-        if (method_exists($originalDocument, 'getChanger')) {
-            $changer = $originalDocument->getChanger();
+        if (method_exists($requestedDocument, 'getChanger')) {
+            $changer = $requestedDocument->getChanger();
         }
 
         /** @var \DateTimeInterface|null $changed */
         $changed = null;
-        if (method_exists($originalDocument, 'getChanged')) {
-            $changed = $originalDocument->getChanged();
+        if (method_exists($requestedDocument, 'getChanged')) {
+            $changed = $requestedDocument->getChanged();
         }
 
         /** @var int|null $creator */
         $creator = null;
-        if (method_exists($originalDocument, 'getCreator')) {
-            $creator = $originalDocument->getCreator();
+        if (method_exists($requestedDocument, 'getCreator')) {
+            $creator = $requestedDocument->getCreator();
         }
 
         /** @var \DateTimeInterface|null $created */
         $created = null;
-        if (method_exists($originalDocument, 'getCreated')) {
-            $created = $originalDocument->getCreated();
+        if (method_exists($requestedDocument, 'getCreated')) {
+            $created = $requestedDocument->getCreated();
         }
 
-        $type = $this->getTemplateType($structure, $document);
+        $templateType = $this->getTemplateType($targetStructure, $targetDocument);
 
-        $this->addToReferenceStore($structure->getUuid(), $type);
+        $this->addToReferenceStore($targetStructure->getUuid(), $templateType);
         $this->addToReferenceStore(
-            $originalStructure->getUuid(),
-            $this->getTemplateType($originalStructure, $originalDocument)
+            $requestedStructure->getUuid(),
+            $this->getTemplateType($requestedStructure, $requestedDocument)
         );
 
         return [
-            'id' => $originalStructure->getUuid(),
-            'nodeType' => $originalStructure->getNodeType(),
-            'type' => $type,
-            'template' => $structureType,
+            'id' => $requestedStructure->getUuid(),
+            'nodeType' => $requestedStructure->getNodeType(),
+            'type' => $templateType,
+            'template' => $templateKey,
             'content' => [],
             'view' => [],
             'author' => $author,
@@ -367,13 +396,13 @@ class StructureResolver implements StructureResolverInterface
 
         if ($document instanceof StructureBehavior) {
             // determine type for structure that is implemented in the SuluPageBundle or the SuluArticleBundle
-            $type = $this->documentInspector->getMetadata($document)->getAlias();
+            $templateType = $this->documentInspector->getMetadata($document)->getAlias();
 
-            if ('home' === $type) {
+            if ('home' === $templateType) {
                 return 'page';
             }
 
-            return $type;
+            return $templateType;
         }
 
         return 'unknown';
@@ -384,7 +413,7 @@ class StructureResolver implements StructureResolverInterface
      *
      * @return StructureBridge
      */
-    private function getMostSpecificStructure(StructureInterface $structure): StructureInterface
+    private function getTargetStructure(StructureInterface $structure): StructureInterface
     {
         $document = $structure->getDocument();
 
