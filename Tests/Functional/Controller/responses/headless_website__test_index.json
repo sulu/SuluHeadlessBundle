@@ -1,5 +1,6 @@
 {
     "id": "@uuid@",
+    "nodeType": 1,
     "type": "page",
     "template": "default",
     "content": {
