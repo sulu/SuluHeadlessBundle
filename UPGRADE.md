@@ -1,6 +1,6 @@
 # Upgrade
 
-## 0.x
+## 0.6.0
 
 ### Change constructor arguments of SingleSnippetSelectionResolver
 
