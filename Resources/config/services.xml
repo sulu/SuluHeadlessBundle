@@ -25,6 +25,9 @@
             <argument type="tagged_iterator" tag="sulu_headless.structure_resolver_extension"/>
         </service>
         <service id="Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface" alias="sulu_headless.structure_resolver"/>
+        <service id="Sulu\Bundle\HeadlessBundle\Content\StructureResolver\LocalizationResolverExtension" autowire="true">
+            <tag name="sulu_headless.structure_resolver_extension" />
+        </service>
 
         <service
             id="sulu_headless.content_resolver"
