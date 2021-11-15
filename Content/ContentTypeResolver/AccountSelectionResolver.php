@@ -58,6 +58,6 @@ class AccountSelectionResolver implements ContentTypeResolverInterface
             $content[] = $this->accountSerializer->serialize($account->getEntity(), $locale, $serializationContext);
         }
 
-        return new ContentView($content, ['ids' => $data ?: []]);
+        return new ContentView($content, ['ids' => $data]);
     }
 }

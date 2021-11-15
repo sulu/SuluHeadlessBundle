@@ -15,7 +15,6 @@ namespace Sulu\Bundle\HeadlessBundle\Content;
 
 use Sulu\Bundle\DocumentManagerBundle\Bridge\DocumentInspector;
 use Sulu\Bundle\PageBundle\Document\BasePageDocument;
-use Sulu\Bundle\PageBundle\Preview\PageRouteDefaultsProvider;
 use Sulu\Bundle\WebsiteBundle\ReferenceStore\ReferenceStoreNotExistsException;
 use Sulu\Bundle\WebsiteBundle\ReferenceStore\ReferenceStorePoolInterface;
 use Sulu\Component\Content\Compat\PropertyInterface;
@@ -218,8 +217,10 @@ class StructureResolver implements StructureResolverInterface
      *
      * @return mixed[]
      */
-    private function getStructureData(StructureInterface $targetStructure, StructureInterface $requestedStructure): array
-    {
+    private function getStructureData(
+        StructureInterface $targetStructure,
+        StructureInterface $requestedStructure
+    ): array {
         $targetDocument = $targetStructure->getDocument();
         $requestedDocument = $requestedStructure->getDocument();
 
@@ -416,9 +417,11 @@ class StructureResolver implements StructureResolverInterface
     private function getTargetStructure(StructureInterface $structure): StructureInterface
     {
         $document = $structure->getDocument();
+        if (!$document instanceof RedirectTypeBehavior) {
+            return $structure;
+        }
 
-        while ($document instanceof RedirectTypeBehavior
-            && RedirectType::INTERNAL === $document->getRedirectType()) {
+        while ($document instanceof RedirectTypeBehavior && RedirectType::INTERNAL === $document->getRedirectType()) {
             $redirectTargetDocument = $document->getRedirectTarget();
 
             if ($redirectTargetDocument instanceof StructureBehavior) {

@@ -100,6 +100,6 @@ class PageSelectionResolver implements ContentTypeResolverInterface
             $pages[] = $this->structureResolver->resolveProperties($pageStructure, $propertyMap, $locale);
         }
 
-        return new ContentView($pages, ['ids' => $data ?: []]);
+        return new ContentView($pages, ['ids' => $data]);
     }
 }
