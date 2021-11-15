@@ -59,6 +59,6 @@ class CategorySelectionResolver implements ContentTypeResolverInterface
             $serializedCategories[] = $this->categorySerializer->serialize($category, $locale, $serializationContext);
         }
 
-        return new ContentView($serializedCategories, ['ids' => $data ?: []]);
+        return new ContentView($serializedCategories, ['ids' => $data]);
     }
 }

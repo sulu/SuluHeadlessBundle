@@ -82,6 +82,6 @@ class ContactAccountSelectionResolver implements ContentTypeResolverInterface
             }
         }
 
-        return new ContentView($content, ['ids' => $data ?: []]);
+        return new ContentView($content, ['ids' => $data]);
     }
 }

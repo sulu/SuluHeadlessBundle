@@ -58,6 +58,6 @@ class ContactSelectionResolver implements ContentTypeResolverInterface
             $content[] = $this->contactSerializer->serialize($contact->getEntity(), $locale, $serializationContext);
         }
 
-        return new ContentView($content, ['ids' => $data ?: []]);
+        return new ContentView($content, ['ids' => $data]);
     }
 }
