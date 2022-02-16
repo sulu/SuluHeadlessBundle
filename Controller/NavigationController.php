@@ -58,8 +58,8 @@ class NavigationController
         NavigationMapperInterface $navigationMapper,
         SerializerInterface $serializer,
         MediaSerializerInterface $mediaSerializer,
-                                 $maxAge,
-                                 $sharedMaxAge
+        $maxAge,
+        $sharedMaxAge
     ) {
         $this->navigationMapper = $navigationMapper;
         $this->serializer = $serializer;

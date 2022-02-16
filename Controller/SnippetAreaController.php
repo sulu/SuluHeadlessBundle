@@ -66,8 +66,8 @@ class SnippetAreaController
         ContentMapperInterface $contentMapper,
         StructureResolverInterface $structureResolver,
         SerializerInterface $serializer,
-                            $maxAge,
-                            $sharedMaxAge
+        $maxAge,
+        $sharedMaxAge
     ) {
         $this->defaultSnippetManager = $defaultSnippetManager;
         $this->contentMapper = $contentMapper;
