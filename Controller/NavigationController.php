@@ -16,6 +16,7 @@ namespace Sulu\Bundle\HeadlessBundle\Controller;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializerInterface;
+use Sulu\Bundle\HttpCacheBundle\Cache\SuluHttpCache;
 use Sulu\Bundle\WebsiteBundle\Navigation\NavigationMapperInterface;
 use Sulu\Component\Rest\ListBuilder\CollectionRepresentation;
 use Sulu\Component\Rest\RequestParametersTrait;
@@ -43,14 +44,28 @@ class NavigationController
      */
     private $mediaSerializer;
 
+    /**
+     * @var int
+     */
+    private $maxAge;
+
+    /**
+     * @var int
+     */
+    private $sharedMaxAge;
+
     public function __construct(
         NavigationMapperInterface $navigationMapper,
         SerializerInterface $serializer,
-        MediaSerializerInterface $mediaSerializer
+        MediaSerializerInterface $mediaSerializer,
+                                 $maxAge,
+                                 $sharedMaxAge
     ) {
         $this->navigationMapper = $navigationMapper;
         $this->serializer = $serializer;
         $this->mediaSerializer = $mediaSerializer;
+        $this->maxAge = $maxAge;
+        $this->sharedMaxAge = $sharedMaxAge;
     }
 
     public function getAction(Request $request, string $context): Response
@@ -73,7 +88,7 @@ class NavigationController
         // need to serialize the media entities inside the excerpt to keep the media serialization consistent
         $navigation = $this->serializeExcerptMedia($navigation, $locale);
 
-        return new Response(
+        $response = new Response(
             $this->serializer->serialize(
                 new CollectionRepresentation($navigation, 'items'),
                 'json',
@@ -84,6 +99,17 @@ class NavigationController
                 'Content-Type' => 'application/json',
             ]
         );
+
+        // cache-control directives
+        $response->setPublic();
+        $response->setMaxAge($this->maxAge);
+        $response->setSharedMaxAge($this->sharedMaxAge);
+
+        // set reverse-proxy TTL (Symfony HttpCache, Varnish, ...) to avoid caching of intermediate proxies
+        $response->headers->set(SuluHttpCache::HEADER_REVERSE_PROXY_TTL, $this->maxAge);
+
+        return $response;
+
     }
 
     /**

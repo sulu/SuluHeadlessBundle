@@ -16,6 +16,7 @@ namespace Sulu\Bundle\HeadlessBundle\Controller;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
+use Sulu\Bundle\HttpCacheBundle\Cache\SuluHttpCache;
 use Sulu\Bundle\SnippetBundle\Snippet\DefaultSnippetManagerInterface;
 use Sulu\Component\Content\Mapper\ContentMapperInterface;
 use Sulu\Component\Rest\RequestParametersTrait;
@@ -50,16 +51,30 @@ class SnippetAreaController
      */
     private $serializer;
 
+    /**
+     * @var int
+     */
+    private $maxAge;
+
+    /**
+     * @var int
+     */
+    private $sharedMaxAge;
+
     public function __construct(
         DefaultSnippetManagerInterface $defaultSnippetManager,
         ContentMapperInterface $contentMapper,
         StructureResolverInterface $structureResolver,
-        SerializerInterface $serializer
+        SerializerInterface $serializer,
+                            $maxAge,
+                            $sharedMaxAge
     ) {
         $this->defaultSnippetManager = $defaultSnippetManager;
         $this->contentMapper = $contentMapper;
         $this->structureResolver = $structureResolver;
         $this->serializer = $serializer;
+        $this->maxAge = $maxAge;
+        $this->sharedMaxAge = $sharedMaxAge;
     }
 
     public function getAction(Request $request, string $area): Response
@@ -102,7 +117,7 @@ class SnippetAreaController
             $includeExtension
         );
 
-        return new Response(
+        $response = new Response(
             $this->serializer->serialize(
                 $resolvedSnippet,
                 'json',
@@ -113,5 +128,15 @@ class SnippetAreaController
                 'Content-Type' => 'application/json',
             ]
         );
+
+        // cache-control directives
+        $response->setPublic();
+        $response->setMaxAge($this->maxAge);
+        $response->setSharedMaxAge($this->sharedMaxAge);
+
+        // set reverse-proxy TTL (Symfony HttpCache, Varnish, ...) to avoid caching of intermediate proxies
+        $response->headers->set(SuluHttpCache::HEADER_REVERSE_PROXY_TTL, $this->maxAge);
+
+        return $response;
     }
 }
