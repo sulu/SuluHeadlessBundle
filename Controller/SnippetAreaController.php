@@ -66,8 +66,8 @@ class SnippetAreaController
         ContentMapperInterface $contentMapper,
         StructureResolverInterface $structureResolver,
         SerializerInterface $serializer,
-        $maxAge,
-        $sharedMaxAge
+        int $maxAge,
+        int $sharedMaxAge
     ) {
         $this->defaultSnippetManager = $defaultSnippetManager;
         $this->contentMapper = $contentMapper;
@@ -135,7 +135,7 @@ class SnippetAreaController
         $response->setSharedMaxAge($this->sharedMaxAge);
 
         // set reverse-proxy TTL (Symfony HttpCache, Varnish, ...) to avoid caching of intermediate proxies
-        $response->headers->set(SuluHttpCache::HEADER_REVERSE_PROXY_TTL, $this->maxAge);
+        $response->headers->set(SuluHttpCache::HEADER_REVERSE_PROXY_TTL, (string) $this->maxAge);
 
         return $response;
     }

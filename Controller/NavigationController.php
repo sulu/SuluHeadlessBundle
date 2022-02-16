@@ -58,8 +58,8 @@ class NavigationController
         NavigationMapperInterface $navigationMapper,
         SerializerInterface $serializer,
         MediaSerializerInterface $mediaSerializer,
-        $maxAge,
-        $sharedMaxAge
+        int $maxAge,
+        int $sharedMaxAge
     ) {
         $this->navigationMapper = $navigationMapper;
         $this->serializer = $serializer;
@@ -106,7 +106,7 @@ class NavigationController
         $response->setSharedMaxAge($this->sharedMaxAge);
 
         // set reverse-proxy TTL (Symfony HttpCache, Varnish, ...) to avoid caching of intermediate proxies
-        $response->headers->set(SuluHttpCache::HEADER_REVERSE_PROXY_TTL, $this->maxAge);
+        $response->headers->set(SuluHttpCache::HEADER_REVERSE_PROXY_TTL, (string) $this->maxAge);
 
         return $response;
 
