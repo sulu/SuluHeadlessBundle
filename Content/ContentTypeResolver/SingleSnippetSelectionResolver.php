@@ -19,11 +19,11 @@ use Sulu\Component\Content\Compat\PropertyInterface;
 class SingleSnippetSelectionResolver implements ContentTypeResolverInterface
 {
     /**
-     * @var SnippetSelectionResolver
+     * @var ContentTypeResolverInterface
      */
     private $snippetSelectionResolver;
 
-    public function __construct(SnippetSelectionResolver $snippetSelectionResolver)
+    public function __construct(ContentTypeResolverInterface $snippetSelectionResolver)
     {
         $this->snippetSelectionResolver = $snippetSelectionResolver;
     }
