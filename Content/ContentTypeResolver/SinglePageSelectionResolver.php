@@ -24,11 +24,11 @@ class SinglePageSelectionResolver implements ContentTypeResolverInterface
     }
 
     /**
-     * @var PageSelectionResolver
+     * @var ContentTypeResolverInterface
      */
     private $pageSelectionResolver;
 
-    public function __construct(PageSelectionResolver $pageSelectionResolver)
+    public function __construct(ContentTypeResolverInterface $pageSelectionResolver)
     {
         $this->pageSelectionResolver = $pageSelectionResolver;
     }

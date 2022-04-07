@@ -24,11 +24,11 @@ class SingleMediaSelectionResolver implements ContentTypeResolverInterface
     }
 
     /**
-     * @var MediaSelectionResolver
+     * @var ContentTypeResolverInterface
      */
     private $mediaSelectionResolver;
 
-    public function __construct(MediaSelectionResolver $mediaSelectionResolver)
+    public function __construct(ContentTypeResolverInterface $mediaSelectionResolver)
     {
         $this->mediaSelectionResolver = $mediaSelectionResolver;
     }
