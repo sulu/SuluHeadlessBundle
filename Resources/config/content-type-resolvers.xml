@@ -181,6 +181,16 @@
         </service>
 
         <service
+            id="sulu_headless.content_resolver.link"
+            class="Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\LinkResolver"
+            lazy="true"
+        >
+            <argument type="service" id="sulu_markup.link_tag.provider_pool"/>
+
+            <tag name="sulu_headless.content_type_resolver"/>
+        </service>
+
+        <service
             id="sulu_headless.content_resolver.text_editor"
             class="Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\TextEditorResolver"
         >
