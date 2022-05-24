@@ -5,7 +5,7 @@
     "description": "Bundle that provides controllers and services for using Sulu as headless content management system",
     "require": {
         "php": "^7.3 || ^8.0",
-        "sulu/sulu": "^2.2 || ^2.3@dev",
+        "sulu/sulu": "^2.4",
         "symfony/config": "^4.4 || ^5.0",
         "symfony/dependency-injection": "^4.4 || ^5.0",
         "symfony/framework-bundle": "^4.4 || ^5.0",

@@ -46,7 +46,7 @@ class Kernel extends SuluTestKernel
     /**
      * @return array<string, mixed>
      */
-    protected function getKernelParameters()
+    protected function getKernelParameters(): array
     {
         $parameters = parent::getKernelParameters();
 
