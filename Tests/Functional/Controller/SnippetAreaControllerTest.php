@@ -27,6 +27,11 @@ class SnippetAreaControllerTest extends BaseTestCase
      */
     private $websiteClient;
 
+    /**
+     * @var string
+     */
+    private static $snippetUuid;
+
     public static function setUpBeforeClass(): void
     {
         self::initPhpcr();
@@ -42,6 +47,8 @@ class SnippetAreaControllerTest extends BaseTestCase
             ],
             'template' => 'default',
         ], 'de');
+
+        self::$snippetUuid = $snippet->getUuid();
 
         $defaultSnippetManager = self::$container->get('sulu_snippet.default_snippet.manager');
         $defaultSnippetManager->save(
@@ -122,6 +129,11 @@ class SnippetAreaControllerTest extends BaseTestCase
 
         $response = $this->websiteClient->getResponse();
         self::assertInstanceOf(Response::class, $response);
+
+        if (200 === $response->getStatusCode()) {
+            $this->assertStringContainsString('public', (string) $response->headers->get('Cache-Control'));
+            $this->assertStringContainsString(self::$snippetUuid, (string) $response->headers->get('x-cache-tags'));
+        }
 
         if (null !== $expectedPatternFile) {
             self::assertResponseContent(

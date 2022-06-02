@@ -16,7 +16,9 @@ namespace Sulu\Bundle\HeadlessBundle\Controller;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
+use Sulu\Bundle\HttpCacheBundle\Cache\SuluHttpCache;
 use Sulu\Bundle\SnippetBundle\Snippet\DefaultSnippetManagerInterface;
+use Sulu\Bundle\WebsiteBundle\ReferenceStore\ReferenceStoreInterface;
 use Sulu\Component\Content\Mapper\ContentMapperInterface;
 use Sulu\Component\Rest\RequestParametersTrait;
 use Sulu\Component\Webspace\Analyzer\Attributes\RequestAttributes;
@@ -29,6 +31,9 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class SnippetAreaController
 {
     use RequestParametersTrait;
+
+    // 7 days
+    public const SNIPPET_AREA_CACHE_LIFE_TIME = '604800';
 
     /**
      * @var DefaultSnippetManagerInterface
@@ -50,16 +55,23 @@ class SnippetAreaController
      */
     private $serializer;
 
+    /**
+     * @var ReferenceStoreInterface
+     */
+    private $snippetReferenceStore;
+
     public function __construct(
         DefaultSnippetManagerInterface $defaultSnippetManager,
         ContentMapperInterface $contentMapper,
         StructureResolverInterface $structureResolver,
-        SerializerInterface $serializer
+        SerializerInterface $serializer,
+        ReferenceStoreInterface $snippetReferenceStore
     ) {
         $this->defaultSnippetManager = $defaultSnippetManager;
         $this->contentMapper = $contentMapper;
         $this->structureResolver = $structureResolver;
         $this->serializer = $serializer;
+        $this->snippetReferenceStore = $snippetReferenceStore;
     }
 
     public function getAction(Request $request, string $area): Response
@@ -96,13 +108,15 @@ class SnippetAreaController
             throw new NotFoundHttpException(sprintf('Snippet for snippet area "%s" does not exist in locale "%s"', $area, $locale));
         }
 
+        $this->snippetReferenceStore->add($snippet->getUuid());
+
         $resolvedSnippet = $this->structureResolver->resolve(
             $snippet,
             $locale,
             $includeExtension
         );
 
-        return new Response(
+        $response = new Response(
             $this->serializer->serialize(
                 $resolvedSnippet,
                 'json',
@@ -113,5 +127,16 @@ class SnippetAreaController
                 'Content-Type' => 'application/json',
             ]
         );
+
+        $response->setPublic();
+        $response->setMaxAge(0);
+        $response->setSharedMaxAge(0);
+
+        $response->headers->set(
+            SuluHttpCache::HEADER_REVERSE_PROXY_TTL,
+            self::SNIPPET_AREA_CACHE_LIFE_TIME
+        );
+
+        return $response;
     }
 }

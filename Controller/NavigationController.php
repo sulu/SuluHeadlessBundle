@@ -16,7 +16,9 @@ namespace Sulu\Bundle\HeadlessBundle\Controller;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializerInterface;
+use Sulu\Bundle\HttpCacheBundle\Cache\SuluHttpCache;
 use Sulu\Bundle\WebsiteBundle\Navigation\NavigationMapperInterface;
+use Sulu\Bundle\WebsiteBundle\ReferenceStore\ReferenceStoreInterface;
 use Sulu\Component\Rest\ListBuilder\CollectionRepresentation;
 use Sulu\Component\Rest\RequestParametersTrait;
 use Sulu\Component\Webspace\Analyzer\Attributes\RequestAttributes;
@@ -27,6 +29,9 @@ use Symfony\Component\HttpFoundation\Response;
 class NavigationController
 {
     use RequestParametersTrait;
+
+    // 7 days
+    public const NAVIGATION_CACHE_LIFE_TIME = '604800';
 
     /**
      * @var NavigationMapperInterface
@@ -43,14 +48,21 @@ class NavigationController
      */
     private $mediaSerializer;
 
+    /**
+     * @var ReferenceStoreInterface
+     */
+    private $navigationReferenceStore;
+
     public function __construct(
         NavigationMapperInterface $navigationMapper,
         SerializerInterface $serializer,
-        MediaSerializerInterface $mediaSerializer
+        MediaSerializerInterface $mediaSerializer,
+        ReferenceStoreInterface $pageReferenceStore
     ) {
         $this->navigationMapper = $navigationMapper;
         $this->serializer = $serializer;
         $this->mediaSerializer = $mediaSerializer;
+        $this->navigationReferenceStore = $pageReferenceStore;
     }
 
     public function getAction(Request $request, string $context): Response
@@ -70,10 +82,12 @@ class NavigationController
 
         $navigation = $this->loadNavigation($webspace->getKey(), $locale, $depth, $flat, $context, $excerpt, $uuid);
 
+        $this->navigationReferenceStore->add($context);
+
         // need to serialize the media entities inside the excerpt to keep the media serialization consistent
         $navigation = $this->serializeExcerptMedia($navigation, $locale);
 
-        return new Response(
+        $response = new Response(
             $this->serializer->serialize(
                 new CollectionRepresentation($navigation, 'items'),
                 'json',
@@ -84,6 +98,16 @@ class NavigationController
                 'Content-Type' => 'application/json',
             ]
         );
+        $response->setPublic();
+        $response->setMaxAge(0);
+        $response->setSharedMaxAge(0);
+
+        $response->headers->set(
+            SuluHttpCache::HEADER_REVERSE_PROXY_TTL,
+            self::NAVIGATION_CACHE_LIFE_TIME
+        );
+
+        return $response;
     }
 
     /**
@@ -110,7 +134,7 @@ class NavigationController
             );
         }
 
-        return $navigation = $this->navigationMapper->getRootNavigation(
+        return $this->navigationMapper->getRootNavigation(
             $webspaceKey,
             $locale,
             $depth,
@@ -128,7 +152,7 @@ class NavigationController
     private function serializeExcerptMedia(array $navigation, string $locale): array
     {
         foreach ($navigation as $itemIndex => $navigationItem) {
-            if (\array_key_exists('excerpt', $navigationItem)) {
+            if (isset($navigationItem['excerpt'])) {
                 foreach ($navigationItem['excerpt']['icon'] as $iconIndex => $iconMedia) {
                     $navigation[$itemIndex]['excerpt']['icon'][$iconIndex] = $this->mediaSerializer->serialize(
                         $iconMedia->getEntity(),
@@ -142,6 +166,11 @@ class NavigationController
                         $locale
                     );
                 }
+            }
+
+            // recursively serialize all excerpt medias
+            if (!empty($navigationItem['children'])) {
+                $navigation[$itemIndex]['children'] = $this->serializeExcerptMedia($navigationItem['children'], $locale);
             }
         }
 

@@ -11,6 +11,7 @@
             <argument type="service" id="sulu_website.navigation_mapper"/>
             <argument type="service" id="jms_serializer.serializer"/>
             <argument type="service" id="sulu_headless.serializer.media"/>
+            <argument type="service" id="sulu_headless.reference_store.navigation"/>
         </service>
         <service id="Sulu\Bundle\HeadlessBundle\Controller\NavigationController"
                  alias="sulu_headless.controller.navigation" public="true"/>
@@ -24,6 +25,7 @@
             <argument type="service" id="sulu.content.mapper"/>
             <argument type="service" id="sulu_headless.structure_resolver"/>
             <argument type="service" id="jms_serializer.serializer"/>
+            <argument type="service" id="sulu_snippet.reference_store.snippet"/>
         </service>
         <service id="Sulu\Bundle\HeadlessBundle\Controller\SnippetAreaController"
                  alias="sulu_headless.controller.snippet_area" public="true"/>
