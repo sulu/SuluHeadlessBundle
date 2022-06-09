@@ -24,6 +24,10 @@ use Sulu\Component\DocumentManager\Event\UnpublishEvent;
 use Sulu\Component\DocumentManager\Events;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
+/**
+ * @final
+ * @internal
+ */
 class NavigationInvalidationSubscriber implements EventSubscriberInterface
 {
     /**
