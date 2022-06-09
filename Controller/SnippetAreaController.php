@@ -60,18 +60,32 @@ class SnippetAreaController
      */
     private $snippetReferenceStore;
 
+    /**
+     * @var int
+     */
+    private $maxAge;
+
+    /**
+     * @var int
+     */
+    private $sharedMaxAge;
+
     public function __construct(
         DefaultSnippetManagerInterface $defaultSnippetManager,
         ContentMapperInterface $contentMapper,
         StructureResolverInterface $structureResolver,
         SerializerInterface $serializer,
-        ReferenceStoreInterface $snippetReferenceStore
+        ReferenceStoreInterface $snippetReferenceStore,
+        int $maxAge,
+        int $sharedMaxAge
     ) {
         $this->defaultSnippetManager = $defaultSnippetManager;
         $this->contentMapper = $contentMapper;
         $this->structureResolver = $structureResolver;
         $this->serializer = $serializer;
         $this->snippetReferenceStore = $snippetReferenceStore;
+        $this->maxAge = $maxAge;
+        $this->sharedMaxAge = $sharedMaxAge;
     }
 
     public function getAction(Request $request, string $area): Response
@@ -129,8 +143,8 @@ class SnippetAreaController
         );
 
         $response->setPublic();
-        $response->setMaxAge(0);
-        $response->setSharedMaxAge(0);
+        $response->setMaxAge($this->maxAge);
+        $response->setSharedMaxAge($this->sharedMaxAge);
 
         $response->headers->set(
             SuluHttpCache::HEADER_REVERSE_PROXY_TTL,

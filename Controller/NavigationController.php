@@ -53,16 +53,30 @@ class NavigationController
      */
     private $navigationReferenceStore;
 
+    /**
+     * @var int
+     */
+    private $maxAge;
+
+    /**
+     * @var int
+     */
+    private $sharedMaxAge;
+
     public function __construct(
         NavigationMapperInterface $navigationMapper,
         SerializerInterface $serializer,
         MediaSerializerInterface $mediaSerializer,
-        ReferenceStoreInterface $pageReferenceStore
+        ReferenceStoreInterface $pageReferenceStore,
+        int $maxAge,
+        int $sharedMaxAge
     ) {
         $this->navigationMapper = $navigationMapper;
         $this->serializer = $serializer;
         $this->mediaSerializer = $mediaSerializer;
         $this->navigationReferenceStore = $pageReferenceStore;
+        $this->maxAge = $maxAge;
+        $this->sharedMaxAge = $sharedMaxAge;
     }
 
     public function getAction(Request $request, string $context): Response
@@ -98,9 +112,10 @@ class NavigationController
                 'Content-Type' => 'application/json',
             ]
         );
+
         $response->setPublic();
-        $response->setMaxAge(0);
-        $response->setSharedMaxAge(0);
+        $response->setMaxAge($this->maxAge);
+        $response->setSharedMaxAge($this->sharedMaxAge);
 
         $response->headers->set(
             SuluHttpCache::HEADER_REVERSE_PROXY_TTL,
