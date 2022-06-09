@@ -25,6 +25,15 @@ class SuluHeadlessExtension extends Extension
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
 
+        $container->setParameter(
+            'sulu_headless.navigation.cache_lifetime',
+            $config['navigation']['cache_lifetime']
+        );
+        $container->setParameter(
+            'sulu_headless.snippet_area.cache_lifetime',
+            $config['snippet_area']['cache_lifetime']
+        );
+
         $loader = new Loader\XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.xml');
         $loader->load('controllers.xml');

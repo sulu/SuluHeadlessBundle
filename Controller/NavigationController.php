@@ -30,9 +30,6 @@ class NavigationController
 {
     use RequestParametersTrait;
 
-    // 7 days
-    public const NAVIGATION_CACHE_LIFE_TIME = '604800';
-
     /**
      * @var NavigationMapperInterface
      */
@@ -63,13 +60,19 @@ class NavigationController
      */
     private $sharedMaxAge;
 
+    /**
+     * @var int
+     */
+    private $cacheLifetime;
+
     public function __construct(
         NavigationMapperInterface $navigationMapper,
         SerializerInterface $serializer,
         MediaSerializerInterface $mediaSerializer,
         ReferenceStoreInterface $pageReferenceStore,
         int $maxAge,
-        int $sharedMaxAge
+        int $sharedMaxAge,
+        int $cacheLifetime
     ) {
         $this->navigationMapper = $navigationMapper;
         $this->serializer = $serializer;
@@ -77,6 +80,7 @@ class NavigationController
         $this->navigationReferenceStore = $pageReferenceStore;
         $this->maxAge = $maxAge;
         $this->sharedMaxAge = $sharedMaxAge;
+        $this->cacheLifetime = $cacheLifetime;
     }
 
     public function getAction(Request $request, string $context): Response
@@ -116,11 +120,7 @@ class NavigationController
         $response->setPublic();
         $response->setMaxAge($this->maxAge);
         $response->setSharedMaxAge($this->sharedMaxAge);
-
-        $response->headers->set(
-            SuluHttpCache::HEADER_REVERSE_PROXY_TTL,
-            self::NAVIGATION_CACHE_LIFE_TIME
-        );
+        $response->headers->set(SuluHttpCache::HEADER_REVERSE_PROXY_TTL, (string) $this->cacheLifetime);
 
         return $response;
     }

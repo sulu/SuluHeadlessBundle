@@ -26,6 +26,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * @final
+ *
  * @internal
  */
 class NavigationInvalidationSubscriber implements EventSubscriberInterface
@@ -55,6 +56,11 @@ class NavigationInvalidationSubscriber implements EventSubscriberInterface
      */
     private $liveSession;
 
+    /**
+     * @var string[]
+     */
+    private $navigationContexts;
+
     public function __construct(
         ?CacheManager $cacheManager,
         PropertyEncoder $propertyEncoder,
@@ -67,51 +73,50 @@ class NavigationInvalidationSubscriber implements EventSubscriberInterface
         $this->documentInspector = $documentInspector;
         $this->defaultSession = $defaultSession;
         $this->liveSession = $liveSession;
+
+        $this->navigationContexts = [];
     }
 
     public static function getSubscribedEvents()
     {
         return [
-            Events::PUBLISH => ['invalidateNavigationContextBeforePublishing', 8192],
-            Events::UNPUBLISH => ['invalidateNavigationContextBeforeUnpublishing', 8192],
-            Events::REMOVE => ['invalidateNavigationContextBeforeRemoving', 8192],
-            Events::REMOVE_LOCALE => ['invalidateNavigationContextBeforeRemovingLocale', 8192],
+            Events::PUBLISH => ['collectNavigationContextBeforePublishing', 8192],
+            Events::UNPUBLISH => ['collectNavigationContextBeforeUnpublishing', 8192],
+            Events::REMOVE => ['collectNavigationContextBeforeRemoving', 8192],
+            Events::REMOVE_LOCALE => ['collectNavigationContextBeforeRemovingLocale', 8192],
+            Events::FLUSH => ['invalidateNavigationContexts', -256],
         ];
     }
 
-    public function invalidateNavigationContextBeforePublishing(PublishEvent $event): void
+    public function collectNavigationContextBeforePublishing(PublishEvent $event): void
     {
         $path = $this->documentInspector->getPath($event->getDocument());
-        $this->invalidateNavigationContext($path, $event->getLocale());
+        $this->collectNavigationContexts($path, $event->getLocale());
     }
 
-    public function invalidateNavigationContextBeforeUnpublishing(UnpublishEvent $event): void
+    public function collectNavigationContextBeforeUnpublishing(UnpublishEvent $event): void
     {
         $path = $this->documentInspector->getPath($event->getDocument());
-        $this->invalidateNavigationContext($path, $event->getLocale());
+        $this->collectNavigationContexts($path, $event->getLocale());
     }
 
-    public function invalidateNavigationContextBeforeRemoving(RemoveEvent $event): void
+    public function collectNavigationContextBeforeRemoving(RemoveEvent $event): void
     {
         $document = $event->getDocument();
         $path = $this->documentInspector->getPath($event->getDocument());
         foreach ($this->documentInspector->getLocales($document) as $locale) {
-            $this->invalidateNavigationContext($path, $locale);
+            $this->collectNavigationContexts($path, $locale);
         }
     }
 
-    public function invalidateNavigationContextBeforeRemovingLocale(RemoveLocaleEvent $event): void
+    public function collectNavigationContextBeforeRemovingLocale(RemoveLocaleEvent $event): void
     {
         $path = $this->documentInspector->getPath($event->getDocument());
-        $this->invalidateNavigationContext($path, $event->getLocale());
+        $this->collectNavigationContexts($path, $event->getLocale());
     }
 
-    public function invalidateNavigationContext(string $path, string $locale): void
+    public function collectNavigationContexts(string $path, string $locale): void
     {
-        if (!$this->cacheManager) {
-            return;
-        }
-
         $defaultNode = $this->defaultSession->getNode($path);
         $liveNode = $this->liveSession->getNode($path);
 
@@ -125,10 +130,26 @@ class NavigationInvalidationSubscriber implements EventSubscriberInterface
             $defaultNavigationContexts = $defaultNode->getProperty($propertyName)->getValue();
         }
 
-        $navigationContexts = array_unique(array_merge($liveNavigationContexts, $defaultNavigationContexts));
+        $this->navigationContexts = array_merge(
+            $this->navigationContexts,
+            $liveNavigationContexts,
+            $defaultNavigationContexts
+        );
+    }
 
-        foreach ($navigationContexts as $navigationContext) {
+    public function invalidateNavigationContexts(): void
+    {
+        if (!$this->cacheManager) {
+            return;
+        }
+
+        foreach ($this->navigationContexts as $navigationContext) {
             $this->cacheManager->invalidateReference('navigation', $navigationContext);
         }
+    }
+
+    public function reset(): void
+    {
+        $this->navigationContexts = [];
     }
 }

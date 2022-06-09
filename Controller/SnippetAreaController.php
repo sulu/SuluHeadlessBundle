@@ -32,9 +32,6 @@ class SnippetAreaController
 {
     use RequestParametersTrait;
 
-    // 7 days
-    public const SNIPPET_AREA_CACHE_LIFE_TIME = '604800';
-
     /**
      * @var DefaultSnippetManagerInterface
      */
@@ -58,7 +55,7 @@ class SnippetAreaController
     /**
      * @var ReferenceStoreInterface
      */
-    private $snippetReferenceStore;
+    private $snippetAreaReferenceStore;
 
     /**
      * @var int
@@ -70,6 +67,11 @@ class SnippetAreaController
      */
     private $sharedMaxAge;
 
+    /**
+     * @var int
+     */
+    private $cacheLifetime;
+
     public function __construct(
         DefaultSnippetManagerInterface $defaultSnippetManager,
         ContentMapperInterface $contentMapper,
@@ -77,15 +79,17 @@ class SnippetAreaController
         SerializerInterface $serializer,
         ReferenceStoreInterface $snippetReferenceStore,
         int $maxAge,
-        int $sharedMaxAge
+        int $sharedMaxAge,
+        int $cacheLifetime
     ) {
         $this->defaultSnippetManager = $defaultSnippetManager;
         $this->contentMapper = $contentMapper;
         $this->structureResolver = $structureResolver;
         $this->serializer = $serializer;
-        $this->snippetReferenceStore = $snippetReferenceStore;
+        $this->snippetAreaReferenceStore = $snippetReferenceStore;
         $this->maxAge = $maxAge;
         $this->sharedMaxAge = $sharedMaxAge;
+        $this->cacheLifetime = $cacheLifetime;
     }
 
     public function getAction(Request $request, string $area): Response
@@ -122,7 +126,7 @@ class SnippetAreaController
             throw new NotFoundHttpException(sprintf('Snippet for snippet area "%s" does not exist in locale "%s"', $area, $locale));
         }
 
-        $this->snippetReferenceStore->add($snippet->getUuid());
+        $this->snippetAreaReferenceStore->add($area);
 
         $resolvedSnippet = $this->structureResolver->resolve(
             $snippet,
@@ -145,11 +149,7 @@ class SnippetAreaController
         $response->setPublic();
         $response->setMaxAge($this->maxAge);
         $response->setSharedMaxAge($this->sharedMaxAge);
-
-        $response->headers->set(
-            SuluHttpCache::HEADER_REVERSE_PROXY_TTL,
-            self::SNIPPET_AREA_CACHE_LIFE_TIME
-        );
+        $response->headers->set(SuluHttpCache::HEADER_REVERSE_PROXY_TTL, (string) $this->cacheLifetime);
 
         return $response;
     }
