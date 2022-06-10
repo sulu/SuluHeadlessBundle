@@ -23,13 +23,14 @@ use Sulu\Component\DocumentManager\Event\RemoveLocaleEvent;
 use Sulu\Component\DocumentManager\Event\UnpublishEvent;
 use Sulu\Component\DocumentManager\Events;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Contracts\Service\ResetInterface;
 
 /**
  * @final
  *
  * @internal
  */
-class NavigationInvalidationSubscriber implements EventSubscriberInterface
+class NavigationInvalidationSubscriber implements EventSubscriberInterface, ResetInterface
 {
     /**
      * @var CacheManager|null
