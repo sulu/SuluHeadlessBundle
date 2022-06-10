@@ -24,6 +24,22 @@ class Configuration implements ConfigurationInterface
     public function getConfigTreeBuilder()
     {
         $treeBuilder = new TreeBuilder('sulu_headless');
+        $rootNode = $treeBuilder->getRootNode();
+
+        $rootNode->children()
+            ->arrayNode('navigation')
+            ->addDefaultsIfNotSet()
+                ->children()
+                    ->scalarNode('cache_lifetime')->defaultValue(86400)->end()
+                ->end()
+            ->end()
+            ->arrayNode('snippet_area')
+                ->addDefaultsIfNotSet()
+                ->children()
+                    ->scalarNode('cache_lifetime')->defaultValue(86400)->end()
+                ->end()
+            ->end()
+        ->end();
 
         return $treeBuilder;
     }

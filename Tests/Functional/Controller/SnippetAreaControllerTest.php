@@ -123,6 +123,11 @@ class SnippetAreaControllerTest extends BaseTestCase
         $response = $this->websiteClient->getResponse();
         self::assertInstanceOf(Response::class, $response);
 
+        if (200 === $response->getStatusCode()) {
+            $this->assertStringContainsString('public', (string) $response->headers->get('Cache-Control'));
+            $this->assertStringContainsString('snippet_area-default', (string) $response->headers->get('x-cache-tags'));
+        }
+
         if (null !== $expectedPatternFile) {
             self::assertResponseContent(
                 $expectedPatternFile,

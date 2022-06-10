@@ -7,3 +7,10 @@ doctrine:
                 dir: "%gedmo_directory%/Tree/Entity"
                 alias: GedmoTree
                 is_bundle: false
+
+sulu_http_cache:
+    tags:
+        enabled: true
+    proxy_client:
+        symfony:
+            enabled: true

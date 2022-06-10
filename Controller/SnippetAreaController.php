@@ -16,7 +16,9 @@ namespace Sulu\Bundle\HeadlessBundle\Controller;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
+use Sulu\Bundle\HttpCacheBundle\Cache\SuluHttpCache;
 use Sulu\Bundle\SnippetBundle\Snippet\DefaultSnippetManagerInterface;
+use Sulu\Bundle\WebsiteBundle\ReferenceStore\ReferenceStoreInterface;
 use Sulu\Component\Content\Mapper\ContentMapperInterface;
 use Sulu\Component\Rest\RequestParametersTrait;
 use Sulu\Component\Webspace\Analyzer\Attributes\RequestAttributes;
@@ -50,16 +52,44 @@ class SnippetAreaController
      */
     private $serializer;
 
+    /**
+     * @var ReferenceStoreInterface
+     */
+    private $snippetAreaReferenceStore;
+
+    /**
+     * @var int
+     */
+    private $maxAge;
+
+    /**
+     * @var int
+     */
+    private $sharedMaxAge;
+
+    /**
+     * @var int
+     */
+    private $cacheLifetime;
+
     public function __construct(
         DefaultSnippetManagerInterface $defaultSnippetManager,
         ContentMapperInterface $contentMapper,
         StructureResolverInterface $structureResolver,
-        SerializerInterface $serializer
+        SerializerInterface $serializer,
+        ReferenceStoreInterface $snippetReferenceStore,
+        int $maxAge,
+        int $sharedMaxAge,
+        int $cacheLifetime
     ) {
         $this->defaultSnippetManager = $defaultSnippetManager;
         $this->contentMapper = $contentMapper;
         $this->structureResolver = $structureResolver;
         $this->serializer = $serializer;
+        $this->snippetAreaReferenceStore = $snippetReferenceStore;
+        $this->maxAge = $maxAge;
+        $this->sharedMaxAge = $sharedMaxAge;
+        $this->cacheLifetime = $cacheLifetime;
     }
 
     public function getAction(Request $request, string $area): Response
@@ -96,13 +126,15 @@ class SnippetAreaController
             throw new NotFoundHttpException(sprintf('Snippet for snippet area "%s" does not exist in locale "%s"', $area, $locale));
         }
 
+        $this->snippetAreaReferenceStore->add($area);
+
         $resolvedSnippet = $this->structureResolver->resolve(
             $snippet,
             $locale,
             $includeExtension
         );
 
-        return new Response(
+        $response = new Response(
             $this->serializer->serialize(
                 $resolvedSnippet,
                 'json',
@@ -113,5 +145,12 @@ class SnippetAreaController
                 'Content-Type' => 'application/json',
             ]
         );
+
+        $response->setPublic();
+        $response->setMaxAge($this->maxAge);
+        $response->setSharedMaxAge($this->sharedMaxAge);
+        $response->headers->set(SuluHttpCache::HEADER_REVERSE_PROXY_TTL, (string) $this->cacheLifetime);
+
+        return $response;
     }
 }

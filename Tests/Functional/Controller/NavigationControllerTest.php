@@ -175,6 +175,8 @@ class NavigationControllerTest extends BaseTestCase
         $response = $this->websiteClient->getResponse();
         $this->assertInstanceOf(Response::class, $response);
 
+        $this->assertStringContainsString('public', (string) $response->headers->get('Cache-Control'));
+        $this->assertStringContainsString('navigation-' . $context, (string) $response->headers->get('x-cache-tags'));
         $this->assertResponseContent(
             $expectedPatternFile,
             $response,
