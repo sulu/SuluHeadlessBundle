@@ -26,7 +26,7 @@ trait CreateSnippetTrait
         string $locale = 'de'
     ): SnippetDocument {
         /** @var DocumentManagerInterface $documentManager */
-        $documentManager = static::$container->get('sulu_document_manager.document_manager');
+        $documentManager = static::getContainer()->get('sulu_document_manager.document_manager');
 
         /** @var SnippetDocument $document */
         $document = $documentManager->create('snippet');
