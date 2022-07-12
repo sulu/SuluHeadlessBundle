@@ -23,6 +23,7 @@ Tests/Application/.env.test.local
 
 # php-cs-fixer
 .php_cs.cache
+.php-cs-fixer.cache
 
 # npm
 package-lock.json
