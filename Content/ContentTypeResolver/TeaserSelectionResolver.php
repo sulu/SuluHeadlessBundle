@@ -59,7 +59,7 @@ class TeaserSelectionResolver implements ContentTypeResolverInterface
 
         $teasers = $this->teaserManager->find($items, $locale);
         $teasers = \array_map(
-            function(Teaser $teaser) use ($locale) {
+            function (Teaser $teaser) use ($locale) {
                 return $this->teaserSerializer->serialize($teaser, $locale);
             },
             $teasers
