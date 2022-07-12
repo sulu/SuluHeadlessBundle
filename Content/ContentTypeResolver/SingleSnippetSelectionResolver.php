@@ -33,9 +33,6 @@ class SingleSnippetSelectionResolver implements ContentTypeResolverInterface
         return 'single_snippet_selection';
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView
     {
         $snippetId = $data ?: null;

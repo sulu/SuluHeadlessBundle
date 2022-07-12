@@ -96,9 +96,9 @@ class LinkResolver implements ContentTypeResolverInterface
             return null;
         }
 
-        $url = reset($linkItems)->getUrl();
+        $url = \reset($linkItems)->getUrl();
         if (isset($value['anchor'])) {
-            $url = sprintf('%s#%s', $url, $value['anchor']);
+            $url = \sprintf('%s#%s', $url, $value['anchor']);
         }
 
         return $url;

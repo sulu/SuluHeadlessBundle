@@ -170,7 +170,7 @@ class NavigationControllerTest extends BaseTestCase
             $context = $filters['context'];
         }
 
-        $this->websiteClient->request('GET', '/api/navigations/' . $context . '?' . http_build_query($filters));
+        $this->websiteClient->request('GET', '/api/navigations/' . $context . '?' . \http_build_query($filters));
 
         $response = $this->websiteClient->getResponse();
         $this->assertInstanceOf(Response::class, $response);

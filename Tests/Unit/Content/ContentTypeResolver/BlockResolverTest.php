@@ -138,7 +138,7 @@ class BlockResolverTest extends TestCase
 
     public function testResolveWithVisitors(): void
     {
-        if (!class_exists(BlockVisitorInterface::class)) {
+        if (!\class_exists(BlockVisitorInterface::class)) {
             $this->markTestSkipped('Requires a newer sulu version with block visitors.');
         }
 
@@ -245,7 +245,7 @@ class BlockResolverTest extends TestCase
 
     public function testResolveWithSkips(): void
     {
-        if (!class_exists(BlockVisitorInterface::class)) {
+        if (!\class_exists(BlockVisitorInterface::class)) {
             $this->markTestSkipped('Requires a newer sulu version with block visitors.');
         }
 

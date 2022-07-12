@@ -51,7 +51,7 @@ trait CreatePageTrait
         $document->setLocale($locale);
         $document->setTitle($data['title']);
         $document->setStructureType($data['template'] ?? 'default');
-        $document->setResourceSegment($data['url'] ?? '/' . strtolower($data['title']));
+        $document->setResourceSegment($data['url'] ?? '/' . \strtolower($data['title']));
         $document->setExtensionsData($extensionData);
 
         if ($data['published'] ?? true) {

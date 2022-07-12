@@ -53,9 +53,6 @@ class SnippetSelectionResolver implements ContentTypeResolverInterface
         return 'snippet_selection';
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView
     {
         /** @var StructureBridge $structure */

@@ -75,7 +75,7 @@ class HeadlessWebsiteControllerTest extends BaseTestCase
 
         $this->assertStringContainsString('window.SULU_HEADLESS_VIEW_DATA =', $content);
 
-        $jsonContent = str_replace([
+        $jsonContent = \str_replace([
             '<script>window.SULU_HEADLESS_VIEW_DATA = ',
             ';</script>',
         ], '', $content);

@@ -142,7 +142,7 @@ class SnippetAreaControllerTest extends BaseTestCase
             $content = $response->getContent();
             self::assertIsString($content);
 
-            $responseObject = json_decode($content);
+            $responseObject = \json_decode($content);
             self::assertNotFalse($responseObject);
 
             self::assertObjectHasAttribute('message', $responseObject);

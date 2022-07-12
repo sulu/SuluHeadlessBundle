@@ -131,7 +131,7 @@ class NavigationInvalidationSubscriber implements EventSubscriberInterface, Rese
             $defaultNavigationContexts = $defaultNode->getProperty($propertyName)->getValue();
         }
 
-        $this->navigationContexts = array_merge(
+        $this->navigationContexts = \array_merge(
             $this->navigationContexts,
             $liveNavigationContexts,
             $defaultNavigationContexts

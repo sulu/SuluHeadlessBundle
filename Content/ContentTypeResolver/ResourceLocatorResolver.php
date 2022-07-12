@@ -29,7 +29,7 @@ class ResourceLocatorResolver implements ContentTypeResolverInterface
         $structure = $property->getStructure();
 
         // The getResourceLocator method returns the target url for pages of type internal and external link
-        if (method_exists($structure, 'getResourceLocator')) {
+        if (\method_exists($structure, 'getResourceLocator')) {
             $resourceLocator = $structure->getResourceLocator();
         }
 
