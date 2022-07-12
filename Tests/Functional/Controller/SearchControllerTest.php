@@ -84,7 +84,7 @@ class SearchControllerTest extends BaseTestCase
      */
     public function testGetAction(string $query, array $indices, string $expectedPatternFile): void
     {
-        $this->websiteClient->request('GET', '/api/search?q=' . $query . '&indices=' . implode(',', $indices));
+        $this->websiteClient->request('GET', '/api/search?q=' . $query . '&indices=' . \implode(',', $indices));
 
         $response = $this->websiteClient->getResponse();
         $this->assertInstanceOf(Response::class, $response);

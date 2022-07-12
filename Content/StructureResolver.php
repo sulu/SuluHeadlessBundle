@@ -126,8 +126,8 @@ class StructureResolver implements StructureResolverInterface
             }
 
             // the '.' is used to separate the extension name from the property name.
-            if (false !== strpos($sourceProperty, '.')) {
-                [$extensionName, $propertyName] = explode('.', $sourceProperty);
+            if (false !== \strpos($sourceProperty, '.')) {
+                [$extensionName, $propertyName] = \explode('.', $sourceProperty);
 
                 if (!isset($unresolvedExtensionData[$extensionName][$propertyName])) {
                     continue;
@@ -226,44 +226,44 @@ class StructureResolver implements StructureResolverInterface
 
         /** @var string|null $templateKey */
         $templateKey = null;
-        if (method_exists($targetDocument, 'getStructureType')) {
+        if (\method_exists($targetDocument, 'getStructureType')) {
             $templateKey = $targetDocument->getStructureType();
         }
 
         /** @var int|null $author */
         $author = null;
-        if (method_exists($targetDocument, 'getAuthor')) {
+        if (\method_exists($targetDocument, 'getAuthor')) {
             $author = $targetDocument->getAuthor();
         }
 
         /** @var \DateTimeInterface|null $authored */
         $authored = null;
-        if (method_exists($targetDocument, 'getAuthored')) {
+        if (\method_exists($targetDocument, 'getAuthored')) {
             /** @var \DateTimeInterface|null $authored typehint in sulu is wrong */
             $authored = $targetDocument->getAuthored();
         }
 
         /** @var int|null $changer */
         $changer = null;
-        if (method_exists($requestedDocument, 'getChanger')) {
+        if (\method_exists($requestedDocument, 'getChanger')) {
             $changer = $requestedDocument->getChanger();
         }
 
         /** @var \DateTimeInterface|null $changed */
         $changed = null;
-        if (method_exists($requestedDocument, 'getChanged')) {
+        if (\method_exists($requestedDocument, 'getChanged')) {
             $changed = $requestedDocument->getChanged();
         }
 
         /** @var int|null $creator */
         $creator = null;
-        if (method_exists($requestedDocument, 'getCreator')) {
+        if (\method_exists($requestedDocument, 'getCreator')) {
             $creator = $requestedDocument->getCreator();
         }
 
         /** @var \DateTimeInterface|null $created */
         $created = null;
-        if (method_exists($requestedDocument, 'getCreated')) {
+        if (\method_exists($requestedDocument, 'getCreated')) {
             $created = $requestedDocument->getCreated();
         }
 
@@ -303,7 +303,7 @@ class StructureResolver implements StructureResolverInterface
 
         /** @var ExtensionContainer|mixed[] $extensionData */
         $extensionData = [];
-        if (method_exists($document, 'getExtensionsData')) {
+        if (\method_exists($document, 'getExtensionsData')) {
             $extensionData = $document->getExtensionsData();
         }
 
@@ -386,11 +386,11 @@ class StructureResolver implements StructureResolverInterface
     {
         $structureContent = null;
 
-        if (method_exists($structure, 'getContent')) {
+        if (\method_exists($structure, 'getContent')) {
             $structureContent = $structure->getContent();
         }
 
-        if (\is_object($structureContent) && method_exists($structureContent, 'getTemplateType')) {
+        if (\is_object($structureContent) && \method_exists($structureContent, 'getTemplateType')) {
             // determine type for structure that is implemented based on the SuluContentBundle
             return $structureContent->getTemplateType();
         }

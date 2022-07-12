@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Tests\Traits;
 
-use SplFileInfo;
 use Sulu\Bundle\MediaBundle\Entity\Collection;
 use Sulu\Bundle\MediaBundle\Entity\CollectionInterface;
 use Sulu\Bundle\MediaBundle\Entity\CollectionMeta;
@@ -62,7 +61,7 @@ trait CreateMediaTrait
     ): MediaInterface {
         $manager = static::$container->get('doctrine.orm.entity_manager');
 
-        $file = new SplFileInfo(__DIR__ . \DIRECTORY_SEPARATOR . 'test-image.png');
+        $file = new \SplFileInfo(__DIR__ . \DIRECTORY_SEPARATOR . 'test-image.png');
         $fileName = $file->getFilename();
         $uploadedFile = new UploadedFile($file->getPathname(), $fileName);
 

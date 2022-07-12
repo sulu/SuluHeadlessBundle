@@ -73,7 +73,7 @@ class SmartContentResolver implements ContentTypeResolverInterface
         CategoryRequestHandlerInterface $categoryRequestHandler,
         ?TargetGroupStoreInterface $targetGroupStore = null
     ) {
-        $this->resolvers = iterator_to_array($resolvers);
+        $this->resolvers = \iterator_to_array($resolvers);
         $this->tagManager = $tagManager;
         $this->requestStack = $requestStack;
         $this->tagRequestHandler = $tagRequestHandler;
@@ -86,7 +86,7 @@ class SmartContentResolver implements ContentTypeResolverInterface
         // gather data provider and effective parameters
         $providerResolver = $this->getProviderResolver($property);
         /** @var PropertyParameter[] $params */
-        $params = array_merge(
+        $params = \array_merge(
             $this->getDefaultParams($providerResolver),
             $property->getParams()
         );
@@ -199,7 +199,7 @@ class SmartContentResolver implements ContentTypeResolverInterface
         $names = [];
 
         foreach ($tagIdentifiers as $tagIdentifier) {
-            if (is_numeric($tagIdentifier)) {
+            if (\is_numeric($tagIdentifier)) {
                 $ids[] = $tagIdentifier;
             } else {
                 $names[] = $tagIdentifier;
@@ -207,7 +207,7 @@ class SmartContentResolver implements ContentTypeResolverInterface
         }
 
         if (!empty($names)) {
-            $ids = array_merge($ids, $this->tagManager->resolveTagNames($names));
+            $ids = \array_merge($ids, $this->tagManager->resolveTagNames($names));
         }
 
         return $ids;
@@ -278,7 +278,7 @@ class SmartContentResolver implements ContentTypeResolverInterface
             $defaults['alias'] = $provider->getAlias();
         }
 
-        return array_merge(
+        return \array_merge(
             $defaults,
             $provider->getProviderDefaultParams()
         );

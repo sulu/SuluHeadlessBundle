@@ -35,10 +35,10 @@ trait AssertResponseContentTrait
         $this->assertIsString($responseContent);
 
         $responsesFolder = $this->getCalledClassFolder() . \DIRECTORY_SEPARATOR . 'responses';
-        $responsePattern = file_get_contents($responsesFolder . \DIRECTORY_SEPARATOR . $patternFilename);
+        $responsePattern = \file_get_contents($responsesFolder . \DIRECTORY_SEPARATOR . $patternFilename);
         $this->assertIsString($responsePattern);
 
-        $this->assertMatchesPattern(trim($responsePattern), trim($responseContent), $message);
+        $this->assertMatchesPattern(\trim($responsePattern), \trim($responseContent), $message);
     }
 
     private function getCalledClassFolder(): string

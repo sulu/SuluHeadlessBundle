@@ -93,7 +93,7 @@ class MediaSerializer implements MediaSerializerInterface
         // replace extension of filename with preferred media extension if possible
         $preferredExtension = $this->imageConverter->getSupportedOutputImageFormats($formatMediaApi->getMimeType())[0] ?? null;
         if ($preferredExtension) {
-            $fileName = pathinfo($fileName)['filename'] . '.' . $preferredExtension;
+            $fileName = \pathinfo($fileName)['filename'] . '.' . $preferredExtension;
         }
 
         $mediaData['formatUri'] = $this->formatCache->getMediaUrl(

@@ -69,13 +69,13 @@ class ContactAccountSelectionResolver implements ContentTypeResolverInterface
         $content = [];
         foreach ($data as $entry) {
             $serializationContext = new SerializationContext();
-            if (0 === strncmp($entry, 'c', 1)) {
-                $contact = $this->contactManager->getById((int) substr($entry, 1), $locale);
+            if (0 === \strncmp($entry, 'c', 1)) {
+                $contact = $this->contactManager->getById((int) \substr($entry, 1), $locale);
                 $serializationContext->setGroups(['partialContact']);
 
                 $content[] = $this->contactSerializer->serialize($contact->getEntity(), $locale, $serializationContext);
-            } elseif (0 === strncmp($entry, 'a', 1)) {
-                $account = $this->accountManager->getById((int) substr($entry, 1), $locale);
+            } elseif (0 === \strncmp($entry, 'a', 1)) {
+                $account = $this->accountManager->getById((int) \substr($entry, 1), $locale);
                 $serializationContext->setGroups(['partialAccount']);
 
                 $content[] = $this->accountSerializer->serialize($account->getEntity(), $locale, $serializationContext);

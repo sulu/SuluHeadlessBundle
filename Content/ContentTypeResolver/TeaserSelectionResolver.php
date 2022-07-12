@@ -44,7 +44,7 @@ class TeaserSelectionResolver implements ContentTypeResolverInterface
 
     public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView
     {
-        $value = array_merge(
+        $value = \array_merge(
             [
                 'presentAs' => null,
                 'items' => [],
@@ -58,8 +58,8 @@ class TeaserSelectionResolver implements ContentTypeResolverInterface
         }
 
         $teasers = $this->teaserManager->find($items, $locale);
-        $teasers = array_map(
-            function (Teaser $teaser) use ($locale) {
+        $teasers = \array_map(
+            function(Teaser $teaser) use ($locale) {
                 return $this->teaserSerializer->serialize($teaser, $locale);
             },
             $teasers

@@ -46,7 +46,7 @@ class SearchController
         $query = $this->getRequestParameter($request, 'q', true);
 
         $locale = $request->getLocale();
-        $indices = array_filter(explode(',', $this->getRequestParameter($request, 'indices', true, '')));
+        $indices = \array_filter(\explode(',', $this->getRequestParameter($request, 'indices', true, '')));
 
         $hits = $this->searchManager
             ->createSearch($this->prepareQuery($query))
@@ -74,12 +74,12 @@ class SearchController
         }
 
         $queryString = '';
-        $queryValues = explode(' ', $query);
+        $queryValues = \explode(' ', $query);
         foreach ($queryValues as $queryValue) {
             if (\strlen($queryValue) > 2) {
                 $queryString .= '+("' . self::escapeDoubleQuotes($queryValue) . '" OR ' .
-                    preg_replace('/([^\pL\s\d])/u', '?', $queryValue) . '* OR ' .
-                    preg_replace('/([^\pL\s\d])/u', '', $queryValue) . '~) ';
+                    \preg_replace('/([^\pL\s\d])/u', '?', $queryValue) . '* OR ' .
+                    \preg_replace('/([^\pL\s\d])/u', '', $queryValue) . '~) ';
             } else {
                 $queryString .= '+("' . self::escapeDoubleQuotes($queryValue) . '") ';
             }
@@ -90,6 +90,6 @@ class SearchController
 
     protected function escapeDoubleQuotes(string $query): string
     {
-        return str_replace('"', '\\"', $query);
+        return \str_replace('"', '\\"', $query);
     }
 }

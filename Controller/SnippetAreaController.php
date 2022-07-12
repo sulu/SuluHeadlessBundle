@@ -107,15 +107,15 @@ class SnippetAreaController
         try {
             $snippetId = $this->defaultSnippetManager->loadIdentifier($webspaceKey, $area);
         } catch (ParameterNotFoundException $e) {
-            if ($e->getMessage() !== sprintf('You have requested a non-existent parameter "%s".', $area)) {
+            if ($e->getMessage() !== \sprintf('You have requested a non-existent parameter "%s".', $area)) {
                 throw $e;
             }
 
-            throw new NotFoundHttpException(sprintf('Snippet area "%s" does not exist', $area));
+            throw new NotFoundHttpException(\sprintf('Snippet area "%s" does not exist', $area));
         }
 
         if (!$snippetId) {
-            throw new NotFoundHttpException(sprintf('No snippet found for snippet area "%s"', $area));
+            throw new NotFoundHttpException(\sprintf('No snippet found for snippet area "%s"', $area));
         }
 
         /** @var string $webspaceKey */
@@ -123,7 +123,7 @@ class SnippetAreaController
         $snippet = $this->contentMapper->load($snippetId, $webspaceKey, $locale);
 
         if (!$snippet->getHasTranslation()) {
-            throw new NotFoundHttpException(sprintf('Snippet for snippet area "%s" does not exist in locale "%s"', $area, $locale));
+            throw new NotFoundHttpException(\sprintf('Snippet for snippet area "%s" does not exist in locale "%s"', $area, $locale));
         }
 
         $this->snippetAreaReferenceStore->add($area);
