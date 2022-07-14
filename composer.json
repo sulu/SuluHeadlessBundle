@@ -5,12 +5,12 @@
     "description": "Bundle that provides controllers and services for using Sulu as headless content management system",
     "require": {
         "php": "^7.3 || ^8.0",
-        "sulu/sulu": "^2.4",
-        "symfony/config": "^4.4 || ^5.0",
-        "symfony/dependency-injection": "^4.4 || ^5.0",
-        "symfony/framework-bundle": "^4.4 || ^5.0",
-        "symfony/http-foundation": "^4.4 || ^5.0",
-        "symfony/http-kernel": "^4.4 || ^5.0"
+        "sulu/sulu": "^2.4 || ^2.5@dev",
+        "symfony/config": "^4.4 || ^5.0 || ^6.0",
+        "symfony/dependency-injection": "^4.4 || ^5.0 || ^6.0",
+        "symfony/framework-bundle": "^4.4 || ^5.0 || ^6.0",
+        "symfony/http-foundation": "^4.4 || ^5.0 || ^6.0",
+        "symfony/http-kernel": "^4.4 || ^5.0 || ^6.0"
     },
     "require-dev": {
         "coduo/php-matcher": "^5.0 || ^6.0",
@@ -25,10 +25,10 @@
         "phpstan/phpstan-phpunit": "^0.12",
         "phpstan/phpstan-symfony": "^0.12",
         "phpunit/phpunit": "^8.4",
-        "symfony/browser-kit": "^4.4 || ^5.0",
-        "symfony/console": "^4.4 || ^5.0",
-        "symfony/dotenv": "^4.4 || ^5.0",
-        "symfony/error-handler": "^4.4 || ^5.0",
+        "symfony/browser-kit": "^4.4 || ^5.0 || ^6.0",
+        "symfony/console": "^4.4 || ^5.0 || ^6.0",
+        "symfony/dotenv": "^4.4 || ^5.0 || ^6.0",
+        "symfony/error-handler": "^4.4 || ^5.0 || ^6.0",
         "symfony/monolog-bundle": "^3.1",
         "thecodingmachine/phpstan-strict-rules": "^0.12"
     },

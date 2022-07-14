@@ -1,16 +1,16 @@
 sulu_headless.api.navigation:
     path: /api/navigations/{context}.{_format}
     defaults:
-        _controller: sulu_headless.controller.navigation:getAction
+        _controller: sulu_headless.controller.navigation::getAction
         _format: json
 
 sulu_headless.api.search:
     path: /api/search
     defaults:
-        _controller: sulu_headless.controller.search:getAction
+        _controller: sulu_headless.controller.search::getAction
 
 sulu_headless.api.snippet_area:
     path: /api/snippet-areas/{area}.{_format}
     defaults:
-        _controller: sulu_headless.controller.snippet_area:getAction
+        _controller: sulu_headless.controller.snippet_area::getAction
         _format: json

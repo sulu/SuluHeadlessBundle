@@ -57,7 +57,7 @@ class HeadlessWebsiteController extends WebsiteController
     protected function resolveStructure(StructureInterface $structure): array
     {
         /** @var StructureResolverInterface $structureResolver */
-        $structureResolver = $this->get('sulu_headless.structure_resolver');
+        $structureResolver = $this->container->get('sulu_headless.structure_resolver');
 
         return $structureResolver->resolve($structure, $structure->getLanguageCode());
     }

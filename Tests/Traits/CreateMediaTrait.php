@@ -29,7 +29,7 @@ trait CreateMediaTrait
 {
     private static function createCollection(string $title, string $locale): CollectionInterface
     {
-        $manager = static::$container->get('doctrine.orm.entity_manager');
+        $manager = static::getContainer()->get('doctrine.orm.entity_manager');
 
         $collection = new Collection();
 
@@ -59,13 +59,13 @@ trait CreateMediaTrait
         CollectionInterface $collection,
         string $locale
     ): MediaInterface {
-        $manager = static::$container->get('doctrine.orm.entity_manager');
+        $manager = static::getContainer()->get('doctrine.orm.entity_manager');
 
         $file = new \SplFileInfo(__DIR__ . \DIRECTORY_SEPARATOR . 'test-image.png');
         $fileName = $file->getFilename();
         $uploadedFile = new UploadedFile($file->getPathname(), $fileName);
 
-        $storageOptions = static::$container->get('sulu_media.storage')->save(
+        $storageOptions = static::getContainer()->get('sulu_media.storage')->save(
             $uploadedFile->getPathname(),
             $fileName
         );

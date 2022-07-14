@@ -43,7 +43,7 @@ class SnippetAreaControllerTest extends BaseTestCase
             'template' => 'default',
         ], 'de');
 
-        $defaultSnippetManager = self::$container->get('sulu_snippet.default_snippet.manager');
+        $defaultSnippetManager = static::getContainer()->get('sulu_snippet.default_snippet.manager');
         $defaultSnippetManager->save(
             'sulu_io',
             'default',
