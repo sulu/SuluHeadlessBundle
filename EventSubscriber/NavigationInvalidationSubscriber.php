@@ -116,12 +116,14 @@ class NavigationInvalidationSubscriber implements EventSubscriberInterface, Rese
         $this->collectNavigationContexts($path, $event->getLocale());
     }
 
-    public function collectNavigationContexts(string $path, string $locale): void
+    public function collectNavigationContexts(string $path, ?string $locale): void
     {
         $defaultNode = $this->defaultSession->getNode($path);
         $liveNode = $this->liveSession->getNode($path);
 
-        $propertyName = $this->propertyEncoder->localizedContentName('navContexts', $locale);
+        $propertyName = $locale ?
+            $this->propertyEncoder->localizedContentName('navContexts', $locale) :
+            $this->propertyEncoder->contentName('navContexts');
         $liveNavigationContexts = [];
         $defaultNavigationContexts = [];
         if ($liveNode->hasProperty($propertyName)) {
