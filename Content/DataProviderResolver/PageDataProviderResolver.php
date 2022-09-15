@@ -129,12 +129,13 @@ class PageDataProviderResolver implements DataProviderResolverInterface
             $propertyMap[$paramName] = \is_string($paramValue) ? $paramValue : $paramName;
         }
 
-        $resolvedPages = [];
+        $resolvedPages = \array_fill_keys($pageIds, null);
+
         foreach ($pageStructures as $pageStructure) {
-            $resolvedPages[] = $this->structureResolver->resolveProperties($pageStructure, $propertyMap, $options['locale']);
+            $resolvedPages[$pageStructure->getUuid()] = $this->structureResolver->resolveProperties($pageStructure, $propertyMap, $options['locale']);
         }
 
-        return new DataProviderResult($resolvedPages, $providerResult->getHasNextPage());
+        return new DataProviderResult(\array_values(\array_filter($resolvedPages)), $providerResult->getHasNextPage());
     }
 
     /**

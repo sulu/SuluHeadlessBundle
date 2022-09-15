@@ -95,11 +95,12 @@ class PageSelectionResolver implements ContentTypeResolverInterface
             $propertyMap[$paramName] = \is_string($paramValue) ? $paramValue : $paramName;
         }
 
-        $pages = [];
+        $pages = \array_fill_keys($data, null);
+
         foreach ($pageStructures as $pageStructure) {
-            $pages[] = $this->structureResolver->resolveProperties($pageStructure, $propertyMap, $locale);
+            $pages[$pageStructure->getUuid()] = $this->structureResolver->resolveProperties($pageStructure, $propertyMap, $locale);
         }
 
-        return new ContentView($pages, ['ids' => $data]);
+        return new ContentView(\array_values(\array_filter($pages)), ['ids' => $data]);
     }
 }

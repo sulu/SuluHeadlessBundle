@@ -127,14 +127,16 @@ class PageDataProviderResolverTest extends TestCase
         $this->contentQueryBuilder->build('webspace-key', ['en'])->willReturn(['page-query-string']);
 
         $pageStructure1 = $this->prophesize(StructureInterface::class);
+        $pageStructure1->getUuid()->willReturn('page-id-1');
         $pageStructure2 = $this->prophesize(StructureInterface::class);
+        $pageStructure2->getUuid()->willReturn('page-id-2');
         $this->contentMapper->loadBySql2(
             'page-query-string',
             'en',
             'webspace-key'
         )->willReturn([
-            $pageStructure1->reveal(),
             $pageStructure2->reveal(),
+            $pageStructure1->reveal(),
         ])->shouldBeCalledOnce();
 
         $this->structureResolver->resolveProperties(
