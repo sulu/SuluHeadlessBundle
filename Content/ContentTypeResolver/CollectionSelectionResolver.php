@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver;
 
+use Doctrine\Persistence\ObjectRepository;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\CollectionSerializerInterface;
 use Sulu\Bundle\MediaBundle\Entity\CollectionInterface;
@@ -53,8 +54,21 @@ class CollectionSelectionResolver implements ContentTypeResolverInterface
             return new ContentView([], ['ids' => []]);
         }
 
-        /** @var iterable<CollectionInterface> $collections */
-        $collections = $this->collectionRepository->findBy(['id' => $ids]);
+        if ($this->collectionRepository instanceof ObjectRepository) {
+            /** @var iterable<CollectionInterface> $collections */
+            $collections = $this->collectionRepository->findBy(['id' => $ids]);
+        } else {
+            $collections = [];
+            foreach ($ids as $id) {
+                /** @var CollectionInterface|null $collection */
+                $collection = $this->collectionRepository->findCollectionById($id);
+
+                if ($collection) {
+                    $collections[] = $collection;
+                }
+            }
+        }
+
         $serializedCollections = \array_fill_keys($ids, null);
 
         foreach ($collections as $collection) {

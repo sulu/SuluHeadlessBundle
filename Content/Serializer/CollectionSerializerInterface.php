@@ -20,10 +20,9 @@ interface CollectionSerializerInterface
     /**
      * @return array{
      *     id: int,
-     *     key: string,
+     *     key: string|null,
      *     title: string|null,
      *     description: string|null,
-     *     locale: string,
      * }
      */
     public function serialize(CollectionInterface $collection, string $locale): array;

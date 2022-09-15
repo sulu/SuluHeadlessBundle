@@ -18,9 +18,6 @@ use Sulu\Bundle\MediaBundle\Entity\CollectionInterface;
 
 class CollectionSerializer implements CollectionSerializerInterface
 {
-    /**
-     * @return mixed[]
-     */
     public function serialize(CollectionInterface $collection, string $locale): array
     {
         $apiCollection = new Collection($collection, $locale);
