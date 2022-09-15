@@ -226,5 +226,26 @@
         >
             <tag name="sulu_headless.content_type_resolver"/>
         </service>
+
+        <service
+            id="sulu_headless.content_resolver.collection_selection"
+            class="Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\CollectionSelectionResolver"
+            lazy="true"
+        >
+            <argument type="service" id="sulu_media.collection_repository"/>
+            <argument type="service" id="sulu_headless.serializer.collection"/>
+
+            <tag name="sulu_headless.content_type_resolver"/>
+        </service>
+
+        <service
+            id="sulu_headless.content_resolver.single_collection_selection"
+            class="Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\SingleCollectionSelectionResolver"
+            lazy="true"
+        >
+            <argument type="service" id="sulu_headless.content_resolver.collection_selection"/>
+
+            <tag name="sulu_headless.content_type_resolver"/>
+        </service>
     </services>
 </container>

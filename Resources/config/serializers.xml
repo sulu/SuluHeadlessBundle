@@ -61,5 +61,10 @@
             <argument type="service" id="sulu_website.reference_store_pool"/>
         </service>
         <service id="Sulu\Bundle\HeadlessBundle\Content\Serializer\TeaserSerializerInterface" alias="sulu_headless.serializer.teaser"/>
+
+        <service
+            id="sulu_headless.serializer.collection"
+            class="Sulu\Bundle\HeadlessBundle\Content\Serializer\CollectionSerializer"/>
+        <service id="Sulu\Bundle\HeadlessBundle\Content\Serializer\CollectionSerializerInterface" alias="sulu_headless.serializer.collection"/>
     </services>
 </container>
