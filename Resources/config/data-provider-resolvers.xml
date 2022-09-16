@@ -14,6 +14,18 @@
         </service>
 
         <service
+            id="sulu_headless.provider_resolver.snippet"
+            class="Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver\SnippetDataProviderResolver"
+        >
+            <argument type="service" id="sulu_snippet.smart_content.snippet_data_provider"/>
+            <argument type="service" id="sulu_headless.structure_resolver"/>
+            <argument type="service" id="sulu_snippet.smart_content.data_provider.query_builder"/>
+            <argument type="service" id="sulu.content.mapper"/>
+
+            <tag name="sulu_headless.data_provider_resolver"/>
+        </service>
+
+        <service
             id="sulu_headless.provider_resolver.page"
             class="Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver\PageDataProviderResolver"
         >
