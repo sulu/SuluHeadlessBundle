@@ -37,5 +37,25 @@
 
             <tag name="sulu_headless.data_provider_resolver"/>
         </service>
+
+        <service
+            id="sulu_headless.provider_resolver.contact"
+            class="Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver\ContactDataProviderResolver"
+        >
+            <argument type="service" id="sulu_contact.smart_content.data_provider.contact"/>
+            <argument type="service" id="sulu_headless.serializer.contact"/>
+
+            <tag name="sulu_headless.data_provider_resolver"/>
+        </service>
+
+        <service
+            id="sulu_headless.provider_resolver.account"
+            class="Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver\AccountDataProviderResolver"
+        >
+            <argument type="service" id="sulu_contact.smart_content.data_provider.account"/>
+            <argument type="service" id="sulu_headless.serializer.account"/>
+
+            <tag name="sulu_headless.data_provider_resolver"/>
+        </service>
     </services>
 </container>
