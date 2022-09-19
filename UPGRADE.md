@@ -1,5 +1,9 @@
 # Upgrade
 
+## 0.9.0
+
+### Make NavigationInvalidationSubscriber::collectNavigationContexts method private
+
 ## 0.6.0
 
 ### Change constructor arguments of SingleSnippetSelectionResolver
