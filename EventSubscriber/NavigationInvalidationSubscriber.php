@@ -91,51 +91,53 @@ class NavigationInvalidationSubscriber implements EventSubscriberInterface, Rese
 
     public function collectNavigationContextBeforePublishing(PublishEvent $event): void
     {
-        $path = $this->documentInspector->getPath($event->getDocument());
-        $this->collectNavigationContexts($path, $event->getLocale());
+        $this->collectNavigationContexts($event->getDocument(), $event->getLocale());
     }
 
     public function collectNavigationContextBeforeUnpublishing(UnpublishEvent $event): void
     {
-        $path = $this->documentInspector->getPath($event->getDocument());
-        $this->collectNavigationContexts($path, $event->getLocale());
+        $this->collectNavigationContexts($event->getDocument(), $event->getLocale());
     }
 
     public function collectNavigationContextBeforeRemoving(RemoveEvent $event): void
     {
-        $document = $event->getDocument();
-        $path = $this->documentInspector->getPath($event->getDocument());
-        foreach ($this->documentInspector->getLocales($document) as $locale) {
-            $this->collectNavigationContexts($path, $locale);
-        }
+        $this->collectNavigationContexts($event->getDocument(), null);
     }
 
     public function collectNavigationContextBeforeRemovingLocale(RemoveLocaleEvent $event): void
     {
-        $path = $this->documentInspector->getPath($event->getDocument());
-        $this->collectNavigationContexts($path, $event->getLocale());
+        $this->collectNavigationContexts($event->getDocument(), $event->getLocale());
     }
 
-    public function collectNavigationContexts(string $path, string $locale): void
+    private function collectNavigationContexts(object $document, ?string $eventLocale): void
     {
+        $path = $this->documentInspector->getPath($document);
+        $locales = $eventLocale ? [$eventLocale] : $this->documentInspector->getLocales($document);
+
         $defaultNode = $this->defaultSession->getNode($path);
         $liveNode = $this->liveSession->getNode($path);
 
-        $propertyName = $this->propertyEncoder->localizedContentName('navContexts', $locale);
-        $liveNavigationContexts = [];
-        $defaultNavigationContexts = [];
-        if ($liveNode->hasProperty($propertyName)) {
-            $liveNavigationContexts = $liveNode->getProperty($propertyName)->getValue();
-        }
-        if ($defaultNode->hasProperty($propertyName)) {
-            $defaultNavigationContexts = $defaultNode->getProperty($propertyName)->getValue();
-        }
+        foreach ($locales as $locale) {
+            $propertyName = $this->propertyEncoder->localizedContentName('navContexts', $locale);
+            $liveNavigationContexts = [];
+            $defaultNavigationContexts = [];
 
-        $this->navigationContexts = \array_merge(
-            $this->navigationContexts,
-            $liveNavigationContexts,
-            $defaultNavigationContexts
-        );
+            if ($liveNode->hasProperty($propertyName)) {
+                $liveNavigationContexts = $liveNode->getProperty($propertyName)->getValue();
+            }
+
+            if ($defaultNode->hasProperty($propertyName)) {
+                $defaultNavigationContexts = $defaultNode->getProperty($propertyName)->getValue();
+            }
+
+            $this->navigationContexts = \array_unique(
+                \array_merge(
+                    $this->navigationContexts,
+                    $liveNavigationContexts,
+                    $defaultNavigationContexts
+                )
+            );
+        }
     }
 
     public function invalidateNavigationContexts(): void
