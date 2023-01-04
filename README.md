@@ -60,7 +60,7 @@ return [
 
 ### Include the routes of the bundle
 
-Include the routes of the bundle in a new `config/routes/sulu_headles_website.yml` file in your project:
+Include the routes of the bundle in a new `config/routes/sulu_headless_website.yml` file in your project:
 
 ```yaml
 sulu_headless:
