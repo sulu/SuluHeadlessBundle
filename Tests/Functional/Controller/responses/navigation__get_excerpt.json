@@ -80,6 +80,7 @@
                             "version": 1,
                             "subVersion": 0,
                             "name": "test-image.png",
+                            "preferredExtension": "png",
                             "type": {
                                 "name": "image",
                                 "id": 2
