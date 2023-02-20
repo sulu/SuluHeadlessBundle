@@ -2,7 +2,25 @@
 
 ## 0.10.0
 
+### Add extension placeholder to serialized medias
 
+Before this update the preferred extension was always added to the uri. 
+Now the preferred extension is extracted into a new field `preferredExtension` and in the uri the placeholder `{extension}` is used instead of the extension.
+
+**Before:**
+```json
+{
+    "formatUri": "/media/1/{format}/media-1.png?v=1-0"
+}
+```
+
+**After:**
+```json
+{
+    "formatUri": "/media/1/{format}/media-1.{extension}?v=1-0",
+    "preferredExtension": "png"
+}
+```
 
 ## 0.9.0
 
