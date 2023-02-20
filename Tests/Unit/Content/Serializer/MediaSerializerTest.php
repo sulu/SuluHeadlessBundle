@@ -114,8 +114,8 @@ class MediaSerializerTest extends TestCase
             ->willReturn(['jpg'])
             ->shouldBeCalled();
 
-        $this->formatCache->getMediaUrl(1, 'media-1.jpg', '{format}', 1, 0)
-            ->willReturn('/media/1/{format}/media-1.jpg?v=1-0')
+        $this->formatCache->getMediaUrl(1, 'media-1.extension', '{format}', 1, 0)
+            ->willReturn('/media/1/{format}/media-1.extension?v=1-0')
             ->shouldBeCalled();
 
         $this->referenceStore->add(1)
@@ -126,7 +126,8 @@ class MediaSerializerTest extends TestCase
 
         $this->assertSame([
             'id' => 1,
-            'formatUri' => '/media/1/{format}/media-1.jpg?v=1-0',
+            'preferredExtension' => 'jpg',
+            'formatUri' => '/media/1/{format}/media-1.{extension}?v=1-0',
         ], $result);
     }
 
@@ -178,8 +179,8 @@ class MediaSerializerTest extends TestCase
             ->willReturn([])
             ->shouldBeCalled();
 
-        $this->formatCache->getMediaUrl(1, 'preview-media.png', '{format}', 1, 0)
-            ->willReturn('/media/1/{format}/preview-media.png?v=1-0')
+        $this->formatCache->getMediaUrl(1, 'preview-media.extension', '{format}', 1, 0)
+            ->willReturn('/media/1/{format}/preview-media.extension?v=1-0')
             ->shouldBeCalled();
 
         $this->referenceStore->add(1)
@@ -190,7 +191,7 @@ class MediaSerializerTest extends TestCase
 
         $this->assertSame([
             'id' => 1,
-            'formatUri' => '/media/1/{format}/preview-media.png?v=1-0',
+            'formatUri' => '/media/1/{format}/preview-media.{extension}?v=1-0',
         ], $result);
     }
 
@@ -232,8 +233,8 @@ class MediaSerializerTest extends TestCase
             ->willReturn([])
             ->shouldBeCalled();
 
-        $this->formatCache->getMediaUrl(1, 'media-1.png', '{format}', 1, 0)
-            ->willReturn('/media/1/{format}/media-1.png?v=1-0')
+        $this->formatCache->getMediaUrl(1, 'media-1.extension', '{format}', 1, 0)
+            ->willReturn('/media/1/{format}/media-1.extension?v=1-0')
             ->shouldBeCalled();
 
         $this->referenceStore->add(1)
@@ -244,7 +245,7 @@ class MediaSerializerTest extends TestCase
 
         $this->assertSame([
             'id' => 1,
-            'formatUri' => '/media/1/{format}/media-1.png?v=1-0',
+            'formatUri' => '/media/1/{format}/media-1.{extension}?v=1-0',
         ], $result);
     }
 }

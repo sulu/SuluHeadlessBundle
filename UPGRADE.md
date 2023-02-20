@@ -1,5 +1,9 @@
 # Upgrade
 
+## 0.10.0
+
+
+
 ## 0.9.0
 
 ### Make NavigationInvalidationSubscriber::collectNavigationContexts method private
