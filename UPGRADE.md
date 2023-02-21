@@ -7,6 +7,8 @@
 Before this update the preferred extension was always added to the uri. 
 Now the preferred extension is extracted into a new field `preferredExtension` and in the uri the placeholder `{extension}` is used instead of the extension.
 
+For non-image medias the `formatUri` as well as the `formatPreferredExtension` fields are omitted.
+
 **Before:**
 ```json
 {
@@ -17,8 +19,8 @@ Now the preferred extension is extracted into a new field `preferredExtension` a
 **After:**
 ```json
 {
-    "formatUri": "/media/1/{format}/media-1.{extension}?v=1-0",
-    "preferredExtension": "png"
+    "formatPreferredExtension": "png",
+    "formatUri": "/media/1/{format}/media-1.{extension}?v=1-0"
 }
 ```
 
