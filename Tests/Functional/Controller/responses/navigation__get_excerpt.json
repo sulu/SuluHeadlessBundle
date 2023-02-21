@@ -97,7 +97,8 @@
                             "properties": [],
                             "categories": [],
                             "targetGroups": [],
-                            "formatUri": "@string@"
+                            "formatUri": "@string@.matchRegex('/^\\/uploads\\/media\\/{format}\\/\\d{2}\\/\\d+-test-image\\.{extension}\\?v=1-0$/')",
+                            "formatPreferredExtension": "png"
                         }
                     ],
                     "images": []

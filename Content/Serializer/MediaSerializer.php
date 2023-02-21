@@ -94,15 +94,21 @@ class MediaSerializer implements MediaSerializerInterface
         $preferredExtension = $this->imageConverter->getSupportedOutputImageFormats($formatMediaApi->getMimeType())[0] ?? null;
         if ($preferredExtension) {
             $fileName = \pathinfo($fileName)['filename'] . '.' . $preferredExtension;
-        }
 
-        $mediaData['formatUri'] = $this->formatCache->getMediaUrl(
-            $formatMediaApi->getId(),
-            $fileName,
-            '{format}',
-            $formatMediaApi->getVersion(),
-            $formatMediaApi->getSubVersion()
-        );
+            // extension brackets cannot be added here because of the urlencoding
+            $fileName = \pathinfo($fileName)['filename'] . '.' . 'extension';
+            $formatUri = $this->formatCache->getMediaUrl(
+                $formatMediaApi->getId(),
+                $fileName,
+                '{format}',
+                $formatMediaApi->getVersion(),
+                $formatMediaApi->getSubVersion()
+            );
+            $formatUri = \str_replace('.extension', '.{extension}', $formatUri);
+
+            $mediaData['formatPreferredExtension'] = $preferredExtension;
+            $mediaData['formatUri'] = $formatUri;
+        }
 
         $this->referenceStore->add($apiMedia->getId());
 

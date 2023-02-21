@@ -24,10 +24,12 @@ use Sulu\Bundle\MediaBundle\Entity\File;
 use Sulu\Bundle\MediaBundle\Entity\FileVersion;
 use Sulu\Bundle\MediaBundle\Entity\MediaInterface;
 use Sulu\Bundle\MediaBundle\Media\FormatCache\FormatCacheInterface;
+use Sulu\Bundle\MediaBundle\Media\FormatCache\LocalFormatCache;
 use Sulu\Bundle\MediaBundle\Media\ImageConverter\ImageConverterInterface;
 use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
 use Sulu\Bundle\WebsiteBundle\ReferenceStore\ReferenceStoreInterface;
 use Sulu\Component\Serializer\ArraySerializerInterface;
+use Symfony\Component\Filesystem\Filesystem;
 
 class MediaSerializerTest extends TestCase
 {
@@ -47,7 +49,7 @@ class MediaSerializerTest extends TestCase
     private $imageConverter;
 
     /**
-     * @var FormatCacheInterface|ObjectProphecy
+     * @var FormatCacheInterface
      */
     private $formatCache;
 
@@ -66,14 +68,14 @@ class MediaSerializerTest extends TestCase
         $this->mediaManager = $this->prophesize(MediaManagerInterface::class);
         $this->arraySerializer = $this->prophesize(ArraySerializerInterface::class);
         $this->imageConverter = $this->prophesize(ImageConverterInterface::class);
-        $this->formatCache = $this->prophesize(FormatCacheInterface::class);
         $this->referenceStore = $this->prophesize(ReferenceStoreInterface::class);
+        $this->formatCache = new LocalFormatCache(new Filesystem(), __DIR__ . '../../../Application/var/public/uploads/media', '/uploads/media/{slug}', 10);
 
         $this->mediaSerializer = new MediaSerializer(
             $this->mediaManager->reveal(),
             $this->arraySerializer->reveal(),
             $this->imageConverter->reveal(),
-            $this->formatCache->reveal(),
+            $this->formatCache,
             $this->referenceStore->reveal()
         );
     }
@@ -111,11 +113,7 @@ class MediaSerializerTest extends TestCase
         ])->shouldBeCalled();
 
         $this->imageConverter->getSupportedOutputImageFormats('image/png')
-            ->willReturn(['jpg'])
-            ->shouldBeCalled();
-
-        $this->formatCache->getMediaUrl(1, 'media-1.jpg', '{format}', 1, 0)
-            ->willReturn('/media/1/{format}/media-1.jpg?v=1-0')
+            ->willReturn(['png'])
             ->shouldBeCalled();
 
         $this->referenceStore->add(1)
@@ -126,7 +124,53 @@ class MediaSerializerTest extends TestCase
 
         $this->assertSame([
             'id' => 1,
-            'formatUri' => '/media/1/{format}/media-1.jpg?v=1-0',
+            'formatPreferredExtension' => 'png',
+            'formatUri' => '/uploads/media/{format}/01/1-media-1.{extension}?v=1-0',
+        ], $result);
+    }
+
+    public function testSerializeDocument(): void
+    {
+        $locale = 'en';
+        $media = $this->prophesize(MediaInterface::class);
+
+        // expected and unexpected object calls
+        $apiMedia = $this->prophesize(Media::class);
+        $apiMedia->getId()->willReturn(1)->shouldBeCalled();
+        $apiMedia->getName()->willReturn('media-1.pdf')->shouldBeCalled();
+        $apiMedia->getMimeType()->willReturn('application/pdf')->shouldBeCalled();
+
+        $apiMediaArgument = Argument::that(function (Media $apiMedia) use ($media, $locale) {
+            return $apiMedia->getEntity() === $media->reveal() && $locale === $apiMedia->getLocale();
+        });
+
+        // expected and unexpected service calls
+        $this->mediaManager->addFormatsAndUrl($apiMediaArgument)
+            ->willReturn($apiMedia->reveal())
+            ->shouldBeCalled();
+
+        $this->arraySerializer->serialize($apiMedia->reveal(), null)->willReturn([
+            'id' => 1,
+            'formats' => [],
+            'storageOptions' => [],
+            'thumbnails' => [],
+            'versions' => [],
+            'downloadCounter' => [],
+            '_hash' => [],
+        ])->shouldBeCalled();
+
+        $this->imageConverter->getSupportedOutputImageFormats('application/pdf')
+            ->willReturn([])
+            ->shouldBeCalled();
+
+        $this->referenceStore->add(1)
+            ->shouldBeCalled();
+
+        // call test function
+        $result = $this->mediaSerializer->serialize($media->reveal(), $locale);
+
+        $this->assertSame([
+            'id' => 1,
         ], $result);
     }
 
@@ -175,11 +219,7 @@ class MediaSerializerTest extends TestCase
         ])->shouldBeCalled();
 
         $this->imageConverter->getSupportedOutputImageFormats('image/png')
-            ->willReturn([])
-            ->shouldBeCalled();
-
-        $this->formatCache->getMediaUrl(1, 'preview-media.png', '{format}', 1, 0)
-            ->willReturn('/media/1/{format}/preview-media.png?v=1-0')
+            ->willReturn(['png'])
             ->shouldBeCalled();
 
         $this->referenceStore->add(1)
@@ -190,7 +230,8 @@ class MediaSerializerTest extends TestCase
 
         $this->assertSame([
             'id' => 1,
-            'formatUri' => '/media/1/{format}/preview-media.png?v=1-0',
+            'formatPreferredExtension' => 'png',
+            'formatUri' => '/uploads/media/{format}/01/1-preview-media.{extension}?v=1-0',
         ], $result);
     }
 
@@ -229,11 +270,7 @@ class MediaSerializerTest extends TestCase
         ])->shouldBeCalled();
 
         $this->imageConverter->getSupportedOutputImageFormats('image/png')
-            ->willReturn([])
-            ->shouldBeCalled();
-
-        $this->formatCache->getMediaUrl(1, 'media-1.png', '{format}', 1, 0)
-            ->willReturn('/media/1/{format}/media-1.png?v=1-0')
+            ->willReturn(['png'])
             ->shouldBeCalled();
 
         $this->referenceStore->add(1)
@@ -244,7 +281,8 @@ class MediaSerializerTest extends TestCase
 
         $this->assertSame([
             'id' => 1,
-            'formatUri' => '/media/1/{format}/media-1.png?v=1-0',
+            'formatPreferredExtension' => 'png',
+            'formatUri' => '/uploads/media/{format}/01/1-media-1.{extension}?v=1-0',
         ], $result);
     }
 }
