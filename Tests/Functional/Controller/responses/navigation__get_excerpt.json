@@ -80,7 +80,6 @@
                             "version": 1,
                             "subVersion": 0,
                             "name": "test-image.png",
-                            "preferredExtension": "png",
                             "type": {
                                 "name": "image",
                                 "id": 2
@@ -98,7 +97,8 @@
                             "properties": [],
                             "categories": [],
                             "targetGroups": [],
-                            "formatUri": "@string@"
+                            "formatUri": "@string@",
+                            "formatPreferredExtension": "@string@"
                         }
                     ],
                     "images": []
