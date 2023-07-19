@@ -20,6 +20,7 @@ use Sulu\Bundle\MarkupBundle\Markup\Link\LinkItem;
 use Sulu\Bundle\MarkupBundle\Markup\Link\LinkProviderInterface;
 use Sulu\Bundle\MarkupBundle\Markup\Link\LinkProviderPoolInterface;
 use Sulu\Component\Content\Compat\PropertyInterface;
+use Sulu\Component\Content\Compat\StructureInterface;
 
 class LinkResolverTest extends TestCase
 {
@@ -37,7 +38,15 @@ class LinkResolverTest extends TestCase
         $provider = $this->prophesize(LinkProviderInterface::class);
         $linkResolver = new LinkResolver($providerPool->reveal());
 
+        $structure = $this->prophesize(StructureInterface::class);
+        $structure->getLanguageCode()
+            ->shouldBeCalled()
+            ->willReturn('en');
+
         $property = $this->prophesize(PropertyInterface::class);
+        $property->getStructure()
+            ->shouldBeCalled()
+            ->wilLReturn($structure->reveal());
         $property->getValue()
             ->shouldBeCalled()
             ->willReturn([
@@ -81,7 +90,15 @@ class LinkResolverTest extends TestCase
         $provider = $this->prophesize(LinkProviderInterface::class);
         $linkResolver = new LinkResolver($providerPool->reveal());
 
+        $structure = $this->prophesize(StructureInterface::class);
+        $structure->getLanguageCode()
+            ->shouldBeCalled()
+            ->willReturn('en');
+
         $property = $this->prophesize(PropertyInterface::class);
+        $property->getStructure()
+            ->shouldBeCalled()
+            ->wilLReturn($structure->reveal());
         $property->getValue()
             ->shouldBeCalled()
             ->willReturn([

@@ -79,6 +79,7 @@ class LinkResolver implements ContentTypeResolverInterface
     private function getContentData(PropertyInterface $property): ?string
     {
         $value = $property->getValue();
+        $locale = $property->getStructure()->getLanguageCode();
 
         if (!$value || !isset($value['provider'])) {
             return null;
@@ -90,7 +91,7 @@ class LinkResolver implements ContentTypeResolverInterface
 
         $provider = $this->linkProviderPool->getProvider($value['provider']);
 
-        $linkItems = $provider->preload([$value['href']], $value['locale']);
+        $linkItems = $provider->preload([$value['href']], $locale);
 
         if (0 === \count($linkItems)) {
             return null;
