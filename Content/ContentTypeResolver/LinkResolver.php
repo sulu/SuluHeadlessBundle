@@ -38,7 +38,7 @@ class LinkResolver implements ContentTypeResolverInterface
 
     public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView
     {
-        $content = $this->getContentData($property);
+        $content = $this->getContentData($property, $locale);
         $view = $this->getViewData($property);
 
         return new ContentView($content, $view);
@@ -76,10 +76,9 @@ class LinkResolver implements ContentTypeResolverInterface
         return $result;
     }
 
-    private function getContentData(PropertyInterface $property): ?string
+    private function getContentData(PropertyInterface $property, string $locale): ?string
     {
         $value = $property->getValue();
-        $locale = $property->getStructure()->getLanguageCode();
 
         if (!$value || !isset($value['provider'])) {
             return null;
