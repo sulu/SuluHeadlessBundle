@@ -20,6 +20,7 @@ use Sulu\Component\Content\Compat\PropertyInterface;
 use Sulu\Component\Content\Compat\Structure\SnippetBridge;
 use Sulu\Component\Content\Compat\Structure\StructureBridge;
 use Sulu\Component\Content\Mapper\ContentMapperInterface;
+use Sulu\Component\DocumentManager\Exception\DocumentNotFoundException;
 
 class SnippetSelectionResolver implements ContentTypeResolverInterface
 {
@@ -75,7 +76,11 @@ class SnippetSelectionResolver implements ContentTypeResolverInterface
         $snippets = [];
         foreach ($snippetIds as $snippetId) {
             /** @var SnippetBridge $snippet */
-            $snippet = $this->contentMapper->load($snippetId, $webspaceKey, $locale);
+            try {
+                $snippet = $this->contentMapper->load($snippetId, $webspaceKey, $locale);
+            } catch (DocumentNotFoundException $e) {
+                continue;
+            }
 
             if (!$snippet->getHasTranslation() && null !== $shadowLocale) {
                 /** @var SnippetBridge $snippet */
