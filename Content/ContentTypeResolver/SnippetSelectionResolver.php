@@ -80,12 +80,15 @@ class SnippetSelectionResolver implements ContentTypeResolverInterface
             if (!$snippet->getHasTranslation() && null !== $shadowLocale) {
                 /** @var SnippetBridge $snippet */
                 $snippet = $this->contentMapper->load($snippetId, $webspaceKey, $shadowLocale);
+                $snippet->getDocument()->setLocale($shadowLocale);
+                $snippet->getDocument()->setOriginalLocale($locale);
             }
 
             $snippet->setIsShadow(null !== $shadowLocale);
             /** @var string $shadowBaseLanguage */
             $shadowBaseLanguage = $shadowLocale;
             $snippet->setShadowBaseLanguage($shadowBaseLanguage);
+            $snippet->setLanguageCode($locale);
 
             $snippets[] = $this->structureResolver->resolve($snippet, $locale, $includeExtension);
         }
