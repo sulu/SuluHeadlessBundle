@@ -15,6 +15,7 @@ namespace Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver;
 
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
+use Sulu\Bundle\SnippetBundle\Document\SnippetDocument;
 use Sulu\Bundle\SnippetBundle\Snippet\DefaultSnippetManagerInterface;
 use Sulu\Component\Content\Compat\PropertyInterface;
 use Sulu\Component\Content\Compat\Structure\SnippetBridge;
@@ -75,8 +76,8 @@ class SnippetSelectionResolver implements ContentTypeResolverInterface
 
         $snippets = [];
         foreach ($snippetIds as $snippetId) {
-            /** @var SnippetBridge $snippet */
             try {
+                /** @var SnippetBridge $snippet */
                 $snippet = $this->contentMapper->load($snippetId, $webspaceKey, $locale);
             } catch (DocumentNotFoundException $e) {
                 continue;
@@ -85,15 +86,16 @@ class SnippetSelectionResolver implements ContentTypeResolverInterface
             if (!$snippet->getHasTranslation() && null !== $shadowLocale) {
                 /** @var SnippetBridge $snippet */
                 $snippet = $this->contentMapper->load($snippetId, $webspaceKey, $shadowLocale);
-                $snippet->getDocument()->setLocale($shadowLocale);
-                $snippet->getDocument()->setOriginalLocale($locale);
+                /** @var SnippetDocument $document */
+                $document = $snippet->getDocument();
+                $document->setLocale($shadowLocale);
+                $document->setOriginalLocale($locale);
             }
 
             $snippet->setIsShadow(null !== $shadowLocale);
             /** @var string $shadowBaseLanguage */
             $shadowBaseLanguage = $shadowLocale;
             $snippet->setShadowBaseLanguage($shadowBaseLanguage);
-            $snippet->setLanguageCode($locale);
 
             $snippets[] = $this->structureResolver->resolve($snippet, $locale, $includeExtension);
         }
