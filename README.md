@@ -11,7 +11,7 @@
         <img src="https://img.shields.io/github/license/sulu/SuluHeadlessBundle.svg" alt="GitHub license">
     </a>
     <a href="https://github.com/sulu/SuluHeadlessBundle/actions" target="_blank">
-        <img src="https://img.shields.io/github/actions/workflow/status/sulu/SuluHeadlessBundle/test-application.yaml?branch=0.x" alt="Test workflow status">
+        <img src="https://img.shields.io/github/actions/workflow/status/sulu/SuluHeadlessBundle/test-application.yaml" alt="Test workflow status">
     </a>
     <a href="https://github.com/sulu/sulu/releases" target="_blank">
         <img src="https://img.shields.io/badge/sulu%20compatibility-%3E=2.0-52b6ca.svg" alt="Sulu compatibility">
