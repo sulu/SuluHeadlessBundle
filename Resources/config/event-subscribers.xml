@@ -18,7 +18,6 @@
             <argument type="service" id="sulu_http_cache.cache_manager" on-invalid="null"/>
 
             <tag name="kernel.event_subscriber" />
-            <tag name="kernel.reset" method="reset"/>
         </service>
     </services>
 </container>
