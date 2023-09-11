@@ -366,6 +366,31 @@ export default HeadlessTemplatePage;
 Finally, you can build your frontend application by executing `npm install` and `npm run build` in the `assets/headless`
 directory.
 
+### Extending the StructureResolver 
+To add more data to the json that is returned for a site, you can extend the StructureResolver by registering an service with the tag `sulu_headless.structure_resolver_extension`.
+
+```
+use Sulu\Bundle\HeadlessBundle\Content\StructureResolver\StructureResolverExtensionInterface;
+
+class MyStructureExtension implements StructureResolverExtensionInterface
+{
+    public function getKey(): string 
+    {
+        return 'myKey';
+    }
+    
+    public function resolve(
+        StructureInterface $requestedStructure,
+        string $locale
+    ): mixed {
+        return [
+            'foo' => 'bar',
+            'fruits' => Fruits::getArray($locale),
+            'webspaceKey' => $requestedStructure->getWebspaceKey()
+        ];
+    }
+}
+```
 
 ## ❤️&nbsp; Support and Contributions
 
