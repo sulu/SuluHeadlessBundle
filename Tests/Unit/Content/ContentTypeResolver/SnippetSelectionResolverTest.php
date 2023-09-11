@@ -18,6 +18,7 @@ use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\SnippetSelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
+use Sulu\Bundle\SnippetBundle\Document\SnippetDocument;
 use Sulu\Bundle\SnippetBundle\Snippet\DefaultSnippetManagerInterface;
 use Sulu\Component\Content\Compat\PropertyInterface;
 use Sulu\Component\Content\Compat\PropertyParameter;
@@ -233,6 +234,12 @@ class SnippetSelectionResolverTest extends TestCase
         $snippet1de = $this->prophesize(SnippetBridge::class);
         $snippet1de->setIsShadow(true)->shouldBeCalled();
         $snippet1de->setShadowBaseLanguage('de')->shouldBeCalled();
+
+        /** @var SnippetDocument|ObjectProphecy $snippet1DeDocument */
+        $snippet1DeDocument = $this->prophesize(SnippetDocument::class);
+        $snippet1de->getDocument()->willReturn($snippet1DeDocument->reveal());
+        $snippet1DeDocument->setLocale('de')->shouldBeCalled();
+        $snippet1DeDocument->setOriginalLocale('en')->shouldBeCalled();
 
         $this->contentMapper->load('snippet-1', 'webspace-key', 'en')->willReturn($snippet1en->reveal());
         $this->contentMapper->load('snippet-1', 'webspace-key', 'de')->willReturn($snippet1de->reveal());
