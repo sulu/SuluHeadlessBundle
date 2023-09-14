@@ -58,6 +58,12 @@ class ContactSelectionResolver implements ContentTypeResolverInterface
             $content[] = $this->contactSerializer->serialize($contact->getEntity(), $locale, $serializationContext);
         }
 
+        $ids = $property->getValue();
+        $idPositions = \array_flip($ids);
+        \usort($content, function($a, $b) use ($idPositions) {
+            return $idPositions[$a['id']] - $idPositions[$b['id']];
+        });
+
         return new ContentView($content, ['ids' => $data]);
     }
 }
