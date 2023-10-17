@@ -13,11 +13,5 @@
             <tag name="sulu_document_manager.event_subscriber"/>
             <tag name="kernel.reset" method="reset"/>
         </service>
-
-        <service id="sulu_headless.event_subscriber.snippet_area_invalidation" class="Sulu\Bundle\HeadlessBundle\EventSubscriber\SnippetAreaInvalidationSubscriber">
-            <argument type="service" id="sulu_http_cache.cache_manager" on-invalid="null"/>
-
-            <tag name="kernel.event_subscriber" />
-        </service>
     </services>
 </container>
