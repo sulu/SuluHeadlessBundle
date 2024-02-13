@@ -39,11 +39,5 @@
             <tag name="sulu_website.reference_store" alias="navigation"/>
             <tag name="kernel.reset" method="reset"/>
         </service>
-
-        <service id="sulu_headless.reference_store.snippet_area"
-                 class="Sulu\Bundle\WebsiteBundle\ReferenceStore\ReferenceStore">
-            <tag name="sulu_website.reference_store" alias="snippet_area"/>
-            <tag name="kernel.reset" method="reset"/>
-        </service>
     </services>
 </container>

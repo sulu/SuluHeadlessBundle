@@ -28,7 +28,7 @@
             <argument type="service" id="sulu.content.mapper"/>
             <argument type="service" id="sulu_headless.structure_resolver"/>
             <argument type="service" id="jms_serializer.serializer"/>
-            <argument type="service" id="sulu_headless.reference_store.snippet_area"/>
+            <argument type="service" id="sulu_snippet.reference_store.snippet_area"/>
             <argument>%sulu_http_cache.cache.max_age%</argument>
             <argument>%sulu_http_cache.cache.shared_max_age%</argument>
             <argument>%sulu_headless.snippet_area.cache_lifetime%</argument>
