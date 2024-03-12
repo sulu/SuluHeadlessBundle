@@ -85,6 +85,13 @@ must be set to the `HeadlessWebsiteController` included in this bundle:
 This controller will provide the **content of the page as JSON object** if the page is requested in the JSON format 
 via `{pageUrl}.json`.
 
+### Apache config
+```conf
+# Add this RewriteRule to handle .json requests
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^([^\.]+)\.json$ $1.php [NC,L]
+```
 
 ## 💡&nbsp; Key Concepts
 
