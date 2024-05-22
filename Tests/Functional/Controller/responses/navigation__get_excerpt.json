@@ -21,6 +21,7 @@
                 "urls": {
                     "de": "\/test-1"
                 },
+                "lastModified": null,
                 "author": null,
                 "authored": "@string@.isDateTime()",
                 "order": 20,
@@ -57,6 +58,7 @@
                 "urls": {
                     "de": "\/test-2"
                 },
+                "lastModified": null,
                 "author": null,
                 "authored": "@string@.isDateTime()",
                 "order": 30,

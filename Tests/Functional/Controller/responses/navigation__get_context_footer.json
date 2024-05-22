@@ -17,6 +17,7 @@
                 "urls": {
                     "de": "\/test-3"
                 },
+                "lastModified": null,
                 "author": null,
                 "authored": "@string@.isDateTime()",
                 "changer": null,

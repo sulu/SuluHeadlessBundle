@@ -17,6 +17,7 @@
                 "urls": {
                     "de": "/test-1a"
                 },
+                "lastModified": null,
                 "author": null,
                 "authored": "@string@.isDateTime()",
                 "changer": null,
@@ -42,6 +43,7 @@
                 "urls": {
                     "de": "/test-1b"
                 },
+                "lastModified": null,
                 "author": null,
                 "authored": "@string@.isDateTime()",
                 "changer": null,

@@ -173,6 +173,7 @@ class NavigationControllerTest extends BaseTestCase
         $this->websiteClient->request('GET', '/api/navigations/' . $context . '?' . \http_build_query($filters));
 
         $response = $this->websiteClient->getResponse();
+
         $this->assertInstanceOf(Response::class, $response);
 
         $this->assertStringContainsString('public', (string) $response->headers->get('Cache-Control'));
