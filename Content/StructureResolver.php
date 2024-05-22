@@ -126,7 +126,7 @@ class StructureResolver implements StructureResolverInterface
             }
 
             // the '.' is used to separate the extension name from the property name.
-            if (false !== \strpos($sourceProperty, '.')) {
+            if (\str_contains($sourceProperty, '.')) {
                 [$extensionName, $propertyName] = \explode('.', $sourceProperty);
 
                 if (!isset($unresolvedExtensionData[$extensionName][$propertyName])) {

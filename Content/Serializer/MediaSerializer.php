@@ -96,7 +96,7 @@ class MediaSerializer implements MediaSerializerInterface
             $fileName = \pathinfo($fileName)['filename'] . '.' . $preferredExtension;
 
             // extension brackets cannot be added here because of the urlencoding
-            $fileName = \pathinfo($fileName)['filename'] . '.' . 'extension';
+            $fileName = \pathinfo($fileName)['filename'] . '.extension';
             $formatUri = $this->formatCache->getMediaUrl(
                 $formatMediaApi->getId(),
                 $fileName,
