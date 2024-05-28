@@ -86,6 +86,7 @@ class SearchControllerTest extends BaseTestCase
     {
         $this->websiteClient->request('GET', '/api/search?q=' . $query . '&indices=' . \implode(',', $indices));
 
+        
         $response = $this->websiteClient->getResponse();
         $this->assertInstanceOf(Response::class, $response);
 
