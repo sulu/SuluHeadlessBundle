@@ -1,0 +1,56 @@
+{
+    "_embedded": {
+        "items": [
+            {
+                "id": "@uuid@",
+                "uuid": "@uuid@",
+                "nodeType": 1,
+                "publishedState": true,
+                "published": "@string@.isDateTime()",
+                "title": "Test 1",
+                "locale": "de",
+                "webspaceKey": "sulu_io",
+                "template": "default",
+                "parent": "@uuid@",
+                "url": "/test-1",
+                "path": "@string@.match(\"/test-1\").optional()",
+                "urls": {
+                    "de": "/test-1"
+                },
+                "author": null,
+                "authored": "@string@.isDateTime()",
+                "changer": null,
+                "changed": "@string@.isDateTime()",
+                "creator": null,
+                "created": "@string@.isDateTime()",
+                "order": 20,
+                "children": []
+            },
+            {
+                "id": "@uuid@",
+                "uuid": "@uuid@",
+                "nodeType": 1,
+                "publishedState": true,
+                "published": "@string@.isDateTime()",
+                "title": "Test 2",
+                "locale": "de",
+                "webspaceKey": "sulu_io",
+                "template": "default",
+                "parent": "@uuid@",
+                "path": "@string@.match(\"/test-2\").optional()",
+                "url": "/test-2",
+                "urls": {
+                    "de": "/test-2"
+                },
+                "author": null,
+                "authored": "@string@.isDateTime()",
+                "changer": null,
+                "changed": "@string@.isDateTime()",
+                "creator": null,
+                "created": "@string@.isDateTime()",
+                "order": 30,
+                "children": []
+            }
+        ]
+    }
+}

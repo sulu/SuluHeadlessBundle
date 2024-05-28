@@ -112,23 +112,30 @@ class NavigationControllerTest extends BaseTestCase
      */
     public function provideAttributes(): \Generator
     {
+        $path = '';
+        /* Todo Can be removed after ending support of sulu 2.5 */
+        if (\version_compare(\Composer\InstalledVersions::getVersion('sulu/sulu') ?? '999.999.999', '2.6.0', '<')
+        ) {
+            $path = '/legacy/';
+        }
+
         yield [
             [],
-            'navigation__get.json',
+            $path . 'navigation__get.json',
         ];
 
         yield [
             [
                 'context' => 'footer',
             ],
-            'navigation__get_context_footer.json',
+            $path . 'navigation__get_context_footer.json',
         ];
 
         yield [
             [
                 'depth' => 2,
             ],
-            'navigation__get_depth_2.json',
+            $path . 'navigation__get_depth_2.json',
         ];
 
         yield [
@@ -136,21 +143,21 @@ class NavigationControllerTest extends BaseTestCase
                 'depth' => 2,
                 'flat' => 'true',
             ],
-            'navigation__get_depth_2_flat.json',
+            $path . 'navigation__get_depth_2_flat.json',
         ];
 
         yield [
             [
                 'excerpt' => 'true',
             ],
-            'navigation__get_excerpt.json',
+            $path . 'navigation__get_excerpt.json',
         ];
 
         yield [
             [
                 'uuid' => true,
             ],
-            'navigation__get_uuid.json',
+            $path . 'navigation__get_uuid.json',
         ];
     }
 
