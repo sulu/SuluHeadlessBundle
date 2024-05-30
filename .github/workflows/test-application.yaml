@@ -21,29 +21,45 @@ jobs:
             fail-fast: false
             matrix:
                 include:
-                    - php-version: '8.2'
-                      lint: false
-                      coverage: false
-                      dependency-versions: 'lowest'
-                      tools: 'composer:v2'
-                      env:
-                          SYMFONY_DEPRECATIONS_HELPER: disabled
+                    -   php-version: '8.0'
+                        lint: false
+                        coverage: false
+                        dependency-versions: 'lowest'
+                        tools: 'composer:v2'
+                        env:
+                            SYMFONY_DEPRECATIONS_HELPER: disabled
 
-                    - php-version: '8.2'
-                      lint: true
-                      coverage: true
-                      dependency-versions: 'highest'
-                      tools: 'composer:v2'
-                      env:
-                          SYMFONY_DEPRECATIONS_HELPER: weak
+                    -   php-version: '8.1'
+                        lint: true
+                        coverage: true
+                        dependency-versions: 'highest'
+                        tools: 'composer:v2'
+                        env:
+                            SYMFONY_DEPRECATIONS_HELPER: weak
 
-                    - php-version: '8.3'
-                      lint: false
-                      coverage: false
-                      dependency-versions: 'highest'
-                      tools: 'composer:v2'
-                      env:
-                          SYMFONY_DEPRECATIONS_HELPER: weak
+                    -   php-version: '8.1'
+                        lint: true
+                        coverage: true
+                        dependency-versions: 'highest'
+                        tools: 'composer:v2'
+                        env:
+                            SYMFONY_DEPRECATIONS_HELPER: weak
+
+                    -   php-version: '8.2'
+                        lint: true
+                        coverage: true
+                        dependency-versions: 'highest'
+                        tools: 'composer:v2'
+                        env:
+                            SYMFONY_DEPRECATIONS_HELPER: weak
+
+                    -   php-version: '8.3'
+                        lint: false
+                        coverage: false
+                        dependency-versions: 'highest'
+                        tools: 'composer:v2'
+                        env:
+                            SYMFONY_DEPRECATIONS_HELPER: weak
 
         services:
             mysql:
@@ -55,36 +71,36 @@ jobs:
                 options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
 
         steps:
-            - name: Checkout project
-              uses: actions/checkout@v2
+            -   name: Checkout project
+                uses: actions/checkout@v2
 
-            - name: Install and configure PHP
-              uses: shivammathur/setup-php@v2
-              with:
-                  php-version: ${{ matrix.php-version }}
-                  extensions: ctype, iconv, mysql
-                  coverage: pcov
-                  tools: ${{ matrix.tools }}
+            -   name: Install and configure PHP
+                uses: shivammathur/setup-php@v2
+                with:
+                    php-version: ${{ matrix.php-version }}
+                    extensions: ctype, iconv, mysql
+                    coverage: pcov
+                    tools: ${{ matrix.tools }}
 
-            - name: Install composer dependencies
-              uses: ramsey/composer-install@v1
-              with:
-                  dependency-versions: ${{ matrix.dependency-versions }}
-                  composer-options: ${{ matrix.composer-options }}
+            -   name: Install composer dependencies
+                uses: ramsey/composer-install@v1
+                with:
+                    dependency-versions: ${{ matrix.dependency-versions }}
+                    composer-options: ${{ matrix.composer-options }}
 
-            - name: Bootstrap test environment
-              run: composer bootstrap-test-environment
+            -   name: Bootstrap test environment
+                run: composer bootstrap-test-environment
 
-            - name: Lint code
-              if: ${{ matrix.lint }}
-              run: composer lint
+            -   name: Lint code
+                if: ${{ matrix.lint }}
+                run: composer lint
 
-            - name: Execute unit test cases
-              run: composer test -- Tests/Unit --coverage-php var/coverage.php --coverage-html coverage-report --log-junit var/junit.xml
+            -   name: Execute unit test cases
+                run: composer test -- Tests/Unit --coverage-php var/coverage.php --coverage-html coverage-report --log-junit var/junit.xml
 
-            - name: Execute functional test cases
-              run: composer test -- Tests/Functional --log-junit var/junit.xml
+            -   name: Execute functional test cases
+                run: composer test -- Tests/Functional --log-junit var/junit.xml
 
-            - name: Check code coverage
-              if: ${{ matrix.coverage }}
-              run: php vendor/bin/code-coverage-checker "var/coverage.php" "line" "95" "Content"
+            -   name: Check code coverage
+                if: ${{ matrix.coverage }}
+                run: php vendor/bin/code-coverage-checker "var/coverage.php" "line" "95" "Content"
