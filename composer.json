@@ -36,7 +36,6 @@
         "symfony/console": "^4.4 || ^5.4 || ^6.3 || ^7.0",
         "symfony/dotenv": "^4.4 || ^5.4 || ^6.3 || ^7.0",
         "symfony/error-handler": "^4.4 || ^5.4 || ^6.3 || ^7.0",
-        "symfony/security-bundle": "^4.4 || ^5.4 || ^6.3 || ^7.0",
         "symfony/monolog-bundle": "^3.1",
         "thecodingmachine/phpstan-strict-rules": "^1.0"
     },
