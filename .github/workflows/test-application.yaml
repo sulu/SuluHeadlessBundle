@@ -13,6 +13,7 @@ jobs:
         runs-on: ubuntu-latest
 
         env:
+            COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             DATABASE_URL: mysql://root:root@127.0.0.1:3306/su_headless_test?serverVersion=5.7
             DATABASE_CHARSET: utf8mb4
             DATABASE_COLLATE: utf8mb4_unicode_ci
@@ -111,6 +112,7 @@ jobs:
         runs-on: ubuntu-latest
 
         env:
+            COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             DATABASE_URL: mysql://root:root@127.0.0.1:3306/su_headless_test?serverVersion=5.7
             DATABASE_CHARSET: utf8mb4
             DATABASE_COLLATE: utf8mb4_unicode_ci
