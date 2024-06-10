@@ -113,8 +113,12 @@ class NavigationControllerTest extends BaseTestCase
     public function provideAttributes(): \Generator
     {
         $path = '';
+
+        $suluSuluVersion = \Composer\InstalledVersions::getVersion('sulu/sulu');
+
         /* Todo Can be removed after ending support of sulu 2.5 */
-        if (\version_compare(\Composer\InstalledVersions::getVersion('sulu/sulu') ?? '999.999.999', '2.6.0', '<')
+        if (\version_compare($suluSuluVersion ?? '999.999.999', '2.6.0', '<')
+            && 0 !== \strpos($suluSuluVersion, 'dev-')
         ) {
             $path = '/legacy/';
         }
