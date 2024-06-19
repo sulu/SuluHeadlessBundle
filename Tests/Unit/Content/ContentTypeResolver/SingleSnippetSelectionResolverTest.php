@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
 
 use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\SingleSnippetSelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\SnippetSelectionResolver;
@@ -29,6 +30,8 @@ use Sulu\Component\Content\Mapper\ContentMapperInterface;
 
 class SingleSnippetSelectionResolverTest extends TestCase
 {
+    use ProphecyTrait;
+
     /**
      * @var ObjectProphecy|ContentMapperInterface
      */

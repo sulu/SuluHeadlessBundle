@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
 
 use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\PageSelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\SinglePageSelectionResolver;
@@ -22,6 +23,8 @@ use Sulu\Component\Content\Compat\PropertyInterface;
 
 class SinglePageSelectionResolverTest extends TestCase
 {
+    use ProphecyTrait;
+
     /**
      * @var SinglePageSelectionResolver
      */
@@ -49,12 +52,13 @@ class SinglePageSelectionResolverTest extends TestCase
     public function testResolve(): void
     {
         $property = $this->prophesize(PropertyInterface::class);
-        $this->pageSelectionResolver->resolve([1], $property, 'en', [])->willReturn(
+        $uuid = '2c55ea29-a5ba-4847-90ce-038b86384ab5';
+        $this->pageSelectionResolver->resolve([$uuid], $property, 'en', [])->willReturn(
             new ContentView(
                 [
                     [
-                        'id' => '1',
-                        'uuid' => '1',
+                        'id' => $uuid,
+                        'uuid' => $uuid,
                         'nodeType' => 1,
                         'path' => '/testpage',
                         'changer' => 1,
@@ -72,13 +76,13 @@ class SinglePageSelectionResolverTest extends TestCase
             )
         );
 
-        $result = $this->singlePageSelectionResolver->resolve(1, $property->reveal(), 'en');
+        $result = $this->singlePageSelectionResolver->resolve($uuid, $property->reveal(), 'en');
 
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame(
             [
-                'id' => '1',
-                'uuid' => '1',
+                'id' => $uuid,
+                'uuid' => $uuid,
                 'nodeType' => 1,
                 'path' => '/testpage',
                 'changer' => 1,
@@ -95,7 +99,7 @@ class SinglePageSelectionResolverTest extends TestCase
         );
         $this->assertSame(
             [
-                'id' => 1,
+                'id' => $uuid,
             ],
             $result->getView()
         );

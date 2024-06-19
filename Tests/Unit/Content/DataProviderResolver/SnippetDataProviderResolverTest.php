@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\DataProviderResolver;
 
 use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver\SnippetDataProviderResolver;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
@@ -28,6 +29,8 @@ use Sulu\Component\SmartContent\ResourceItemInterface;
 
 class SnippetDataProviderResolverTest extends TestCase
 {
+    use ProphecyTrait;
+
     /**
      * @var DataProviderInterface|ObjectProphecy
      */

@@ -46,11 +46,11 @@ class SingleContactSelectionResolver implements ContentTypeResolverInterface
 
     public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView
     {
-        if (empty($data)) {
+        if (!\is_numeric($data)) {
             return new ContentView(null, ['id' => null]);
         }
 
-        $contact = $this->contactManager->getById($data, $locale);
+        $contact = $this->contactManager->getById((int) $data, $locale);
         $serializationContext = new SerializationContext();
         $serializationContext->setGroups(['partialContact']);
 

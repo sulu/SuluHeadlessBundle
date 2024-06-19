@@ -113,7 +113,7 @@ class ContactSerializer implements ContactSerializerInterface
         }
 
         if (null !== $apiContact->getAvatar()) {
-            /** @var mixed[] $avatarData */
+            /** @var array{id: int, url: string, thumbnails: array<string, string>} $avatarData */
             $avatarData = $apiContact->getAvatar();
             $avatar = $this->mediaManager->getById($avatarData['id'], $locale);
             $contactData['avatar'] = $this->mediaSerializer->serialize($avatar->getEntity(), $locale);

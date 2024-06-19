@@ -15,6 +15,7 @@ namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
 
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\TeaserSelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\TeaserSerializerInterface;
@@ -24,6 +25,8 @@ use Sulu\Component\Content\Compat\PropertyInterface;
 
 class TeaserSelectionResolverTest extends TestCase
 {
+    use ProphecyTrait;
+
     /**
      * @var TeaserManagerInterface|ObjectProphecy
      */

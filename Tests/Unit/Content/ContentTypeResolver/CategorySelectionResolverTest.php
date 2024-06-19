@@ -16,6 +16,7 @@ namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
 use JMS\Serializer\SerializationContext;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\CategoryBundle\Category\CategoryManagerInterface;
 use Sulu\Bundle\CategoryBundle\Entity\CategoryInterface;
@@ -26,6 +27,8 @@ use Sulu\Component\Content\Compat\PropertyInterface;
 
 class CategorySelectionResolverTest extends TestCase
 {
+    use ProphecyTrait;
+
     /**
      * @var CategoryManagerInterface|ObjectProphecy
      */

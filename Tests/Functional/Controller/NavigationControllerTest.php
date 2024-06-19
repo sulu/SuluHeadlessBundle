@@ -11,7 +11,7 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-namespace Sulu\Bundle\HeadlessBundle\Tests\Functional\Controller;
+namespace Functional\Controller;
 
 use Sulu\Bundle\HeadlessBundle\Tests\Functional\BaseTestCase;
 use Sulu\Bundle\HeadlessBundle\Tests\Traits\CreateMediaTrait;
@@ -113,8 +113,13 @@ class NavigationControllerTest extends BaseTestCase
     public function provideAttributes(): \Generator
     {
         $path = '';
+
+        $suluSuluVersion = \Composer\InstalledVersions::getVersion('sulu/sulu');
+
         /* Todo Can be removed after ending support of sulu 2.5 */
-        if (\version_compare(\Composer\InstalledVersions::getVersion('sulu/sulu') ?? '999.999.999', '2.6.0', '<')
+        if ($suluSuluVersion
+            && \version_compare($suluSuluVersion, '2.6.0', '<')
+            && 0 !== \strpos($suluSuluVersion, 'dev-')
         ) {
             $path = '/legacy/';
         }

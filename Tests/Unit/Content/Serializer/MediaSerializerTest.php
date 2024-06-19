@@ -16,6 +16,7 @@ namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\Serializer;
 use JMS\Serializer\SerializationContext;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializer;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializerInterface;
@@ -33,6 +34,8 @@ use Symfony\Component\Filesystem\Filesystem;
 
 class MediaSerializerTest extends TestCase
 {
+    use ProphecyTrait;
+
     /**
      * @var MediaManagerInterface|ObjectProphecy
      */

@@ -15,6 +15,7 @@ namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
 
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\LinkResolver;
 use Sulu\Bundle\MarkupBundle\Markup\Link\LinkItem;
 use Sulu\Bundle\MarkupBundle\Markup\Link\LinkProviderInterface;
@@ -24,6 +25,8 @@ use Sulu\Component\Content\Compat\StructureInterface;
 
 class LinkResolverTest extends TestCase
 {
+    use ProphecyTrait;
+
     public function testGetContentType(): void
     {
         $linkProviderPool = $this->prophesize(LinkProviderPoolInterface::class);

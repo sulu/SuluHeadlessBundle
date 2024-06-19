@@ -12,7 +12,7 @@ parameters:
     paths:
         - .
     level: max
-    excludes_analyse:
+    excludePaths:
         - %currentWorkingDirectory%/DependencyInjection/Configuration.php
         - %currentWorkingDirectory%/Tests/Application/var/*
         - %currentWorkingDirectory%/vendor/*

@@ -16,6 +16,7 @@ namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\Serializer;
 use JMS\Serializer\SerializationContext;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\ContactBundle\Api\Contact;
 use Sulu\Bundle\ContactBundle\Contact\ContactManager;
@@ -35,6 +36,8 @@ use Sulu\Component\Serializer\ArraySerializerInterface;
 
 class ContactSerializerTest extends TestCase
 {
+    use ProphecyTrait;
+
     /**
      * @var ContactManager|ObjectProphecy
      */

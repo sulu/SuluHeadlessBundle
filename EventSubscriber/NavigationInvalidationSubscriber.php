@@ -123,10 +123,12 @@ class NavigationInvalidationSubscriber implements EventSubscriberInterface, Rese
             $defaultNavigationContexts = [];
 
             if ($liveNode->hasProperty($propertyName)) {
+                /** @var string[] $liveNavigationContexts */
                 $liveNavigationContexts = $liveNode->getProperty($propertyName)->getValue();
             }
 
             if ($defaultNode->hasProperty($propertyName)) {
+                /** @var string[] $defaultNavigationContexts */
                 $defaultNavigationContexts = $defaultNode->getProperty($propertyName)->getValue();
             }
 

@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
 
 use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\ResourceLocatorResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
@@ -23,6 +24,8 @@ use Sulu\Component\Content\Compat\StructureInterface;
 
 class ResourceLocatorResolverTest extends TestCase
 {
+    use ProphecyTrait;
+
     /**
      * @var ResourceLocatorResolver
      */

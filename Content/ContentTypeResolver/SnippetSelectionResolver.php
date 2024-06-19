@@ -68,7 +68,7 @@ class SnippetSelectionResolver implements ContentTypeResolverInterface
         /** @var string $defaultArea */
         $defaultArea = isset($params['default']) ? $params['default']->getValue() : null;
 
-        $snippetIds = $data ?? [];
+        $snippetIds = \is_array($data) ? $data : [];
         if (empty($snippetIds) && $defaultArea) {
             $defaultSnippetId = $this->defaultSnippetManager->loadIdentifier($webspaceKey, $defaultArea);
             $snippetIds = $defaultSnippetId ? [$defaultSnippetId] : [];

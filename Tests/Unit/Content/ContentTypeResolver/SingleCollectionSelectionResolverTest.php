@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
 
 use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\CollectionSelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\SingleCollectionSelectionResolver;
@@ -22,6 +23,8 @@ use Sulu\Component\Content\Compat\PropertyInterface;
 
 class SingleCollectionSelectionResolverTest extends TestCase
 {
+    use ProphecyTrait;
+
     /**
      * @var SingleCollectionSelectionResolver
      */

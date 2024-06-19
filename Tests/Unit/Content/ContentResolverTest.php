@@ -15,6 +15,7 @@ namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content;
 
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\HeadlessBundle\Content\ContentResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentResolverInterface;
@@ -24,6 +25,8 @@ use Sulu\Component\Content\Compat\PropertyInterface;
 
 class ContentResolverTest extends TestCase
 {
+    use ProphecyTrait;
+
     /**
      * @var ContentTypeResolverInterface|ObjectProphecy
      */

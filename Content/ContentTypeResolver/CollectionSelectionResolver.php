@@ -50,7 +50,7 @@ class CollectionSelectionResolver implements ContentTypeResolverInterface
         /** @var int[]|null $ids */
         $ids = $data;
 
-        if (empty($ids)) {
+        if (empty($ids) || !\is_array($ids)) {
             return new ContentView([], ['ids' => []]);
         }
 

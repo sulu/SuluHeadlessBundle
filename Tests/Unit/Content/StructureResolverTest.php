@@ -15,6 +15,7 @@ namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content;
 
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\DocumentManagerBundle\Bridge\DocumentInspector;
 use Sulu\Bundle\HeadlessBundle\Content\ContentResolverInterface;
@@ -33,6 +34,8 @@ use Sulu\Component\DocumentManager\Metadata;
 
 class StructureResolverTest extends TestCase
 {
+    use ProphecyTrait;
+
     /**
      * @var StructureBridge|ObjectProphecy
      */

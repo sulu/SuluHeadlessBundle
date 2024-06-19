@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
 
 use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\PageTreeRouteResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
@@ -21,6 +22,8 @@ use Sulu\Component\Content\Compat\PropertyInterface;
 
 class PageTreeRouteResolverTest extends TestCase
 {
+    use ProphecyTrait;
+
     /**
      * @var PageTreeRouteResolver
      */

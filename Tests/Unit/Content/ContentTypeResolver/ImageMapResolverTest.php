@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
 
 use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\HeadlessBundle\Content\ContentResolverInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\ImageMapResolver;
@@ -28,6 +29,8 @@ use Sulu\Component\Content\Compat\PropertyType;
 
 class ImageMapResolverTest extends TestCase
 {
+    use ProphecyTrait;
+
     /**
      * @var MediaManagerInterface|ObjectProphecy
      */

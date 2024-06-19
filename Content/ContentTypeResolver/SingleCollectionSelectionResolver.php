@@ -35,14 +35,13 @@ class SingleCollectionSelectionResolver implements ContentTypeResolverInterface
 
     public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView
     {
-        /** @var int|null $id */
         $id = $data;
 
-        if (empty($id)) {
+        if (!\is_numeric($id)) {
             return new ContentView(null, ['id' => null]);
         }
 
-        $content = $this->collectionSelectionResolver->resolve([$id], $property, $locale, $attributes);
+        $content = $this->collectionSelectionResolver->resolve([(int) $id], $property, $locale, $attributes);
 
         /** @var mixed[]|null $contentData */
         $contentData = $content->getContent();

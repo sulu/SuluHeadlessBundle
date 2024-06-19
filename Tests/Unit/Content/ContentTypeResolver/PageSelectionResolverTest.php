@@ -15,6 +15,7 @@ namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
 
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\PageSelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
@@ -27,6 +28,8 @@ use Sulu\Component\Content\Query\ContentQueryBuilderInterface;
 
 class PageSelectionResolverTest extends TestCase
 {
+    use ProphecyTrait;
+
     /**
      * @var StructureResolverInterface|ObjectProphecy
      */

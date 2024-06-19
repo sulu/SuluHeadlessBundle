@@ -1,36 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Parameter \\#1 \\$ids of method Sulu\\\\Bundle\\\\ContactBundle\\\\Contact\\\\AccountManager\\:\\:getByIds\\(\\) expects array, mixed given\\.$#"
-			count: 1
-			path: Content/ContentTypeResolver/AccountSelectionResolver.php
-
-		-
-			message: "#^Parameter \\#1 \\$ids of method Sulu\\\\Bundle\\\\CategoryBundle\\\\Category\\\\CategoryManagerInterface\\:\\:findByIds\\(\\) expects array, mixed given\\.$#"
-			count: 1
-			path: Content/ContentTypeResolver/CategorySelectionResolver.php
-
-		-
-			message: "#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\\.$#"
-			count: 1
-			path: Content/ContentTypeResolver/ContactAccountSelectionResolver.php
-
-		-
-			message: "#^Parameter \\#1 \\$string of function substr expects string, mixed given\\.$#"
-			count: 2
-			path: Content/ContentTypeResolver/ContactAccountSelectionResolver.php
-
-		-
-			message: "#^Parameter \\#1 \\$string1 of function strncmp expects string, mixed given\\.$#"
-			count: 2
-			path: Content/ContentTypeResolver/ContactAccountSelectionResolver.php
-
-		-
-			message: "#^Parameter \\#1 \\$ids of method Sulu\\\\Bundle\\\\ContactBundle\\\\Contact\\\\ContactManager\\:\\:getByIds\\(\\) expects array, mixed given\\.$#"
-			count: 1
-			path: Content/ContentTypeResolver/ContactSelectionResolver.php
-
-		-
 			message: "#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\\.$#"
 			count: 1
 			path: Content/ContentTypeResolver/ImageMapResolver.php
@@ -71,67 +41,12 @@ parameters:
 			path: Content/ContentTypeResolver/ImageMapResolver.php
 
 		-
-			message: "#^Cannot access offset 'ids' on mixed\\.$#"
-			count: 1
-			path: Content/ContentTypeResolver/MediaSelectionResolver.php
-
-		-
-			message: "#^Method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Content\\\\ContentTypeResolver\\\\MediaSelectionResolver\\:\\:resolveApiMedias\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Content/ContentTypeResolver/MediaSelectionResolver.php
-
-		-
-			message: "#^Parameter \\#1 \\$ids of method Sulu\\\\Bundle\\\\MediaBundle\\\\Media\\\\Manager\\\\MediaManagerInterface\\:\\:getByIds\\(\\) expects array, mixed given\\.$#"
-			count: 1
-			path: Content/ContentTypeResolver/MediaSelectionResolver.php
-
-		-
-			message: "#^Parameter \\#1 \\$value of function count expects array\\|Countable, mixed given\\.$#"
-			count: 1
-			path: Content/ContentTypeResolver/MediaSelectionResolver.php
-
-		-
-			message: "#^Parameter \\#2 \\.\\.\\.\\$arrays of function array_merge expects array, mixed given\\.$#"
-			count: 1
-			path: Content/ContentTypeResolver/MediaSelectionResolver.php
-
-		-
 			message: "#^Cannot use array destructuring on string\\.$#"
 			count: 1
 			path: Content/ContentTypeResolver/PageSelectionResolver.php
 
 		-
-			message: "#^Parameter \\#1 \\$keys of function array_fill_keys expects array, mixed given\\.$#"
-			count: 1
-			path: Content/ContentTypeResolver/PageSelectionResolver.php
-
-		-
-			message: "#^Cannot cast mixed to int\\.$#"
-			count: 1
-			path: Content/ContentTypeResolver/SingleAccountSelectionResolver.php
-
-		-
-			message: "#^Cannot cast mixed to int\\.$#"
-			count: 1
-			path: Content/ContentTypeResolver/SingleCategorySelectionResolver.php
-
-		-
-			message: "#^Parameter \\#1 \\$id of method Sulu\\\\Bundle\\\\ContactBundle\\\\Contact\\\\ContactManager\\:\\:getById\\(\\) expects int, mixed given\\.$#"
-			count: 1
-			path: Content/ContentTypeResolver/SingleContactSelectionResolver.php
-
-		-
 			message: "#^Cannot access offset 0 on mixed\\.$#"
-			count: 1
-			path: Content/ContentTypeResolver/SingleMediaSelectionResolver.php
-
-		-
-			message: "#^Parameter \\#2 \\$array of function array_key_exists expects array, mixed given\\.$#"
-			count: 1
-			path: Content/ContentTypeResolver/SingleMediaSelectionResolver.php
-
-		-
-			message: "#^Parameter \\#2 \\.\\.\\.\\$arrays of function array_merge expects array, mixed given\\.$#"
 			count: 1
 			path: Content/ContentTypeResolver/SingleMediaSelectionResolver.php
 
@@ -149,16 +64,6 @@ parameters:
 			message: "#^Cannot cast mixed to int\\.$#"
 			count: 1
 			path: Content/ContentTypeResolver/SmartContentResolver.php
-
-		-
-			message: "#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\\.$#"
-			count: 1
-			path: Content/ContentTypeResolver/SnippetSelectionResolver.php
-
-		-
-			message: "#^Parameter \\#1 \\$uuid of method Sulu\\\\Component\\\\Content\\\\Mapper\\\\ContentMapperInterface\\:\\:load\\(\\) expects string, mixed given\\.$#"
-			count: 2
-			path: Content/ContentTypeResolver/SnippetSelectionResolver.php
 
 		-
 			message: "#^Parameter \\#1 \\$content of method Sulu\\\\Bundle\\\\MarkupBundle\\\\Markup\\\\MarkupParserInterface\\:\\:parse\\(\\) expects string, mixed given\\.$#"
@@ -256,16 +161,6 @@ parameters:
 			path: Content/DataProviderResolver/SnippetDataProviderResolver.php
 
 		-
-			message: "#^Parameter \\#1 \\$id of method Sulu\\\\Bundle\\\\MediaBundle\\\\Media\\\\Manager\\\\MediaManagerInterface\\:\\:getById\\(\\) expects int, mixed given\\.$#"
-			count: 1
-			path: Content/Serializer/AccountSerializer.php
-
-		-
-			message: "#^Parameter \\#1 \\$id of method Sulu\\\\Bundle\\\\MediaBundle\\\\Media\\\\Manager\\\\MediaManagerInterface\\:\\:getById\\(\\) expects int, mixed given\\.$#"
-			count: 1
-			path: Content/Serializer/ContactSerializer.php
-
-		-
 			message: "#^Cannot access offset string on mixed\\.$#"
 			count: 2
 			path: Content/StructureResolver.php
@@ -309,28 +204,3 @@ parameters:
 			message: "#^Parameter \\#1 \\$navigation of method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Controller\\\\NavigationController\\:\\:serializeExcerptMedia\\(\\) expects array, mixed given\\.$#"
 			count: 1
 			path: Controller/NavigationController.php
-
-		-
-			message: "#^Parameter \\#2 \\.\\.\\.\\$arrays of function array_merge expects array, mixed given\\.$#"
-			count: 1
-			path: EventSubscriber/NavigationInvalidationSubscriber.php
-
-		-
-			message: "#^Parameter \\#3 \\.\\.\\.\\$arrays of function array_merge expects array, mixed given\\.$#"
-			count: 1
-			path: EventSubscriber/NavigationInvalidationSubscriber.php
-
-		-
-			message: "#^Property Sulu\\\\Bundle\\\\HeadlessBundle\\\\EventSubscriber\\\\NavigationInvalidationSubscriber\\:\\:\\$navigationContexts \\(array\\<string\\>\\) does not accept array\\.$#"
-			count: 1
-			path: EventSubscriber/NavigationInvalidationSubscriber.php
-
-		-
-			message: "#^Cannot access property \\$message on mixed\\.$#"
-			count: 1
-			path: Tests/Functional/Controller/SnippetAreaControllerTest.php
-
-		-
-			message: "#^Parameter \\#2 \\$object of static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertObjectHasAttribute\\(\\) expects object, mixed given\\.$#"
-			count: 1
-			path: Tests/Functional/Controller/SnippetAreaControllerTest.php

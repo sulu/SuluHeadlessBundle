@@ -16,6 +16,7 @@ namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
 use JMS\Serializer\SerializationContext;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\ContactBundle\Api\Account;
 use Sulu\Bundle\ContactBundle\Contact\AccountManager;
@@ -27,6 +28,8 @@ use Sulu\Component\Content\Compat\PropertyInterface;
 
 class AccountSelectionResolverTest extends TestCase
 {
+    use ProphecyTrait;
+
     /**
      * @var AccountManager|ObjectProphecy
      */

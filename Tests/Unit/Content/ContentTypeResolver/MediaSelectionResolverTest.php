@@ -15,6 +15,7 @@ namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
 
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\MediaSelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
@@ -26,6 +27,8 @@ use Sulu\Component\Content\Compat\PropertyInterface;
 
 class MediaSelectionResolverTest extends TestCase
 {
+    use ProphecyTrait;
+
     /**
      * @var MediaManagerInterface|ObjectProphecy
      */

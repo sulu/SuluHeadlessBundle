@@ -15,6 +15,7 @@ namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\Serializer;
 
 use JMS\Serializer\SerializationContext;
 use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\CategoryBundle\Api\Category;
 use Sulu\Bundle\CategoryBundle\Category\CategoryManagerInterface;
@@ -28,6 +29,8 @@ use Sulu\Component\Serializer\ArraySerializerInterface;
 
 class CategorySerializerTest extends TestCase
 {
+    use ProphecyTrait;
+
     /**
      * @var CategoryManagerInterface|ObjectProphecy
      */

@@ -15,6 +15,7 @@ namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\DataProviderResolver;
 
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\ContactBundle\Api\Contact;
 use Sulu\Bundle\ContactBundle\Entity\ContactInterface;
@@ -28,6 +29,8 @@ use Sulu\Component\SmartContent\ResourceItemInterface;
 
 class ContactDataProviderResolverTest extends TestCase
 {
+    use ProphecyTrait;
+
     /**
      * @var ContactDataProvider|ObjectProphecy
      */

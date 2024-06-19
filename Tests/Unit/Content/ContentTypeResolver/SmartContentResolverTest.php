@@ -15,6 +15,7 @@ namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
 
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\AudienceTargetingBundle\TargetGroup\TargetGroupStoreInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\SmartContentResolver;
@@ -34,6 +35,8 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 class SmartContentResolverTest extends TestCase
 {
+    use ProphecyTrait;
+
     /**
      * @var DataProviderResolverInterface|ObjectProphecy
      */

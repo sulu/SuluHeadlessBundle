@@ -18,8 +18,8 @@
 
 # tests
 Tests/Application/var
-Tests/Application/.env.dev.local
-Tests/Application/.env.test.local
+Tests/Application/.env.local
+Tests/Application/.env.*.local
 
 # php-cs-fixer
 .php_cs.cache

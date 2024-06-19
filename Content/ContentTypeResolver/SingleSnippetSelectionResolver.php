@@ -38,7 +38,7 @@ class SingleSnippetSelectionResolver implements ContentTypeResolverInterface
         $snippetId = $data ?: null;
 
         $contentView = $this->snippetSelectionResolver->resolve(
-            $snippetId ? [$snippetId] : null,
+            \is_string($snippetId) ? [$snippetId] : null,
             $property,
             $locale,
             $attributes
