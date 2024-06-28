@@ -88,10 +88,6 @@ jobs:
             - name: Remove not required test tooling
               run: composer remove "*php-cs-fixer*" "*phpstan*" --no-update --dev
 
-            - name: Install Symfony 7 dev branch # TODO remove
-              if: ${{ matrix.php-version == '8.2' || matrix.php-version == '8.3' }}
-              run: composer require sulu/sulu:"dev-feature/symfony-7-support as 2.6.3" --no-update
-
             - name: Install composer dependencies
               uses: ramsey/composer-install@v3
               with:
