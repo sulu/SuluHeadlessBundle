@@ -26,6 +26,7 @@ jobs:
                       coverage: false
                       dependency-versions: 'lowest'
                       tools: 'composer:v2'
+                      phpunit-config: 'phpunit-9.xml.dist'
                       env:
                           SYMFONY_DEPRECATIONS_HELPER: disabled
 
@@ -33,6 +34,7 @@ jobs:
                       coverage: true
                       dependency-versions: 'highest'
                       tools: 'composer:v2'
+                      phpunit-config: 'phpunit-9.xml.dist'
                       env:
                           SYMFONY_DEPRECATIONS_HELPER: weak
 
@@ -108,10 +110,10 @@ jobs:
               run: composer bootstrap-test-environment
 
             - name: Execute unit test cases
-              run: composer test -- Tests/Unit --coverage-php var/coverage.php --coverage-html coverage-report --log-junit var/junit.xml
+              run: composer test -- Tests/Unit --coverage-php var/coverage.php --coverage-html coverage-report --log-junit var/junit.xml --config ${{ matrix.phpunit-config || 'phpunit.xml.dist' }}
 
             - name: Execute functional test cases
-              run: composer test -- Tests/Functional --log-junit var/junit.xml
+              run: composer test -- Tests/Functional --log-junit var/junit.xml --config ${{ matrix.phpunit-config || 'phpunit.xml.dist' }}
 
             - name: Check code coverage
               if: ${{ matrix.coverage }}
