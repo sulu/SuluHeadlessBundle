@@ -20,6 +20,21 @@
                  alias="sulu_headless.controller.navigation" public="true"/>
 
         <service
+                id="sulu_headless.controller.analytics"
+                class="Sulu\Bundle\HeadlessBundle\Controller\AnalyticsController"
+                public="true"
+        >
+            <argument type="service" id="jms_serializer.serializer"/>
+            <argument type="service" id="sulu.repository.analytics"/>
+            <argument>%kernel.environment%</argument>
+            <argument>%sulu_http_cache.cache.max_age%</argument>
+            <argument>%sulu_http_cache.cache.shared_max_age%</argument>
+            <argument>%sulu_headless.navigation.cache_lifetime%</argument>
+        </service>
+        <service id="Sulu\Bundle\HeadlessBundle\Controller\AnalyticsController"
+                 alias="sulu_headless.controller.navigation" public="true"/>
+
+        <service
             id="sulu_headless.controller.snippet_area"
             class="Sulu\Bundle\HeadlessBundle\Controller\SnippetAreaController"
             public="true"

@@ -4,6 +4,12 @@ sulu_headless.api.navigation:
         _controller: sulu_headless.controller.navigation::getAction
         _format: json
 
+sulu_headless.api.analytics:
+    path: /api/analytics.{_format}
+    defaults:
+        _controller: sulu_headless.controller.analytics::getAction
+        _format: json
+
 sulu_headless.api.search:
     path: /api/search
     defaults:
