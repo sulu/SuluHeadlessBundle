@@ -1,6 +1,4 @@
 {
-    "author": null,
-    "authored": null,
     "changed": "@string@.isDateTime()",
     "changer": null,
     "content": {
@@ -10,7 +8,6 @@
     "created": "@string@.isDateTime()",
     "creator": null,
     "id": "@uuid@",
-    "nodeType": 1,
     "template": "default",
     "type": "snippet",
     "view": {

@@ -13,51 +13,130 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Tests\Traits;
 
-use Sulu\Bundle\SnippetBundle\Document\SnippetDocument;
-use Sulu\Component\DocumentManager\DocumentManagerInterface;
+use Doctrine\ORM\EntityManagerInterface;
+use Sulu\Content\Domain\Model\WorkflowInterface;
+use Sulu\Messenger\Infrastructure\Symfony\Messenger\FlushMiddleware\EnableFlushStamp;
+use Sulu\Snippet\Application\Message\ApplyWorkflowTransitionSnippetMessage;
+use Sulu\Snippet\Application\Message\CreateSnippetMessage;
+use Sulu\Snippet\Domain\Model\Snippet;
+use Sulu\Snippet\Domain\Model\SnippetArea;
+use Sulu\Snippet\Domain\Model\SnippetInterface;
+use Symfony\Component\Messenger\Envelope;
+use Symfony\Component\Messenger\Stamp\HandledStamp;
 
 trait CreateSnippetTrait
 {
     /**
-     * @param mixed[] $data
+     * Create a snippet with simple data structure matching old API.
+     *
+     * @param array<string, mixed> $data Snippet data including:
+     *                                   - title: string (required)
+     *                                   - template: string (optional, defaults to 'default')
+     *                                   - description: string (optional)
+     *                                   - seo: array (optional)
+     *                                   - excerpt: array (optional)
+     * @param string $locale The locale to create the snippet in
      */
-    private static function createSnippet(
+    protected static function createSnippet(
         array $data,
-        string $locale = 'de'
-    ): SnippetDocument {
-        /** @var DocumentManagerInterface $documentManager */
-        $documentManager = static::getContainer()->get('sulu_document_manager.document_manager');
-
-        /** @var SnippetDocument $document */
-        $document = $documentManager->create('snippet');
-
-        if (!$document instanceof SnippetDocument) {
-            throw new \RuntimeException('Invalid document');
-        }
-
+        string $locale = 'de',
+    ): Snippet {
         if (!\array_key_exists('title', $data) || !\is_string($data['title'])) {
-            throw new \RuntimeException('Expected a title as string is given.');
+            throw new \RuntimeException('Expected a title as string.');
         }
 
-        $extensionData = [
-            'seo' => $data['seo'] ?? [],
-            'excerpt' => $data['excerpt'] ?? [],
+        $messageBus = static::getContainer()->get('sulu_message_bus');
+
+        // Build snippet data in Sulu 3.0 format
+        $snippetData = [
+            'locale' => $locale,
+            'template' => $data['template'] ?? 'default',
+            'title' => $data['title'],
         ];
-        unset($data['excerpt']);
-        unset($data['seo']);
 
-        $document->setLocale($locale);
-        $document->setTitle($data['title']);
-        $document->setStructureType($data['template'] ?? 'default');
-        $document->setExtensionsData($extensionData);
+        // Add SEO data if provided
+        if (isset($data['seo']) && \is_array($data['seo'])) {
+            $snippetData['seo'] = $data['seo'];
+        }
 
-        $document->getStructure()->bind($data);
+        // Add excerpt/taxonomy data - Sulu 3.0 expects flat keys like excerptTags, excerptCategories
+        if (isset($data['excerpt']) && \is_array($data['excerpt'])) {
+            $excerptData = $data['excerpt'];
+            if (isset($excerptData['tags']) && \is_array($excerptData['tags'])) {
+                $snippetData['excerptTags'] = $excerptData['tags'];
+            }
+            if (isset($excerptData['categories']) && \is_array($excerptData['categories'])) {
+                $snippetData['excerptCategories'] = $excerptData['categories'];
+            }
+        }
 
-        $documentManager->persist($document, $locale);
+        // Merge any additional template-specific data
+        $reservedKeys = ['title', 'template', 'seo', 'excerpt'];
+        foreach ($data as $key => $value) {
+            if (!\in_array($key, $reservedKeys, true)) {
+                $snippetData[$key] = $value;
+            }
+        }
 
-        $documentManager->publish($document, $locale);
-        $documentManager->flush();
+        // Create snippet
+        $envelope = $messageBus->dispatch(
+            new Envelope(
+                new CreateSnippetMessage(data: $snippetData),
+                [new EnableFlushStamp()]
+            )
+        );
 
-        return $document;
+        /** @var HandledStamp[] $handledStamps */
+        $handledStamps = $envelope->all(HandledStamp::class);
+
+        /** @var Snippet $snippet */
+        $snippet = $handledStamps[0]->getResult();
+
+        // Publish the snippet
+        $messageBus->dispatch(
+            new Envelope(
+                new ApplyWorkflowTransitionSnippetMessage(
+                    identifier: ['uuid' => $snippet->getUuid()],
+                    locale: $locale,
+                    transitionName: WorkflowInterface::WORKFLOW_TRANSITION_PUBLISH
+                ),
+                [new EnableFlushStamp()]
+            )
+        );
+
+        return $snippet;
     }
+
+    /**
+     * Create a snippet area linking a snippet to a webspace.
+     */
+    protected static function createSnippetArea(
+        string $areaKey,
+        string $webspaceKey,
+        SnippetInterface $snippet,
+    ): SnippetArea {
+        $entityManager = static::getEntityManager();
+        $snippetAreaRepository = static::getContainer()->get('sulu_snippet.snippet_area_repository');
+
+        $existingSnippetArea = $snippetAreaRepository->findOneBy([
+            'areaKey' => $areaKey,
+            'webspaceKey' => $webspaceKey,
+        ]);
+
+        if ($existingSnippetArea instanceof SnippetArea) {
+            $existingSnippetArea->setSnippet($snippet);
+            $entityManager->flush();
+
+            return $existingSnippetArea;
+        }
+
+        $snippetArea = new SnippetArea($areaKey, $webspaceKey);
+        $snippetArea->setSnippet($snippet);
+        $entityManager->persist($snippetArea);
+        $entityManager->flush();
+
+        return $snippetArea;
+    }
+
+    abstract protected static function getEntityManager(): EntityManagerInterface;
 }

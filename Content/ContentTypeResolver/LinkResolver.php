@@ -13,33 +13,26 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver;
 
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\MarkupBundle\Markup\Link\LinkProviderPoolInterface;
-use Sulu\Component\Content\Compat\PropertyInterface;
-use Sulu\Component\Content\Types\Link;
 
 class LinkResolver implements ContentTypeResolverInterface
 {
-    /**
-     * @var LinkProviderPoolInterface
-     */
-    private $linkProviderPool;
-
     public static function getContentType(): string
     {
         return 'link';
     }
 
     public function __construct(
-        LinkProviderPoolInterface $linkProviderPool
+        private LinkProviderPoolInterface $linkProviderPool,
     ) {
-        $this->linkProviderPool = $linkProviderPool;
     }
 
-    public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView
+    public function resolve(mixed $data, FieldMetadata $fieldMetadata, string $locale, array $attributes = []): ContentView
     {
-        $content = $this->getContentData($property);
-        $view = $this->getViewData($property);
+        $content = $this->getContentData($data, $locale);
+        $view = $this->getViewData($data);
 
         return new ContentView($content, $view);
     }
@@ -52,17 +45,15 @@ class LinkResolver implements ContentTypeResolverInterface
      *     title?: string
      * }
      */
-    private function getViewData(PropertyInterface $property): array
+    private function getViewData(mixed $value): array
     {
-        $value = $property->getValue();
-
-        if (!$value) {
+        if (!\is_array($value) || empty($value)) {
             return [];
         }
 
         $result = [
-            'provider' => $value['provider'],
-            'locale' => $value['locale'],
+            'provider' => $value['provider'] ?? null,
+            'locale' => $value['locale'] ?? null,
         ];
 
         if (isset($value['target'])) {
@@ -76,17 +67,14 @@ class LinkResolver implements ContentTypeResolverInterface
         return $result;
     }
 
-    private function getContentData(PropertyInterface $property): ?string
+    private function getContentData(mixed $value, string $locale): ?string
     {
-        $value = $property->getValue();
-        $locale = $property->getStructure()->getLanguageCode();
-
-        if (!$value || !isset($value['provider'])) {
+        if (!\is_array($value) || !isset($value['provider'])) {
             return null;
         }
 
-        if (Link::LINK_TYPE_EXTERNAL === $value['provider']) {
-            return $value['href'];
+        if (!isset($value['href'])) {
+            return null;
         }
 
         $provider = $this->linkProviderPool->getProvider($value['provider']);

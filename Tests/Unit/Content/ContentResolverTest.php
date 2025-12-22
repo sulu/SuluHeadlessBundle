@@ -17,11 +17,11 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 use Sulu\Bundle\HeadlessBundle\Content\ContentResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentResolverInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\ContentTypeResolverInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
-use Sulu\Component\Content\Compat\PropertyInterface;
 
 class ContentResolverTest extends TestCase
 {
@@ -37,6 +37,8 @@ class ContentResolverTest extends TestCase
      */
     private $contentResolver;
 
+    private FieldMetadata $fieldMetadata;
+
     protected function setUp(): void
     {
         $this->mediaSelectionResolver = $this->prophesize(ContentTypeResolverInterface::class);
@@ -44,30 +46,30 @@ class ContentResolverTest extends TestCase
         $this->contentResolver = new ContentResolver(
             new \ArrayIterator(['media_selection' => $this->mediaSelectionResolver->reveal()])
         );
+
+        $this->fieldMetadata = new FieldMetadata('media');
+        $this->fieldMetadata->setType('media_selection');
     }
 
     public function testResolve(): void
     {
-        $property = $this->prophesize(PropertyInterface::class);
-        $property->getContentTypeName()->willReturn('media_selection');
-
         $contentView = $this->prophesize(ContentView::class);
 
-        $this->mediaSelectionResolver->resolve('TEST', $property->reveal(), 'en', ['webspaceKey' => 'sulu_io'])
+        $this->mediaSelectionResolver->resolve('TEST', $this->fieldMetadata, 'en', ['webspaceKey' => 'sulu_io'])
             ->willReturn($contentView->reveal());
 
-        $result = $this->contentResolver->resolve('TEST', $property->reveal(), 'en', ['webspaceKey' => 'sulu_io']);
+        $result = $this->contentResolver->resolve('TEST', $this->fieldMetadata, 'en', ['webspaceKey' => 'sulu_io']);
         $this->assertSame($contentView->reveal(), $result);
     }
 
     public function testResolveNoResolverFound(): void
     {
-        $property = $this->prophesize(PropertyInterface::class);
-        $property->getContentTypeName()->willReturn('text_line');
+        $fieldMetadata = new FieldMetadata('text');
+        $fieldMetadata->setType('text_line');
 
         $this->mediaSelectionResolver->resolve(Argument::cetera())->shouldNotBeCalled();
 
-        $result = $this->contentResolver->resolve('TEST', $property->reveal(), 'en', ['webspaceKey' => 'sulu_io']);
+        $result = $this->contentResolver->resolve('TEST', $fieldMetadata, 'en', ['webspaceKey' => 'sulu_io']);
         $this->assertSame('TEST', $result->getContent());
         $this->assertSame([], $result->getView());
     }

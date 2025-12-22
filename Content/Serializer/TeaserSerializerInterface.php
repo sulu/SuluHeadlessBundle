@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Content\Serializer;
 
 use JMS\Serializer\SerializationContext;
-use Sulu\Bundle\PageBundle\Teaser\Teaser;
+use Sulu\Bundle\AdminBundle\Teaser\Teaser;
 
 interface TeaserSerializerInterface
 {

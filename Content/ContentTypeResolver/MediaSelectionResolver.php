@@ -13,11 +13,11 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver;
 
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializerInterface;
 use Sulu\Bundle\MediaBundle\Api\Media;
 use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
-use Sulu\Component\Content\Compat\PropertyInterface;
 
 class MediaSelectionResolver implements ContentTypeResolverInterface
 {
@@ -26,25 +26,13 @@ class MediaSelectionResolver implements ContentTypeResolverInterface
         return 'media_selection';
     }
 
-    /**
-     * @var MediaManagerInterface
-     */
-    private $mediaManager;
-
-    /**
-     * @var MediaSerializerInterface
-     */
-    private $mediaSerializer;
-
     public function __construct(
-        MediaManagerInterface $mediaManager,
-        MediaSerializerInterface $mediaSerializer
+        private MediaManagerInterface $mediaManager,
+        private MediaSerializerInterface $mediaSerializer,
     ) {
-        $this->mediaManager = $mediaManager;
-        $this->mediaSerializer = $mediaSerializer;
     }
 
-    public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView
+    public function resolve(mixed $data, FieldMetadata $fieldMetadata, string $locale, array $attributes = []): ContentView
     {
         if (empty($data) || !\is_array($data)) {
             return new ContentView([], ['ids' => []]);

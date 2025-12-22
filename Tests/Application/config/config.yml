@@ -14,3 +14,8 @@ sulu_http_cache:
     proxy_client:
         symfony:
             enabled: true
+
+cmsig_seal:
+    engines:
+        default:
+            adapter: 'memory://'

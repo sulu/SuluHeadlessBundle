@@ -14,11 +14,11 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver;
 
 use Doctrine\Persistence\ObjectRepository;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\CollectionSerializerInterface;
 use Sulu\Bundle\MediaBundle\Entity\CollectionInterface;
 use Sulu\Bundle\MediaBundle\Entity\CollectionRepositoryInterface;
-use Sulu\Component\Content\Compat\PropertyInterface;
 
 class CollectionSelectionResolver implements ContentTypeResolverInterface
 {
@@ -27,25 +27,13 @@ class CollectionSelectionResolver implements ContentTypeResolverInterface
         return 'collection_selection';
     }
 
-    /**
-     * @var CollectionRepositoryInterface
-     */
-    private $collectionRepository;
-
-    /**
-     * @var CollectionSerializerInterface
-     */
-    private $collectionSerializer;
-
     public function __construct(
-        CollectionRepositoryInterface $collectionRepository,
-        CollectionSerializerInterface $collectionSerializer
+        private CollectionRepositoryInterface $collectionRepository,
+        private CollectionSerializerInterface $collectionSerializer,
     ) {
-        $this->collectionRepository = $collectionRepository;
-        $this->collectionSerializer = $collectionSerializer;
     }
 
-    public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView
+    public function resolve(mixed $data, FieldMetadata $fieldMetadata, string $locale, array $attributes = []): ContentView
     {
         /** @var int[]|null $ids */
         $ids = $data;

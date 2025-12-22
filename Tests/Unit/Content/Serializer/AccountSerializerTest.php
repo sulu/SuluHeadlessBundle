@@ -24,10 +24,10 @@ use Sulu\Bundle\ContactBundle\Entity\AccountInterface;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\AccountSerializer;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\AccountSerializerInterface;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializerInterface;
+use Sulu\Bundle\HttpCacheBundle\ReferenceStore\ReferenceStoreInterface;
 use Sulu\Bundle\MediaBundle\Api\Media;
 use Sulu\Bundle\MediaBundle\Entity\MediaInterface;
 use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
-use Sulu\Bundle\WebsiteBundle\ReferenceStore\ReferenceStoreInterface;
 use Sulu\Component\Serializer\ArraySerializerInterface;
 
 class AccountSerializerTest extends TestCase
@@ -127,7 +127,7 @@ class AccountSerializerTest extends TestCase
             ])
             ->shouldBeCalled();
 
-        $this->referenceStore->add(1)
+        $this->referenceStore->add('1', 'account')
             ->shouldBeCalled();
 
         // call test function
@@ -193,7 +193,7 @@ class AccountSerializerTest extends TestCase
             ])
             ->shouldBeCalled();
 
-        $this->referenceStore->add(1)
+        $this->referenceStore->add('1', 'account')
             ->shouldBeCalled();
 
         // call test function
@@ -245,7 +245,7 @@ class AccountSerializerTest extends TestCase
         $this->mediaSerializer->serialize(Argument::cetera())
             ->shouldNotBeCalled();
 
-        $this->referenceStore->add(1)
+        $this->referenceStore->add('1', 'account')
             ->shouldBeCalled();
 
         // call test function

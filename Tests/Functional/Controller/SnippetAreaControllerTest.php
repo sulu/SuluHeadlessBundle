@@ -15,7 +15,7 @@ namespace Sulu\Bundle\HeadlessBundle\Tests\Functional\Controller;
 
 use Sulu\Bundle\HeadlessBundle\Tests\Functional\BaseTestCase;
 use Sulu\Bundle\HeadlessBundle\Tests\Traits\CreateSnippetTrait;
-use Sulu\Bundle\WebsiteBundle\ReferenceStore\ReferenceStoreInterface;
+use Sulu\Bundle\HttpCacheBundle\ReferenceStore\ReferenceStoreInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,19 +24,14 @@ class SnippetAreaControllerTest extends BaseTestCase
 {
     use CreateSnippetTrait;
 
-    /**
-     * @var KernelBrowser
-     */
-    private $websiteClient;
+    private KernelBrowser $websiteClient;
 
-    /**
-     * @var ReferenceStoreInterface|null
-     */
-    private $snippetAreaReferenceStore;
+    private ?ReferenceStoreInterface $snippetAreaReferenceStore = null;
 
     public static function setUpBeforeClass(): void
     {
-        self::initPhpcr();
+        static::purgeDatabase();
+        self::bootKernel();
 
         $snippet = self::createSnippet([
             'title' => 'My Snippet',
@@ -50,20 +45,14 @@ class SnippetAreaControllerTest extends BaseTestCase
             'template' => 'default',
         ], 'de');
 
-        $defaultSnippetManager = static::getContainer()->get('sulu_snippet.default_snippet.manager');
-        $defaultSnippetManager->save(
-            'sulu_io',
-            'default',
-            $snippet->getUuid(),
-            'de',
-        );
+        self::createSnippetArea('default', 'sulu_io', $snippet);
 
         self::createSnippet([
             'title' => 'My other Snippet',
             'template' => 'other',
         ], 'de');
 
-        $currentTime = (new \DateTime());
+        $currentTime = new \DateTime();
         $scheduledBlockEndtime = (new \DateTime())->add(new \DateInterval('PT30M'));
         $snippetWithBlocks = self::createSnippet(
             [
@@ -98,12 +87,10 @@ class SnippetAreaControllerTest extends BaseTestCase
             ],
             'de'
         );
-        $defaultSnippetManager->save(
-            'sulu_io',
-            'default-blocks',
-            $snippetWithBlocks->getUuid(),
-            'de',
-        );
+        self::createSnippetArea('default-blocks', 'sulu_io', $snippetWithBlocks);
+
+        // Clear entity manager to ensure fresh state
+        self::getEntityManager()->clear();
 
         static::ensureKernelShutdown();
     }
@@ -164,7 +151,7 @@ class SnippetAreaControllerTest extends BaseTestCase
             '/api/snippet-areas/invalid',
             Response::HTTP_NOT_FOUND,
             null,
-            'Snippet area "invalid" does not exist',
+            'No snippet found for snippet area "invalid"',
         ];
 
         yield [
@@ -184,7 +171,7 @@ class SnippetAreaControllerTest extends BaseTestCase
         int $statusCode = Response::HTTP_OK,
         ?string $expectedPatternFile = null,
         ?string $errorMessage = null,
-        ?int $reverseProxyTtl = null
+        ?int $reverseProxyTtl = null,
     ): void {
         $this->websiteClient->request('GET', $url);
 

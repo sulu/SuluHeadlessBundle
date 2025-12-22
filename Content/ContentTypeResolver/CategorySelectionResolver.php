@@ -14,10 +14,10 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver;
 
 use JMS\Serializer\SerializationContext;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 use Sulu\Bundle\CategoryBundle\Category\CategoryManagerInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\CategorySerializerInterface;
-use Sulu\Component\Content\Compat\PropertyInterface;
 
 class CategorySelectionResolver implements ContentTypeResolverInterface
 {
@@ -26,25 +26,13 @@ class CategorySelectionResolver implements ContentTypeResolverInterface
         return 'category_selection';
     }
 
-    /**
-     * @var CategoryManagerInterface
-     */
-    private $categoryManager;
-
-    /**
-     * @var CategorySerializerInterface
-     */
-    private $categorySerializer;
-
     public function __construct(
-        CategoryManagerInterface $categoryManager,
-        CategorySerializerInterface $categorySerializer
+        private CategoryManagerInterface $categoryManager,
+        private CategorySerializerInterface $categorySerializer,
     ) {
-        $this->categoryManager = $categoryManager;
-        $this->categorySerializer = $categorySerializer;
     }
 
-    public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView
+    public function resolve(mixed $data, FieldMetadata $fieldMetadata, string $locale, array $attributes = []): ContentView
     {
         if (empty($data) || !\is_array($data)) {
             return new ContentView([], ['ids' => []]);

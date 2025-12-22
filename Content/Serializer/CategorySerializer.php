@@ -20,29 +20,11 @@ use Sulu\Component\Serializer\ArraySerializerInterface;
 
 class CategorySerializer implements CategorySerializerInterface
 {
-    /**
-     * @var CategoryManagerInterface
-     */
-    private $categoryManager;
-
-    /**
-     * @var ArraySerializerInterface
-     */
-    private $arraySerializer;
-
-    /**
-     * @var MediaSerializerInterface
-     */
-    private $mediaSerializer;
-
     public function __construct(
-        CategoryManagerInterface $categoryManager,
-        ArraySerializerInterface $arraySerializer,
-        MediaSerializerInterface $mediaSerializer
+        private CategoryManagerInterface $categoryManager,
+        private ArraySerializerInterface $arraySerializer,
+        private MediaSerializerInterface $mediaSerializer,
     ) {
-        $this->categoryManager = $categoryManager;
-        $this->arraySerializer = $arraySerializer;
-        $this->mediaSerializer = $mediaSerializer;
     }
 
     /**

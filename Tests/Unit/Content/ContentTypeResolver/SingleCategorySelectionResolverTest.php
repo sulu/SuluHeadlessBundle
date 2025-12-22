@@ -18,12 +18,12 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 use Sulu\Bundle\CategoryBundle\Category\CategoryManagerInterface;
 use Sulu\Bundle\CategoryBundle\Entity\CategoryInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\SingleCategorySelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\CategorySerializerInterface;
-use Sulu\Component\Content\Compat\PropertyInterface;
 
 class SingleCategorySelectionResolverTest extends TestCase
 {
@@ -44,10 +44,13 @@ class SingleCategorySelectionResolverTest extends TestCase
      */
     private $singleCategorySelectionResolver;
 
+    private FieldMetadata $fieldMetadata;
+
     protected function setUp(): void
     {
         $this->categoryManager = $this->prophesize(CategoryManagerInterface::class);
         $this->categorySerializer = $this->prophesize(CategorySerializerInterface::class);
+        $this->fieldMetadata = new FieldMetadata('category');
 
         $this->singleCategorySelectionResolver = new SingleCategorySelectionResolver(
             $this->categoryManager->reveal(),
@@ -86,9 +89,7 @@ class SingleCategorySelectionResolverTest extends TestCase
             ],
         ]);
 
-        $property = $this->prophesize(PropertyInterface::class);
-
-        $result = $this->singleCategorySelectionResolver->resolve(1, $property->reveal(), $locale);
+        $result = $this->singleCategorySelectionResolver->resolve(1, $this->fieldMetadata, $locale);
 
         $this->assertInstanceOf(ContentView::class, $result);
 
@@ -118,9 +119,8 @@ class SingleCategorySelectionResolverTest extends TestCase
     public function testResolveDataIsNull(): void
     {
         $locale = 'en';
-        $property = $this->prophesize(PropertyInterface::class);
 
-        $result = $this->singleCategorySelectionResolver->resolve(null, $property->reveal(), $locale);
+        $result = $this->singleCategorySelectionResolver->resolve(null, $this->fieldMetadata, $locale);
 
         $this->assertNull($result->getContent());
 

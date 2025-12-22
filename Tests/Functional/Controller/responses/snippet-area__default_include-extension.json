@@ -1,6 +1,4 @@
 {
-    "author": null,
-    "authored": null,
     "changed": "@string@.isDateTime()",
     "changer": null,
     "content": {
@@ -23,19 +21,9 @@
                 "tag2"
             ],
             "title": ""
-        },
-        "seo": {
-            "canonicalUrl": "",
-            "description": "",
-            "hideInSitemap": false,
-            "keywords": "",
-            "noFollow": false,
-            "noIndex": false,
-            "title": ""
         }
     },
     "id": "@uuid@",
-    "nodeType": 1,
     "template": "default",
     "type": "snippet",
     "view": {
@@ -43,4 +31,3 @@
         "title": []
     }
 }
-

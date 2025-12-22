@@ -22,14 +22,12 @@ class HeadlessWebsiteControllerTest extends BaseTestCase
 {
     use CreatePageTrait;
 
-    /**
-     * @var KernelBrowser
-     */
-    private $websiteClient;
+    private KernelBrowser $websiteClient;
 
     public static function setUpBeforeClass(): void
     {
-        self::initPhpcr();
+        static::purgeDatabase();
+        self::bootKernel();
 
         self::createPage([
             'title' => 'Test',
@@ -41,6 +39,9 @@ class HeadlessWebsiteControllerTest extends BaseTestCase
                 'title' => 'excerpt-title',
             ],
         ]);
+
+        // Clear entity manager to ensure fresh state for routing
+        self::getEntityManager()->clear();
 
         static::ensureKernelShutdown();
     }

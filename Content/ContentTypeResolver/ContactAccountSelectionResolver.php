@@ -14,12 +14,12 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver;
 
 use JMS\Serializer\SerializationContext;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 use Sulu\Bundle\ContactBundle\Contact\AccountManager;
 use Sulu\Bundle\ContactBundle\Contact\ContactManager;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\AccountSerializerInterface;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\ContactSerializerInterface;
-use Sulu\Component\Content\Compat\PropertyInterface;
 
 class ContactAccountSelectionResolver implements ContentTypeResolverInterface
 {
@@ -28,39 +28,15 @@ class ContactAccountSelectionResolver implements ContentTypeResolverInterface
         return 'contact_account_selection';
     }
 
-    /**
-     * @var ContactManager
-     */
-    private $contactManager;
-
-    /**
-     * @var AccountManager
-     */
-    private $accountManager;
-
-    /**
-     * @var ContactSerializerInterface
-     */
-    private $contactSerializer;
-
-    /**
-     * @var AccountSerializerInterface
-     */
-    private $accountSerializer;
-
     public function __construct(
-        ContactManager $contactManager,
-        AccountManager $accountManager,
-        ContactSerializerInterface $contactSerializer,
-        AccountSerializerInterface $accountSerializer
+        private ContactManager $contactManager,
+        private AccountManager $accountManager,
+        private ContactSerializerInterface $contactSerializer,
+        private AccountSerializerInterface $accountSerializer,
     ) {
-        $this->contactManager = $contactManager;
-        $this->accountManager = $accountManager;
-        $this->contactSerializer = $contactSerializer;
-        $this->accountSerializer = $accountSerializer;
     }
 
-    public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView
+    public function resolve(mixed $data, FieldMetadata $fieldMetadata, string $locale, array $attributes = []): ContentView
     {
         if (empty($data) || !\is_array($data)) {
             return new ContentView([], ['ids' => []]);

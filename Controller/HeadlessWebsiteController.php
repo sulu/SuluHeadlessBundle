@@ -14,70 +14,92 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Controller;
 
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
-use Sulu\Bundle\WebsiteBundle\Controller\WebsiteController;
-use Sulu\Component\Content\Compat\PageInterface;
-use Sulu\Component\Content\Compat\StructureInterface;
+use Sulu\Content\Domain\Model\DimensionContentInterface;
+use Sulu\Content\UserInterface\Controller\Website\ContentController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class HeadlessWebsiteController extends WebsiteController
+/**
+ * Headless website controller that provides JSON API responses for content.
+ *
+ * Extends the Sulu 3.0 ContentController to add proper JSON serialization
+ * for headless/API use cases.
+ *
+ * @template T of DimensionContentInterface
+ *
+ * @extends ContentController<T>
+ */
+class HeadlessWebsiteController extends ContentController
 {
     /**
-     * We cannot set the typehint of the $structure parameter to PageInterface because the ArticleBundle does not
-     * implement that interface. Therefore we need to define the type via phpdoc to satisfy phpstan.
-     *
-     * @param PageInterface $structure
+     * @param T $object
      */
     public function indexAction(
         Request $request,
-        StructureInterface $structure,
+        DimensionContentInterface $object,
+        string $view,
         bool $preview = false,
-        bool $partial = false
+        bool $partial = false,
     ): Response {
-        $headlessData = $this->resolveStructure($structure);
+        $requestFormat = $request->getRequestFormat() ?? 'html';
 
-        if ('json' !== $request->getRequestFormat()) {
-            return $this->renderStructure($structure, ['headless' => $headlessData], $preview, $partial);
+        // For JSON requests, use the headless structure resolver
+        if ('json' === $requestFormat) {
+            $locale = $object->getLocale() ?? 'en';
+            $headlessData = $this->resolveHeadlessData($object, $locale);
+
+            $response = new JsonResponse($headlessData);
+            $response->headers->set('Content-Type', 'application/json');
+
+            if (!$preview) {
+                $this->enhanceSuluCacheLifeTime($response);
+            }
+
+            return $response;
         }
 
-        $response = new Response($this->serializeData($headlessData));
-        $response->headers->set('Content-Type', 'application/json');
-
-        $cacheLifetimeEnhancer = $this->getCacheTimeLifeEnhancer();
-        if (!$preview && $cacheLifetimeEnhancer) {
-            $cacheLifetimeEnhancer->enhance($response, $structure);
-        }
-
-        return $response;
+        // For HTML requests, delegate to parent controller
+        // but also provide headless data to the template
+        return parent::indexAction($request, $object, $view, $preview, $partial);
     }
 
     /**
-     * @return mixed[]
+     * @param T $object
+     *
+     * @return array<string, mixed>
      */
-    protected function resolveStructure(StructureInterface $structure): array
+    protected function resolveSuluParameters(DimensionContentInterface $object, string $webspaceKey, bool $normalize): array
     {
-        /** @var StructureResolverInterface $structureResolver */
-        $structureResolver = $this->container->get('sulu_headless.structure_resolver');
+        $parameters = parent::resolveSuluParameters($object, $webspaceKey, $normalize);
 
-        return $structureResolver->resolve($structure, $structure->getLanguageCode());
+        // Add headless data to template parameters for hybrid rendering
+        $locale = $object->getLocale() ?? 'en';
+        $parameters['headless'] = $this->resolveHeadlessData($object, $locale);
+
+        return $parameters;
     }
 
     /**
-     * @param mixed[] $data
+     * Resolve dimension content to a JSON-serializable headless format.
+     *
+     * @param T $object
+     *
+     * @return array<string, mixed>
      */
-    protected function serializeData(array $data): string
+    protected function resolveHeadlessData(DimensionContentInterface $object, string $locale): array
     {
-        return \json_encode($data, \JSON_THROW_ON_ERROR);
+        return $this->container->get('sulu_headless.structure_resolver')->resolve($object, $locale);
     }
 
     /**
-     * @return mixed[]
+     * @return array<string, mixed>
      */
     public static function getSubscribedServices(): array
     {
-        $subscribedServices = parent::getSubscribedServices();
-        $subscribedServices['sulu_headless.structure_resolver'] = StructureResolverInterface::class;
+        $services = parent::getSubscribedServices();
+        $services['sulu_headless.structure_resolver'] = StructureResolverInterface::class;
 
-        return $subscribedServices;
+        return $services;
     }
 }

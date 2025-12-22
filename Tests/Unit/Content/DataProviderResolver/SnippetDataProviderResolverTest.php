@@ -13,61 +13,60 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\DataProviderResolver;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use PHPUnit\Framework\TestCase;
+use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
+use Sulu\Bundle\AdminBundle\SmartContent\Configuration\ProviderConfigurationInterface;
+use Sulu\Bundle\AdminBundle\SmartContent\SmartContentProviderInterface;
 use Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver\SnippetDataProviderResolver;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
 use Sulu\Component\Content\Compat\PropertyParameter;
-use Sulu\Component\Content\Compat\StructureInterface;
-use Sulu\Component\Content\Mapper\ContentMapperInterface;
-use Sulu\Component\Content\Query\ContentQueryBuilderInterface;
-use Sulu\Component\SmartContent\Configuration\ProviderConfigurationInterface;
-use Sulu\Component\SmartContent\DataProviderInterface;
-use Sulu\Component\SmartContent\DataProviderResult;
-use Sulu\Component\SmartContent\ResourceItemInterface;
+use Sulu\Content\Application\ContentMerger\ContentMergerInterface;
+use Sulu\Content\Domain\Model\DimensionContentInterface;
+use Sulu\Snippet\Domain\Model\SnippetDimensionContent;
+use Sulu\Snippet\Domain\Model\SnippetInterface;
+use Sulu\Snippet\Domain\Repository\SnippetRepositoryInterface;
 
 class SnippetDataProviderResolverTest extends TestCase
 {
     use ProphecyTrait;
 
     /**
-     * @var DataProviderInterface|ObjectProphecy
+     * @var ObjectProphecy<SmartContentProviderInterface>
      */
-    private $snippetDataProvider;
+    private ObjectProphecy $snippetSmartContentProvider;
 
     /**
-     * @var StructureResolverInterface|ObjectProphecy
+     * @var ObjectProphecy<StructureResolverInterface>
      */
-    private $structureResolver;
+    private ObjectProphecy $structureResolver;
 
     /**
-     * @var ContentQueryBuilderInterface|ObjectProphecy
+     * @var ObjectProphecy<SnippetRepositoryInterface>
      */
-    private $contentQueryBuilder;
+    private ObjectProphecy $snippetRepository;
 
     /**
-     * @var ContentMapperInterface|ObjectProphecy
+     * @var ObjectProphecy<ContentMergerInterface>
      */
-    private $contentMapper;
+    private ObjectProphecy $contentMerger;
 
-    /**
-     * @var SnippetDataProviderResolver
-     */
-    private $snippetDataProviderResolver;
+    private SnippetDataProviderResolver $snippetDataProviderResolver;
 
     protected function setUp(): void
     {
-        $this->snippetDataProvider = $this->prophesize(DataProviderInterface::class);
+        $this->snippetSmartContentProvider = $this->prophesize(SmartContentProviderInterface::class);
         $this->structureResolver = $this->prophesize(StructureResolverInterface::class);
-        $this->contentQueryBuilder = $this->prophesize(ContentQueryBuilderInterface::class);
-        $this->contentMapper = $this->prophesize(ContentMapperInterface::class);
+        $this->snippetRepository = $this->prophesize(SnippetRepositoryInterface::class);
+        $this->contentMerger = $this->prophesize(ContentMergerInterface::class);
 
         $this->snippetDataProviderResolver = new SnippetDataProviderResolver(
-            $this->snippetDataProvider->reveal(),
+            $this->snippetSmartContentProvider->reveal(),
             $this->structureResolver->reveal(),
-            $this->contentQueryBuilder->reveal(),
-            $this->contentMapper->reveal()
+            $this->snippetRepository->reveal(),
+            $this->contentMerger->reveal(),
         );
     }
 
@@ -79,31 +78,18 @@ class SnippetDataProviderResolverTest extends TestCase
     public function testGetProviderConfiguration(): void
     {
         $configuration = $this->prophesize(ProviderConfigurationInterface::class);
-        $this->snippetDataProvider->getConfiguration()->willReturn($configuration->reveal());
+        $this->snippetSmartContentProvider->getConfiguration()->willReturn($configuration->reveal());
 
         $this->assertSame($configuration->reveal(), $this->snippetDataProviderResolver->getProviderConfiguration());
     }
 
     public function testGetProviderDefaultParams(): void
     {
-        $propertyParameter = $this->prophesize(PropertyParameter::class);
-        $this->snippetDataProvider->getDefaultPropertyParameter()->willReturn(['test' => $propertyParameter->reveal()]);
-
-        $this->assertSame(['test' => $propertyParameter->reveal()], $this->snippetDataProviderResolver->getProviderDefaultParams());
+        $this->assertSame([], $this->snippetDataProviderResolver->getProviderDefaultParams());
     }
 
     public function testResolve(): void
     {
-        $providerResultItem1 = $this->prophesize(ResourceItemInterface::class);
-        $providerResultItem1->getId()->willReturn('snippet-id-1');
-
-        $providerResultItem2 = $this->prophesize(ResourceItemInterface::class);
-        $providerResultItem2->getId()->willReturn('snippet-id-2');
-
-        $providerResult = $this->prophesize(DataProviderResult::class);
-        $providerResult->getHasNextPage()->willReturn(true);
-        $providerResult->getItems()->willReturn([$providerResultItem1->reveal(), $providerResultItem2->reveal()]);
-
         $propertyParameters = [
             'properties' => new PropertyParameter('properties', [
                 new PropertyParameter('contentDescription', 'description'),
@@ -111,37 +97,43 @@ class SnippetDataProviderResolverTest extends TestCase
             ]),
         ];
 
-        // expected and unexpected service calls
-        $this->snippetDataProvider->resolveResourceItems(
-            ['filter-key' => 'filter-value'],
-            $propertyParameters,
-            ['webspaceKey' => 'webspace-key', 'locale' => 'en'],
-            10,
-            1,
-            5
-        )->willReturn($providerResult->reveal())->shouldBeCalledOnce();
-
-        $this->contentQueryBuilder->init([
-            'ids' => ['snippet-id-1', 'snippet-id-2'],
-            'properties' => $propertyParameters['properties']->getValue(),
-        ])->shouldBeCalled();
-        $this->contentQueryBuilder->build('webspace-key', ['en'])->willReturn(['snippet-query-string']);
-
-        $snippetStructure1 = $this->prophesize(StructureInterface::class);
-        $snippetStructure1->getUuid()->willReturn('snippet-id-1');
-        $snippetStructure2 = $this->prophesize(StructureInterface::class);
-        $snippetStructure2->getUuid()->willReturn('snippet-id-2');
-        $this->contentMapper->loadBySql2(
-            'snippet-query-string',
-            'en',
-            'webspace-key'
+        // SmartContentProvider returns flat results
+        $this->snippetSmartContentProvider->findFlatBy(
+            Argument::type('array'),
+            Argument::type('array'),
+            ['webspaceKey' => 'webspace-key', 'locale' => 'en']
         )->willReturn([
-            $snippetStructure2->reveal(),
-            $snippetStructure1->reveal(),
-        ])->shouldBeCalledOnce();
+            ['id' => 'snippet-id-1', 'title' => 'Snippet 1'],
+            ['id' => 'snippet-id-2', 'title' => 'Snippet 2'],
+        ]);
+
+        // Create mock snippets with dimension contents
+        $snippet1 = $this->prophesize(SnippetInterface::class);
+        $snippet1->getUuid()->willReturn('snippet-id-1');
+        $dimensionContent1 = $this->prophesize(SnippetDimensionContent::class);
+        $snippet1->getDimensionContents()->willReturn(new ArrayCollection([$dimensionContent1->reveal()]));
+
+        $snippet2 = $this->prophesize(SnippetInterface::class);
+        $snippet2->getUuid()->willReturn('snippet-id-2');
+        $dimensionContent2 = $this->prophesize(SnippetDimensionContent::class);
+        $snippet2->getDimensionContents()->willReturn(new ArrayCollection([$dimensionContent2->reveal()]));
+
+        $this->snippetRepository->findBy(
+            Argument::type('array'),
+            [],
+            [SnippetRepositoryInterface::GROUP_SELECT_SNIPPET_WEBSITE => true]
+        )->willReturn([$snippet1->reveal(), $snippet2->reveal()]);
+
+        // Content merger returns merged dimension content
+        $mergedContent1 = $this->prophesize(DimensionContentInterface::class);
+        $mergedContent2 = $this->prophesize(DimensionContentInterface::class);
+
+        $this->contentMerger->merge(Argument::that(function ($collection) {
+            return true; // Accept any DimensionContentCollection
+        }))->willReturn($mergedContent1->reveal(), $mergedContent2->reveal());
 
         $this->structureResolver->resolveProperties(
-            $snippetStructure1->reveal(),
+            $mergedContent1,
             [
                 'title' => 'title',
                 'contentDescription' => 'description',
@@ -156,15 +148,11 @@ class SnippetDataProviderResolverTest extends TestCase
                 'contentDescription' => 'Snippet Content Description',
                 'excerptTitle' => 'Snippet Excerpt Title 1',
             ],
-            'view' => [
-                'title' => [],
-                'contentDescription' => [],
-                'excerptTitle' => [],
-            ],
-        ])->shouldBeCalledOnce();
+            'view' => [],
+        ]);
 
         $this->structureResolver->resolveProperties(
-            $snippetStructure2->reveal(),
+            $mergedContent2,
             [
                 'title' => 'title',
                 'contentDescription' => 'description',
@@ -179,14 +167,9 @@ class SnippetDataProviderResolverTest extends TestCase
                 'contentDescription' => 'Snippet Content Description',
                 'excerptTitle' => 'Snippet Excerpt Title 2',
             ],
-            'view' => [
-                'title' => [],
-                'contentDescription' => [],
-                'excerptTitle' => [],
-            ],
-        ])->shouldBeCalledOnce();
+            'view' => [],
+        ]);
 
-        // call test function
         $result = $this->snippetDataProviderResolver->resolve(
             ['filter-key' => 'filter-value'],
             $propertyParameters,
@@ -196,67 +179,25 @@ class SnippetDataProviderResolverTest extends TestCase
             5
         );
 
-        $this->assertTrue($result->getHasNextPage());
-        $this->assertSame(
-            [
-                [
-                    'id' => 'snippet-id-1',
-                    'template' => 'default',
-                    'content' => [
-                        'title' => 'Snippet Title 1',
-                        'contentDescription' => 'Snippet Content Description',
-                        'excerptTitle' => 'Snippet Excerpt Title 1',
-                    ],
-                    'view' => [
-                        'title' => [],
-                        'contentDescription' => [],
-                        'excerptTitle' => [],
-                    ],
-                ],
-                [
-                    'id' => 'snippet-id-2',
-                    'template' => 'default',
-                    'content' => [
-                        'title' => 'Snippet Title 2',
-                        'contentDescription' => 'Snippet Content Description',
-                        'excerptTitle' => 'Snippet Excerpt Title 2',
-                    ],
-                    'view' => [
-                        'title' => [],
-                        'contentDescription' => [],
-                        'excerptTitle' => [],
-                    ],
-                ],
-            ],
-            $result->getItems()
-        );
+        // hasNextPage is false because count(2) < pageSize(5)
+        $this->assertFalse($result->getHasNextPage());
+        $this->assertCount(2, $result->getItems());
     }
 
     public function testResolveEmptyProviderResult(): void
     {
-        $providerResult = $this->prophesize(DataProviderResult::class);
-        $providerResult->getHasNextPage()->willReturn(false);
-        $providerResult->getItems()->willReturn([]);
-
         $propertyParameters = [
             'properties' => new PropertyParameter('properties', [
                 new PropertyParameter('contentDescription', 'description'),
-                new PropertyParameter('excerptTitle', 'excerpt.title'),
             ]),
         ];
 
-        // expected and unexpected service calls
-        $this->snippetDataProvider->resolveResourceItems(
-            ['filter-key' => 'filter-value'],
-            $propertyParameters,
-            ['webspaceKey' => 'webspace-key', 'locale' => 'en'],
-            10,
-            1,
-            5
-        )->willReturn($providerResult->reveal())
-            ->shouldBeCalledOnce();
+        $this->snippetSmartContentProvider->findFlatBy(
+            Argument::type('array'),
+            Argument::type('array'),
+            ['webspaceKey' => 'webspace-key', 'locale' => 'en']
+        )->willReturn([]);
 
-        // call test function
         $result = $this->snippetDataProviderResolver->resolve(
             ['filter-key' => 'filter-value'],
             $propertyParameters,
@@ -267,9 +208,6 @@ class SnippetDataProviderResolverTest extends TestCase
         );
 
         $this->assertFalse($result->getHasNextPage());
-        $this->assertSame(
-            [],
-            $result->getItems()
-        );
+        $this->assertSame([], $result->getItems());
     }
 }

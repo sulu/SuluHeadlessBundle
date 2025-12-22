@@ -16,51 +16,59 @@ namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\SnippetSelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
-use Sulu\Bundle\SnippetBundle\Document\SnippetDocument;
-use Sulu\Bundle\SnippetBundle\Snippet\DefaultSnippetManagerInterface;
-use Sulu\Component\Content\Compat\PropertyInterface;
-use Sulu\Component\Content\Compat\PropertyParameter;
-use Sulu\Component\Content\Compat\Structure\SnippetBridge;
-use Sulu\Component\Content\Compat\Structure\StructureBridge;
-use Sulu\Component\Content\Mapper\ContentMapperInterface;
+use Sulu\Content\Application\ContentAggregator\ContentAggregatorInterface;
+use Sulu\Content\Domain\Model\DimensionContentInterface;
+use Sulu\Snippet\Domain\Model\SnippetAreaInterface;
+use Sulu\Snippet\Domain\Model\SnippetDimensionContentInterface;
+use Sulu\Snippet\Domain\Model\SnippetInterface;
+use Sulu\Snippet\Domain\Repository\SnippetAreaRepositoryInterface;
+use Sulu\Snippet\Domain\Repository\SnippetRepositoryInterface;
 
 class SnippetSelectionResolverTest extends TestCase
 {
     use ProphecyTrait;
 
     /**
-     * @var ObjectProphecy|ContentMapperInterface
+     * @var ObjectProphecy<SnippetRepositoryInterface>
      */
-    private $contentMapper;
+    private ObjectProphecy $snippetRepository;
 
     /**
-     * @var ObjectProphecy|StructureResolverInterface
+     * @var ObjectProphecy<StructureResolverInterface>
      */
-    private $structureResolver;
+    private ObjectProphecy $structureResolver;
 
     /**
-     * @var ObjectProphecy|DefaultSnippetManagerInterface
+     * @var ObjectProphecy<ContentAggregatorInterface>
      */
-    private $defaultSnippetManager;
+    private ObjectProphecy $contentAggregator;
 
     /**
-     * @var SnippetSelectionResolver
+     * @var ObjectProphecy<SnippetAreaRepositoryInterface>
      */
-    private $snippetSelectionResolver;
+    private ObjectProphecy $snippetAreaRepository;
+
+    private SnippetSelectionResolver $snippetSelectionResolver;
+
+    private FieldMetadata $fieldMetadata;
 
     protected function setUp(): void
     {
-        $this->contentMapper = $this->prophesize(ContentMapperInterface::class);
+        $this->snippetRepository = $this->prophesize(SnippetRepositoryInterface::class);
         $this->structureResolver = $this->prophesize(StructureResolverInterface::class);
-        $this->defaultSnippetManager = $this->prophesize(DefaultSnippetManagerInterface::class);
+        $this->contentAggregator = $this->prophesize(ContentAggregatorInterface::class);
+        $this->snippetAreaRepository = $this->prophesize(SnippetAreaRepositoryInterface::class);
+        $this->fieldMetadata = new FieldMetadata('snippets');
 
         $this->snippetSelectionResolver = new SnippetSelectionResolver(
-            $this->contentMapper->reveal(),
+            $this->snippetRepository->reveal(),
             $this->structureResolver->reveal(),
-            $this->defaultSnippetManager->reveal()
+            $this->contentAggregator->reveal(),
+            $this->snippetAreaRepository->reveal(),
         );
     }
 
@@ -71,41 +79,51 @@ class SnippetSelectionResolverTest extends TestCase
 
     public function testResolve(): void
     {
-        $structure = $this->prophesize(StructureBridge::class);
-        $structure->getWebspaceKey()->willReturn('webspace-key');
-        $structure->getIsShadow()->willReturn(false);
+        $locale = 'en';
 
-        $property = $this->prophesize(PropertyInterface::class);
-        $property->getStructure()->willReturn($structure->reveal());
-        $property->getParams()->willReturn([]);
+        $snippet1 = $this->prophesize(SnippetInterface::class);
+        $snippet2 = $this->prophesize(SnippetInterface::class);
 
-        $snippet1 = $this->prophesize(SnippetBridge::class);
-        $snippet1->getHasTranslation()->willReturn(true);
-        $snippet1->setIsShadow(false)->shouldBeCalled();
-        $snippet1->setShadowBaseLanguage(null)->shouldBeCalled();
+        $dimensionContent1 = $this->prophesize(SnippetDimensionContentInterface::class);
+        $dimensionContent2 = $this->prophesize(SnippetDimensionContentInterface::class);
 
-        $this->contentMapper->load('snippet-1', 'webspace-key', 'en')->willReturn($snippet1->reveal());
-        $this->structureResolver->resolve($snippet1->reveal(), 'en', false)->willReturn([
+        $this->snippetRepository->findBy(
+            [
+                'uuids' => ['snippet-1', 'snippet-2'],
+                'locale' => $locale,
+                'stage' => DimensionContentInterface::STAGE_LIVE,
+                'load_ghost_content' => true,
+            ],
+            [],
+            [SnippetRepositoryInterface::GROUP_SELECT_SNIPPET_WEBSITE => true],
+        )->willReturn([$snippet1->reveal(), $snippet2->reveal()]);
+
+        $this->contentAggregator->aggregate(
+            $snippet1->reveal(),
+            ['locale' => $locale, 'stage' => DimensionContentInterface::STAGE_LIVE],
+        )->willReturn($dimensionContent1->reveal());
+
+        $this->contentAggregator->aggregate(
+            $snippet2->reveal(),
+            ['locale' => $locale, 'stage' => DimensionContentInterface::STAGE_LIVE],
+        )->willReturn($dimensionContent2->reveal());
+
+        $this->structureResolver->resolve($dimensionContent1->reveal(), $locale, false)->willReturn([
             'id' => 'snippet-1',
             'template' => 'test',
             'content' => [],
             'view' => [],
         ]);
 
-        $snippet2 = $this->prophesize(SnippetBridge::class);
-        $snippet2->getHasTranslation()->willReturn(false);
-        $snippet2->setIsShadow(false)->shouldBeCalled();
-        $snippet2->setShadowBaseLanguage(null)->shouldBeCalled();
-
-        $this->contentMapper->load('snippet-2', 'webspace-key', 'en')->willReturn($snippet2->reveal());
-        $this->structureResolver->resolve($snippet2->reveal(), 'en', false)->willReturn([
+        $this->structureResolver->resolve($dimensionContent2->reveal(), $locale, false)->willReturn([
             'id' => 'snippet-2',
             'template' => 'test',
             'content' => [],
             'view' => [],
         ]);
 
-        $result = $this->snippetSelectionResolver->resolve(['snippet-1', 'snippet-2'], $property->reveal(), 'en', []);
+        $result = $this->snippetSelectionResolver->resolve(['snippet-1', 'snippet-2'], $this->fieldMetadata, $locale, []);
+
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame(
             [
@@ -131,200 +149,74 @@ class SnippetSelectionResolverTest extends TestCase
         );
     }
 
-    public function testResolveWithExcerpt(): void
-    {
-        $structure = $this->prophesize(StructureBridge::class);
-        $structure->getWebspaceKey()->willReturn('webspace-key');
-        $structure->getIsShadow()->willReturn(false);
-
-        $property = $this->prophesize(PropertyInterface::class);
-        $property->getStructure()->willReturn($structure->reveal());
-        $property->getParams()->willReturn([
-            'loadExcerpt' => new PropertyParameter('loadExcerpt', true),
-        ]);
-
-        $snippet1 = $this->prophesize(SnippetBridge::class);
-        $snippet1->getHasTranslation()->willReturn(true);
-        $snippet1->setIsShadow(false)->shouldBeCalled();
-        $snippet1->setShadowBaseLanguage(null)->shouldBeCalled();
-
-        $this->contentMapper->load('snippet-1', 'webspace-key', 'en')->willReturn($snippet1->reveal());
-        $this->structureResolver->resolve($snippet1->reveal(), 'en', true)->willReturn([
-            'id' => 'snippet-1',
-            'template' => 'test',
-            'content' => [],
-            'view' => [],
-        ]);
-
-        $result = $this->snippetSelectionResolver->resolve(['snippet-1'], $property->reveal(), 'en', []);
-        $this->assertInstanceOf(ContentView::class, $result);
-        $this->assertSame(
-            [
-                [
-                    'id' => 'snippet-1',
-                    'template' => 'test',
-                    'content' => [],
-                    'view' => [],
-                ],
-            ],
-            $result->getContent()
-        );
-
-        $this->assertSame(
-            ['ids' => ['snippet-1']],
-            $result->getView()
-        );
-    }
-
-    public function testResolveShadowLocale(): void
-    {
-        $structure = $this->prophesize(StructureBridge::class);
-        $structure->getWebspaceKey()->willReturn('webspace-key');
-        $structure->getIsShadow()->willReturn(true);
-        $structure->getShadowBaseLanguage()->willReturn('de');
-
-        $property = $this->prophesize(PropertyInterface::class);
-        $property->getStructure()->willReturn($structure->reveal());
-        $property->getParams()->willReturn([]);
-
-        $snippet1 = $this->prophesize(SnippetBridge::class);
-        $snippet1->getHasTranslation()->willReturn(true);
-        $snippet1->setIsShadow(true)->shouldBeCalled();
-        $snippet1->setShadowBaseLanguage('de')->shouldBeCalled();
-
-        $this->contentMapper->load('snippet-1', 'webspace-key', 'en')->willReturn($snippet1->reveal());
-        $this->structureResolver->resolve($snippet1->reveal(), 'en', false)->willReturn([
-            'id' => 'snippet-1',
-            'template' => 'test',
-            'content' => [],
-            'view' => [],
-        ]);
-
-        $result = $this->snippetSelectionResolver->resolve(['snippet-1'], $property->reveal(), 'en', []);
-        $this->assertInstanceOf(ContentView::class, $result);
-        $this->assertSame(
-            [
-                [
-                    'id' => 'snippet-1',
-                    'template' => 'test',
-                    'content' => [],
-                    'view' => [],
-                ],
-            ],
-            $result->getContent()
-        );
-
-        $this->assertSame(
-            ['ids' => ['snippet-1']],
-            $result->getView()
-        );
-    }
-
-    public function testResolveShadowLocaleNoTranslation(): void
-    {
-        $structure = $this->prophesize(StructureBridge::class);
-        $structure->getWebspaceKey()->willReturn('webspace-key');
-        $structure->getIsShadow()->willReturn(true);
-        $structure->getShadowBaseLanguage()->willReturn('de');
-
-        $property = $this->prophesize(PropertyInterface::class);
-        $property->getStructure()->willReturn($structure->reveal());
-        $property->getParams()->willReturn([]);
-
-        $snippet1en = $this->prophesize(SnippetBridge::class);
-        $snippet1en->getHasTranslation()->willReturn(false);
-
-        $snippet1de = $this->prophesize(SnippetBridge::class);
-        $snippet1de->setIsShadow(true)->shouldBeCalled();
-        $snippet1de->setShadowBaseLanguage('de')->shouldBeCalled();
-
-        /** @var SnippetDocument|ObjectProphecy $snippet1DeDocument */
-        $snippet1DeDocument = $this->prophesize(SnippetDocument::class);
-        $snippet1de->getDocument()->willReturn($snippet1DeDocument->reveal());
-        $snippet1DeDocument->setLocale('de')->shouldBeCalled();
-        $snippet1DeDocument->setOriginalLocale('en')->shouldBeCalled();
-
-        $this->contentMapper->load('snippet-1', 'webspace-key', 'en')->willReturn($snippet1en->reveal());
-        $this->contentMapper->load('snippet-1', 'webspace-key', 'de')->willReturn($snippet1de->reveal());
-        $this->structureResolver->resolve($snippet1de->reveal(), 'en', false)->willReturn([
-            'id' => 'snippet-1',
-            'template' => 'test',
-            'content' => [],
-            'view' => [],
-        ]);
-
-        $result = $this->snippetSelectionResolver->resolve(['snippet-1'], $property->reveal(), 'en', []);
-        $this->assertInstanceOf(ContentView::class, $result);
-        $this->assertSame(
-            [
-                [
-                    'id' => 'snippet-1',
-                    'template' => 'test',
-                    'content' => [],
-                    'view' => [],
-                ],
-            ],
-            $result->getContent()
-        );
-
-        $this->assertSame(
-            ['ids' => ['snippet-1']],
-            $result->getView()
-        );
-    }
-
     public function testResolveDataIsNull(): void
     {
-        $structure = $this->prophesize(StructureBridge::class);
-        $structure->getWebspaceKey()->willReturn('webspace-key');
-        $structure->getIsShadow()->willReturn(false);
+        $result = $this->snippetSelectionResolver->resolve(null, $this->fieldMetadata, 'en', []);
 
-        $property = $this->prophesize(PropertyInterface::class);
-        $property->getStructure()->willReturn($structure->reveal());
-        $property->getParams()->willReturn([]);
-
-        $result = $this->snippetSelectionResolver->resolve(null, $property->reveal(), 'en', []);
         $this->assertInstanceOf(ContentView::class, $result);
-        $this->assertSame(
-            [],
-            $result->getContent()
-        );
+        $this->assertSame([], $result->getContent());
+        $this->assertSame(['ids' => []], $result->getView());
+    }
 
-        $this->assertSame(
-            ['ids' => []],
-            $result->getView()
-        );
+    public function testResolveDataIsEmptyArray(): void
+    {
+        $result = $this->snippetSelectionResolver->resolve([], $this->fieldMetadata, 'en', []);
+
+        $this->assertInstanceOf(ContentView::class, $result);
+        $this->assertSame([], $result->getContent());
+        $this->assertSame(['ids' => []], $result->getView());
     }
 
     public function testResolveDataIsNullWithDefaultArea(): void
     {
-        $structure = $this->prophesize(StructureBridge::class);
-        $structure->getWebspaceKey()->willReturn('webspace-key');
-        $structure->getIsShadow()->willReturn(false);
+        $locale = 'en';
+        $webspaceKey = 'sulu_io';
 
-        $property = $this->prophesize(PropertyInterface::class);
-        $property->getStructure()->willReturn($structure->reveal());
-        $property->getParams()->willReturn([
-            'default' => new PropertyParameter('default', 'test-snippet-area'),
-        ]);
+        $defaultSnippet = $this->prophesize(SnippetInterface::class);
+        $defaultSnippet->getUuid()->willReturn('default-snippet-1');
 
-        $this->defaultSnippetManager->loadIdentifier('webspace-key', 'test-snippet-area')
-            ->willReturn('default-snippet-1');
+        $snippetArea = $this->prophesize(SnippetAreaInterface::class);
+        $snippetArea->getSnippet()->willReturn($defaultSnippet->reveal());
 
-        $defaultSnippet = $this->prophesize(SnippetBridge::class);
-        $defaultSnippet->getHasTranslation()->willReturn(true);
-        $defaultSnippet->setIsShadow(false)->shouldBeCalled();
-        $defaultSnippet->setShadowBaseLanguage(null)->shouldBeCalled();
+        $this->snippetAreaRepository->findOneBy([
+            'webspaceKey' => $webspaceKey,
+            'areaKey' => 'default_area',
+        ])->willReturn($snippetArea->reveal());
 
-        $this->contentMapper->load('default-snippet-1', 'webspace-key', 'en')->willReturn($defaultSnippet->reveal());
-        $this->structureResolver->resolve($defaultSnippet->reveal(), 'en', false)->willReturn([
+        $dimensionContent = $this->prophesize(SnippetDimensionContentInterface::class);
+
+        $this->snippetRepository->findBy(
+            [
+                'uuids' => ['default-snippet-1'],
+                'locale' => $locale,
+                'stage' => DimensionContentInterface::STAGE_LIVE,
+                'load_ghost_content' => true,
+            ],
+            [],
+            [SnippetRepositoryInterface::GROUP_SELECT_SNIPPET_WEBSITE => true],
+        )->willReturn([$defaultSnippet->reveal()]);
+
+        $this->contentAggregator->aggregate(
+            $defaultSnippet->reveal(),
+            ['locale' => $locale, 'stage' => DimensionContentInterface::STAGE_LIVE],
+        )->willReturn($dimensionContent->reveal());
+
+        $this->structureResolver->resolve($dimensionContent->reveal(), $locale, false)->willReturn([
             'id' => 'default-snippet-1',
             'template' => 'test',
             'content' => [],
             'view' => [],
         ]);
 
-        $result = $this->snippetSelectionResolver->resolve(null, $property->reveal(), 'en', []);
+        // Create field metadata with default option
+        $fieldMetadata = new FieldMetadata('snippets');
+        $option = new \Sulu\Bundle\AdminBundle\Metadata\FormMetadata\OptionMetadata();
+        $option->setName('default');
+        $option->setValue('default_area');
+        $fieldMetadata->addOption($option);
+
+        $result = $this->snippetSelectionResolver->resolve(null, $fieldMetadata, $locale, ['webspaceKey' => $webspaceKey]);
+
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame(
             [

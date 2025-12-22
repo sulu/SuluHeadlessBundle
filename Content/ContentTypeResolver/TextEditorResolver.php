@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver;
 
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\MarkupBundle\Markup\MarkupParserInterface;
-use Sulu\Component\Content\Compat\PropertyInterface;
 
 class TextEditorResolver implements ContentTypeResolverInterface
 {
@@ -24,18 +24,12 @@ class TextEditorResolver implements ContentTypeResolverInterface
         return 'text_editor';
     }
 
-    /**
-     * @var MarkupParserInterface
-     */
-    private $markupParser;
-
     public function __construct(
-        MarkupParserInterface $markupParser
+        private MarkupParserInterface $markupParser,
     ) {
-        $this->markupParser = $markupParser;
     }
 
-    public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView
+    public function resolve(mixed $data, FieldMetadata $fieldMetadata, string $locale, array $attributes = []): ContentView
     {
         if (null === $data) {
             return new ContentView(null);

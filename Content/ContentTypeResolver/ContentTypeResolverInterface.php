@@ -13,16 +13,15 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver;
 
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
-use Sulu\Component\Content\Compat\PropertyInterface;
 
 interface ContentTypeResolverInterface
 {
     public static function getContentType(): string;
 
     /**
-     * @param mixed $data
-     * @param mixed[] $attributes
+     * @param array<string, mixed> $attributes
      */
-    public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView;
+    public function resolve(mixed $data, FieldMetadata $fieldMetadata, string $locale, array $attributes = []): ContentView;
 }

@@ -16,10 +16,10 @@ namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\MediaSelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\SingleMediaSelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
-use Sulu\Component\Content\Compat\PropertyInterface;
 
 class SingleMediaSelectionResolverTest extends TestCase
 {
@@ -35,9 +35,12 @@ class SingleMediaSelectionResolverTest extends TestCase
      */
     private $mediaSelectionResolver;
 
+    private FieldMetadata $fieldMetadata;
+
     protected function setUp(): void
     {
         $this->mediaSelectionResolver = $this->prophesize(MediaSelectionResolver::class);
+        $this->fieldMetadata = new FieldMetadata('media');
 
         $this->singleMediaSelectionResolver = new SingleMediaSelectionResolver(
             $this->mediaSelectionResolver->reveal()
@@ -51,8 +54,7 @@ class SingleMediaSelectionResolverTest extends TestCase
 
     public function testResolve(): void
     {
-        $property = $this->prophesize(PropertyInterface::class);
-        $this->mediaSelectionResolver->resolve(['ids' => [1]], $property, 'en', [])->willReturn(
+        $this->mediaSelectionResolver->resolve(['ids' => [1]], $this->fieldMetadata, 'en', [])->willReturn(
             new ContentView(
                 [
                     [
@@ -64,7 +66,7 @@ class SingleMediaSelectionResolverTest extends TestCase
             )
         );
 
-        $result = $this->singleMediaSelectionResolver->resolve(['id' => 1], $property->reveal(), 'en');
+        $result = $this->singleMediaSelectionResolver->resolve(['id' => 1], $this->fieldMetadata, 'en');
 
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame(
@@ -85,9 +87,8 @@ class SingleMediaSelectionResolverTest extends TestCase
     public function testResolveDataIsNull(): void
     {
         $locale = 'en';
-        $property = $this->prophesize(PropertyInterface::class);
 
-        $result = $this->singleMediaSelectionResolver->resolve(null, $property->reveal(), $locale);
+        $result = $this->singleMediaSelectionResolver->resolve(null, $this->fieldMetadata, $locale);
 
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertNull($result->getContent());
@@ -97,14 +98,13 @@ class SingleMediaSelectionResolverTest extends TestCase
     public function testResolveDataWithoutId(): void
     {
         $locale = 'en';
-        $property = $this->prophesize(PropertyInterface::class);
 
-        $this->mediaSelectionResolver->resolve(['ids' => []], $property, 'en', [])->willReturn(
+        $this->mediaSelectionResolver->resolve(['ids' => []], $this->fieldMetadata, 'en', [])->willReturn(
             new ContentView([], ['ids' => []])
         );
 
         $dataWithoutIdKey = ['unrelatedKey' => 'unrelatedValue'];
-        $result = $this->singleMediaSelectionResolver->resolve($dataWithoutIdKey, $property->reveal(), $locale);
+        $result = $this->singleMediaSelectionResolver->resolve($dataWithoutIdKey, $this->fieldMetadata, $locale);
 
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertNull($result->getContent());

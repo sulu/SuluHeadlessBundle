@@ -4,15 +4,13 @@
             {
                 "id": "@uuid@",
                 "uuid": "@uuid@",
-                "nodeType": 1,
                 "publishedState": true,
                 "published": "@string@.isDateTime()",
                 "title": "Test 3",
                 "locale": "de",
                 "webspaceKey": "sulu_io",
                 "template": "default",
-                "parent": "@uuid@",
-                "path": "@string@.match(\"/test-3\").optional()",
+                "parent": "@null@||@uuid@",
                 "url": "\/test-3",
                 "urls": {
                     "de": "\/test-3"
@@ -24,7 +22,7 @@
                 "changed": "@string@.isDateTime()",
                 "creator": null,
                 "created": "@string@.isDateTime()",
-                "order": 40,
+                "order": "@integer@",
                 "children": []
             }
         ]

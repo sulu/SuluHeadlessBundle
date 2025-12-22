@@ -14,12 +14,11 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver;
 
 use JMS\Serializer\SerializationContext;
-use Sulu\Bundle\ContactBundle\Api\Account;
-use Sulu\Bundle\ContactBundle\Entity\Account as AccountEntity;
+use Sulu\Bundle\AdminBundle\SmartContent\Configuration\ProviderConfigurationInterface;
+use Sulu\Bundle\AdminBundle\SmartContent\SmartContentProviderInterface;
+use Sulu\Bundle\ContactBundle\Entity\AccountRepositoryInterface;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\AccountSerializerInterface;
 use Sulu\Component\Content\Compat\PropertyParameter;
-use Sulu\Component\SmartContent\Configuration\ProviderConfigurationInterface;
-use Sulu\Component\SmartContent\DataProviderInterface;
 
 class AccountDataProviderResolver implements DataProviderResolverInterface
 {
@@ -28,27 +27,16 @@ class AccountDataProviderResolver implements DataProviderResolverInterface
         return 'accounts';
     }
 
-    /**
-     * @var DataProviderInterface
-     */
-    private $accountDataProvider;
-
-    /**
-     * @var AccountSerializerInterface
-     */
-    private $accountSerializer;
-
     public function __construct(
-        DataProviderInterface $accountDataProvider,
-        AccountSerializerInterface $accountSerializer
+        private SmartContentProviderInterface $accountSmartContentProvider,
+        private AccountSerializerInterface $accountSerializer,
+        private AccountRepositoryInterface $accountRepository,
     ) {
-        $this->accountDataProvider = $accountDataProvider;
-        $this->accountSerializer = $accountSerializer;
     }
 
     public function getProviderConfiguration(): ProviderConfigurationInterface
     {
-        return $this->accountDataProvider->getConfiguration();
+        return $this->accountSmartContentProvider->getConfiguration();
     }
 
     /**
@@ -56,7 +44,7 @@ class AccountDataProviderResolver implements DataProviderResolverInterface
      */
     public function getProviderDefaultParams(): array
     {
-        return $this->accountDataProvider->getDefaultPropertyParameter();
+        return [];
     }
 
     public function resolve(
@@ -65,34 +53,77 @@ class AccountDataProviderResolver implements DataProviderResolverInterface
         array $options = [],
         ?int $limit = null,
         int $page = 1,
-        ?int $pageSize = null
+        ?int $pageSize = null,
     ): DataProviderResult {
-        $providerResult = $this->accountDataProvider->resolveResourceItems(
-            $filters,
-            $propertyParameters,
-            $options,
-            $limit,
-            $page,
-            $pageSize
-        );
+        $locale = $options['locale'] ?? 'en';
 
-        /** @var string $locale */
-        $locale = $options['locale'];
+        $smartFilters = $this->convertFilters($filters, $limit, $page, $pageSize);
+        $sortBys = $this->extractSortBys($filters);
 
-        $items = [];
-        foreach ($providerResult->getItems() as $providerItem) {
-            /** @var Account $account */
-            $account = $providerItem->getResource();
-            /** @var AccountEntity $accountEntity */
-            $accountEntity = $account->getEntity();
+        $flatResults = $this->accountSmartContentProvider->findFlatBy($smartFilters, $sortBys, $options);
 
-            $items[] = $this->accountSerializer->serialize(
-                $accountEntity,
-                $locale,
-                SerializationContext::create()->setGroups(['partialAccount'])
-            );
+        $ids = \array_map(fn (array $item) => (int) $item['id'], $flatResults);
+
+        if (empty($ids)) {
+            return new DataProviderResult([], false);
         }
 
-        return new DataProviderResult($items, $providerResult->getHasNextPage());
+        $items = [];
+        foreach ($ids as $id) {
+            $account = $this->accountRepository->find($id);
+            if (null !== $account) {
+                $items[] = $this->accountSerializer->serialize(
+                    $account,
+                    $locale,
+                    SerializationContext::create()->setGroups(['partialAccount']),
+                );
+            }
+        }
+
+        $hasNextPage = null !== $pageSize && \count($flatResults) >= $pageSize;
+
+        return new DataProviderResult($items, $hasNextPage);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function convertFilters(array $filters, ?int $limit, int $page, ?int $pageSize): array
+    {
+        $offset = 0;
+        if (null !== $pageSize && $page > 1) {
+            $offset = ($page - 1) * $pageSize;
+        }
+
+        return [
+            'categories' => $filters['categories'] ?? [],
+            'categoryOperator' => $filters['categoryOperator'] ?? 'OR',
+            'websiteCategories' => $filters['websiteCategories'] ?? [],
+            'websiteCategoryOperator' => $filters['websiteCategoriesOperator'] ?? 'OR',
+            'tags' => $filters['tags'] ?? [],
+            'tagOperator' => $filters['tagOperator'] ?? 'OR',
+            'websiteTags' => $filters['websiteTags'] ?? [],
+            'websiteTagOperator' => $filters['websiteTagsOperator'] ?? 'OR',
+            'types' => [],
+            'typesOperator' => 'OR',
+            'locale' => $filters['locale'] ?? 'en',
+            'dataSource' => $filters['dataSource'] ?? null,
+            'limit' => $pageSize ?? $limit,
+            'offset' => $offset,
+            'includeSubFolders' => true,
+            'excludeDuplicates' => $filters['exclude_duplicates'] ?? false,
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function extractSortBys(array $filters): array
+    {
+        if (!isset($filters['sortBy']) || empty($filters['sortBy'])) {
+            return [];
+        }
+
+        return [$filters['sortBy'] => $filters['sortMethod'] ?? 'asc'];
     }
 }

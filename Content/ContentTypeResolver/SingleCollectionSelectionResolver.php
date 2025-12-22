@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver;
 
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
-use Sulu\Component\Content\Compat\PropertyInterface;
 
 class SingleCollectionSelectionResolver implements ContentTypeResolverInterface
 {
@@ -23,17 +23,12 @@ class SingleCollectionSelectionResolver implements ContentTypeResolverInterface
         return 'single_collection_selection';
     }
 
-    /**
-     * @var ContentTypeResolverInterface
-     */
-    private $collectionSelectionResolver;
-
-    public function __construct(ContentTypeResolverInterface $collectionSelectionResolver)
-    {
-        $this->collectionSelectionResolver = $collectionSelectionResolver;
+    public function __construct(
+        private ContentTypeResolverInterface $collectionSelectionResolver,
+    ) {
     }
 
-    public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView
+    public function resolve(mixed $data, FieldMetadata $fieldMetadata, string $locale, array $attributes = []): ContentView
     {
         $id = $data;
 
@@ -41,7 +36,7 @@ class SingleCollectionSelectionResolver implements ContentTypeResolverInterface
             return new ContentView(null, ['id' => null]);
         }
 
-        $content = $this->collectionSelectionResolver->resolve([(int) $id], $property, $locale, $attributes);
+        $content = $this->collectionSelectionResolver->resolve([(int) $id], $fieldMetadata, $locale, $attributes);
 
         /** @var mixed[]|null $contentData */
         $contentData = $content->getContent();

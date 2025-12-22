@@ -16,16 +16,18 @@ namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FormMetadata;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\TypedFormMetadata;
+use Sulu\Bundle\AdminBundle\Metadata\MetadataProviderInterface;
+use Sulu\Bundle\AdminBundle\Metadata\MetadataProviderRegistry;
 use Sulu\Bundle\HeadlessBundle\Content\ContentResolverInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\ImageMapResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializerInterface;
 use Sulu\Bundle\MediaBundle\Api\Media;
 use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
-use Sulu\Component\Content\Compat\Block\BlockProperty;
-use Sulu\Component\Content\Compat\Property;
-use Sulu\Component\Content\Compat\PropertyInterface;
-use Sulu\Component\Content\Compat\PropertyType;
+use Symfony\Component\DependencyInjection\Container;
 
 class ImageMapResolverTest extends TestCase
 {
@@ -46,10 +48,14 @@ class ImageMapResolverTest extends TestCase
      */
     private $contentResolver;
 
+    private MetadataProviderRegistry $metadataProviderRegistry;
+
     /**
      * @var ImageMapResolver
      */
     private $imageMapResolver;
+
+    private FieldMetadata $fieldMetadata;
 
     protected function setUp(): void
     {
@@ -57,10 +63,27 @@ class ImageMapResolverTest extends TestCase
         $this->mediaSerializer = $this->prophesize(MediaSerializerInterface::class);
         $this->contentResolver = $this->prophesize(ContentResolverInterface::class);
 
-        $this->imageMapResolver = new ImageMapResolver(
+        // Set up a mock form metadata provider that returns empty global blocks
+        $formMetadataProvider = $this->prophesize(MetadataProviderInterface::class);
+        $typedFormMetadata = new TypedFormMetadata();
+        $formMetadataProvider->getMetadata('block', 'en', [])->willReturn($typedFormMetadata);
+
+        $container = new Container();
+        $container->set('form', $formMetadataProvider->reveal());
+        $this->metadataProviderRegistry = new MetadataProviderRegistry($container);
+
+        $this->fieldMetadata = new FieldMetadata('image_map');
+
+        $this->imageMapResolver = $this->createResolver();
+    }
+
+    private function createResolver(): ImageMapResolver
+    {
+        return new ImageMapResolver(
             $this->mediaManager->reveal(),
             $this->mediaSerializer->reveal(),
-            $this->contentResolver->reveal()
+            $this->contentResolver->reveal(),
+            $this->metadataProviderRegistry,
         );
     }
 
@@ -130,70 +153,48 @@ class ImageMapResolverTest extends TestCase
                 'locale' => 'en',
             ]);
 
-        /** @var PropertyInterface|ObjectProphecy $property */
-        $property = $this->prophesize(PropertyInterface::class);
+        // Set up basic hotspot type with title and description fields
+        $basicType = new FormMetadata();
+        $basicType->setKey('basic');
 
-        // Basic hotspot
-        $propertyTypeBasic = $this->prophesize(PropertyType::class);
-        $property->initProperties(0, 'basic')
-            ->shouldBeCalled()
-            ->willReturn($propertyTypeBasic->reveal());
+        $titleField = new FieldMetadata('title');
+        $titleField->setType('text_line');
+        $basicType->addItem($titleField);
 
-        $propertyTextLine = $this->prophesize(Property::class);
-        $propertyTextLine->getName()
-            ->shouldBeCalled()
-            ->willReturn('title');
-        $propertyTextLine->setValue('Test Point')
-            ->shouldBeCalled();
-        $propertyTextLine->getValue()
-            ->shouldBeCalled()
-            ->willReturn('Test Point');
+        $descriptionField = new FieldMetadata('description');
+        $descriptionField->setType('text_area');
+        $basicType->addItem($descriptionField);
 
-        $propertyTextArea = $this->prophesize(Property::class);
-        $propertyTextArea->getName()
-            ->shouldBeCalled()
-            ->willReturn('description');
-        $propertyTextArea->setValue('Test Point description')
-            ->shouldBeCalled();
-        $propertyTextArea->getValue()
-            ->shouldBeCalled()
-            ->willReturn('Test Point description');
+        // Set up advanced hotspot type with media and block fields
+        $advancedType = new FormMetadata();
+        $advancedType->setKey('advanced');
 
-        $propertyTypeBasic->getChildProperties()
-            ->shouldBeCalled()
-            ->willReturn([$propertyTextLine->reveal(), $propertyTextArea->reveal()]);
+        $mediaField = new FieldMetadata('media');
+        $mediaField->setType('single_media_selection');
+        $advancedType->addItem($mediaField);
 
+        $blockField = new FieldMetadata('block_1');
+        $blockField->setType('block');
+        $advancedType->addItem($blockField);
+
+        // Add types to fieldMetadata
+        $this->fieldMetadata->addType($basicType);
+        $this->fieldMetadata->addType($advancedType);
+
+        // Set up content resolver expectations for basic hotspot fields
         $contentViewTextLine = new ContentView('Test Point', []);
         $contentViewTextArea = new ContentView('Test Point description', []);
 
-        $this->contentResolver->resolve('Test Point', $propertyTextLine, $locale, [])
+        $this->contentResolver->resolve('Test Point', $titleField, $locale, [])
             ->shouldBeCalled()
             ->willReturn($contentViewTextLine);
 
-        $this->contentResolver->resolve('Test Point description', $propertyTextArea, $locale, [])
+        $this->contentResolver->resolve('Test Point description', $descriptionField, $locale, [])
             ->shouldBeCalled()
             ->willReturn($contentViewTextArea);
 
-        // Advanced hotspot
-        $propertyTypeAdvanced = $this->prophesize(PropertyType::class);
-        $property->initProperties(1, 'advanced')
-            ->shouldBeCalled()
-            ->willReturn($propertyTypeAdvanced->reveal());
-
-        $propertyMediaSelection = $this->prophesize(Property::class);
-        $propertyMediaSelection->getName()
-            ->shouldBeCalled()
-            ->willReturn('media');
-        $propertyMediaSelection->setValue(['id' => 1])
-            ->shouldBeCalled();
-        $propertyMediaSelection->getValue()
-            ->shouldBeCalled()
-            ->willReturn(['id' => 1]);
-
-        $propertyBlock = $this->prophesize(BlockProperty::class);
-        $propertyBlock->getName()
-            ->shouldBeCalled()
-            ->willReturn('block_1');
+        // Set up content resolver expectations for advanced hotspot fields
+        $contentViewMedia = new ContentView(['id' => 1, 'locale' => 'en'], ['id' => 1]);
         $blockValue = [
             [
                 'type' => 'text-with-image',
@@ -204,17 +205,6 @@ class ImageMapResolverTest extends TestCase
                 'title' => 'Example title',
             ],
         ];
-        $propertyBlock->setValue($blockValue)
-            ->shouldBeCalled();
-        $propertyBlock->getValue()
-            ->shouldBeCalled()
-            ->willReturn($blockValue);
-
-        $propertyTypeAdvanced->getChildProperties()
-            ->shouldBeCalled()
-            ->willReturn([$propertyMediaSelection, $propertyBlock]);
-
-        $contentViewMedia = new ContentView(['id' => 1, 'locale' => 'en'], ['id' => 1]);
         $contentViewBlock = new ContentView(
             [
                 [
@@ -237,15 +227,15 @@ class ImageMapResolverTest extends TestCase
             ]
         );
 
-        $this->contentResolver->resolve(['id' => 1], $propertyMediaSelection, $locale, [])
+        $this->contentResolver->resolve(['id' => 1], $mediaField, $locale, [])
             ->shouldBeCalled()
             ->willReturn($contentViewMedia);
 
-        $this->contentResolver->resolve($blockValue, $propertyBlock, $locale, [])
+        $this->contentResolver->resolve($blockValue, $blockField, $locale, [])
             ->shouldBeCalled()
             ->willReturn($contentViewBlock);
 
-        $contentView = $this->imageMapResolver->resolve($data, $property->reveal(), $locale);
+        $contentView = $this->imageMapResolver->resolve($data, $this->fieldMetadata, $locale);
 
         self::assertSame([
             'image' => [
@@ -319,9 +309,8 @@ class ImageMapResolverTest extends TestCase
     public function testResolveDataIsNull(): void
     {
         $locale = 'en';
-        $property = $this->prophesize(Property::class);
 
-        $result = $this->imageMapResolver->resolve(null, $property->reveal(), $locale);
+        $result = $this->imageMapResolver->resolve(null, $this->fieldMetadata, $locale);
 
         self::assertSame([], $result->getContent());
         self::assertSame([], $result->getView());
@@ -330,9 +319,8 @@ class ImageMapResolverTest extends TestCase
     public function testResolveDataIsEmptyArray(): void
     {
         $locale = 'en';
-        $property = $this->prophesize(Property::class);
 
-        $result = $this->imageMapResolver->resolve([], $property->reveal(), $locale);
+        $result = $this->imageMapResolver->resolve([], $this->fieldMetadata, $locale);
 
         self::assertSame([], $result->getContent());
         self::assertSame([], $result->getView());

@@ -9,21 +9,6 @@
             "mediaId": "@string@",
             "resourceId": "@uuid@",
             "resourceKey": "pages",
-            "title": "Sulu is awesome",
-            "url": "/awesome-sulu",
-            "webspaces": [
-                "sulu_io"
-            ]
-        },
-        {
-            "_formatted": "@array@",
-            "authoredAt": "@string@.isDateTime()",
-            "content": "@array@",
-            "id": "@string@",
-            "locale": "de",
-            "mediaId": "@string@",
-            "resourceId": "@uuid@",
-            "resourceKey": "pages",
             "title": "SEAL is awesome",
             "url": "/awesome-seal",
             "webspaces": [

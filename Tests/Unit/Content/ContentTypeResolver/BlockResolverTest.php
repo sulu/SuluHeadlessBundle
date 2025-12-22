@@ -16,13 +16,16 @@ namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FormMetadata;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\TypedFormMetadata;
+use Sulu\Bundle\AdminBundle\Metadata\MetadataProviderInterface;
+use Sulu\Bundle\AdminBundle\Metadata\MetadataProviderRegistry;
 use Sulu\Bundle\HeadlessBundle\Content\ContentResolverInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\BlockResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
-use Sulu\Component\Content\Compat\Block\BlockPropertyInterface;
-use Sulu\Component\Content\Compat\Block\BlockPropertyType;
-use Sulu\Component\Content\Compat\PropertyInterface;
-use Sulu\Component\Content\Types\Block\BlockVisitorInterface;
+use Sulu\Content\Application\PropertyResolver\BlockVisitor\BlockVisitorInterface;
+use Symfony\Component\DependencyInjection\Container;
 
 class BlockResolverTest extends TestCase
 {
@@ -33,9 +36,24 @@ class BlockResolverTest extends TestCase
      */
     private $contentResolver;
 
+    private MetadataProviderRegistry $metadataProviderRegistry;
+
+    private FieldMetadata $fieldMetadata;
+
     protected function setUp(): void
     {
         $this->contentResolver = $this->prophesize(ContentResolverInterface::class);
+
+        // Set up a mock form metadata provider that returns empty global blocks
+        $formMetadataProvider = $this->prophesize(MetadataProviderInterface::class);
+        $typedFormMetadata = new TypedFormMetadata();
+        $formMetadataProvider->getMetadata('block', 'en', [])->willReturn($typedFormMetadata);
+
+        $container = new Container();
+        $container->set('form', $formMetadataProvider->reveal());
+        $this->metadataProviderRegistry = new MetadataProviderRegistry($container);
+
+        $this->fieldMetadata = new FieldMetadata('block');
     }
 
     public function testGetContentType(): void
@@ -45,14 +63,22 @@ class BlockResolverTest extends TestCase
 
     public function testResolve(): void
     {
-        $titleProperty = $this->prophesize(PropertyInterface::class);
-        $titleProperty->getName()->willReturn('title');
-        $titleProperty->getValue()->willReturn('test-123');
+        $titleFieldMetadata = new FieldMetadata('title');
+        $titleFieldMetadata->setType('text_line');
 
-        $titleType = $this->prophesize(BlockPropertyType::class);
-        $titleType->getName()->willReturn('title');
-        $titleType->getSettings()->willReturn(['segments' => [], 'target_groups' => ['developer']]);
-        $titleType->getChildProperties()->willReturn([$titleProperty->reveal()]);
+        $titleTypeMetadata = new FormMetadata();
+        $titleTypeMetadata->setKey('title');
+        $titleTypeMetadata->addItem($titleFieldMetadata);
+
+        $mediaFieldMetadata = new FieldMetadata('media');
+        $mediaFieldMetadata->setType('media_selection');
+
+        $mediaTypeMetadata = new FormMetadata();
+        $mediaTypeMetadata->setKey('media');
+        $mediaTypeMetadata->addItem($mediaFieldMetadata);
+
+        $this->fieldMetadata->addType($titleTypeMetadata);
+        $this->fieldMetadata->addType($mediaTypeMetadata);
 
         $titleContentView = $this->prophesize(ContentView::class);
         $titleContentView->getContent()->willReturn('test-123');
@@ -60,19 +86,10 @@ class BlockResolverTest extends TestCase
 
         $this->contentResolver->resolve(
             'test-123',
-            $titleProperty->reveal(),
+            $titleFieldMetadata,
             'en',
             ['webspaceKey' => 'sulu_io']
         )->willReturn($titleContentView->reveal());
-
-        $mediaProperty = $this->prophesize(PropertyInterface::class);
-        $mediaProperty->getName()->willReturn('media');
-        $mediaProperty->getValue()->willReturn(['ids' => [1, 2, 3]]);
-
-        $mediaType = $this->prophesize(BlockPropertyType::class);
-        $mediaType->getName()->willReturn('media');
-        $mediaType->getSettings()->willReturn(['segments' => [], 'target_groups' => ['customer']]);
-        $mediaType->getChildProperties()->willReturn([$mediaProperty->reveal()]);
 
         $mediaContentView = $this->prophesize(ContentView::class);
         $mediaContentView->getContent()->willReturn(['media1', 'media2', 'media3']);
@@ -80,7 +97,7 @@ class BlockResolverTest extends TestCase
 
         $this->contentResolver->resolve(
             ['ids' => [1, 2, 3]],
-            $mediaProperty->reveal(),
+            $mediaFieldMetadata,
             'en',
             ['webspaceKey' => 'sulu_io']
         )->willReturn($mediaContentView->reveal());
@@ -98,17 +115,9 @@ class BlockResolverTest extends TestCase
             ],
         ];
 
-        $blockProperty = $this->prophesize(BlockPropertyInterface::class);
-        $blockProperty->getValue()->willReturn($data);
-        $blockProperty->getLength()->willReturn(2);
-
-        $blockProperty->getProperties(0)->willReturn($titleType->reveal());
-
-        $blockProperty->getProperties(1)->willReturn($mediaType->reveal());
-
         $blockResolver = $this->createBlockResolver();
 
-        $result = $blockResolver->resolve($data, $blockProperty->reveal(), 'en', ['webspaceKey' => 'sulu_io']);
+        $result = $blockResolver->resolve($data, $this->fieldMetadata, 'en', ['webspaceKey' => 'sulu_io']);
 
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame(
@@ -141,18 +150,22 @@ class BlockResolverTest extends TestCase
 
     public function testResolveWithVisitors(): void
     {
-        if (!\class_exists(BlockVisitorInterface::class)) {
-            $this->markTestSkipped('Requires a newer sulu version with block visitors.');
-        }
+        $titleFieldMetadata = new FieldMetadata('title');
+        $titleFieldMetadata->setType('text_line');
 
-        $titleProperty = $this->prophesize(PropertyInterface::class);
-        $titleProperty->getName()->willReturn('title');
-        $titleProperty->getValue()->willReturn('test-123');
+        $titleTypeMetadata = new FormMetadata();
+        $titleTypeMetadata->setKey('title');
+        $titleTypeMetadata->addItem($titleFieldMetadata);
 
-        $titleType = $this->prophesize(BlockPropertyType::class);
-        $titleType->getName()->willReturn('title');
-        $titleType->getSettings()->willReturn([]);
-        $titleType->getChildProperties()->willReturn([$titleProperty->reveal()]);
+        $mediaFieldMetadata = new FieldMetadata('media');
+        $mediaFieldMetadata->setType('media_selection');
+
+        $mediaTypeMetadata = new FormMetadata();
+        $mediaTypeMetadata->setKey('media');
+        $mediaTypeMetadata->addItem($mediaFieldMetadata);
+
+        $this->fieldMetadata->addType($titleTypeMetadata);
+        $this->fieldMetadata->addType($mediaTypeMetadata);
 
         $titleContentView = $this->prophesize(ContentView::class);
         $titleContentView->getContent()->willReturn('test-123');
@@ -160,19 +173,10 @@ class BlockResolverTest extends TestCase
 
         $this->contentResolver->resolve(
             'test-123',
-            $titleProperty->reveal(),
+            $titleFieldMetadata,
             'en',
             ['webspaceKey' => 'sulu_io']
         )->willReturn($titleContentView->reveal());
-
-        $mediaProperty = $this->prophesize(PropertyInterface::class);
-        $mediaProperty->getName()->willReturn('media');
-        $mediaProperty->getValue()->willReturn(['ids' => [1, 2, 3]]);
-
-        $mediaType = $this->prophesize(BlockPropertyType::class);
-        $mediaType->getName()->willReturn('media');
-        $mediaType->getSettings()->willReturn(['target_groups' => ['customer']]);
-        $mediaType->getChildProperties()->willReturn([$mediaProperty->reveal()]);
 
         $mediaContentView = $this->prophesize(ContentView::class);
         $mediaContentView->getContent()->willReturn(['media1', 'media2', 'media3']);
@@ -180,7 +184,7 @@ class BlockResolverTest extends TestCase
 
         $this->contentResolver->resolve(
             ['ids' => [1, 2, 3]],
-            $mediaProperty->reveal(),
+            $mediaFieldMetadata,
             'en',
             ['webspaceKey' => 'sulu_io']
         )->willReturn($mediaContentView->reveal());
@@ -201,21 +205,15 @@ class BlockResolverTest extends TestCase
         $blockVisitor1 = $this->prophesize(BlockVisitorInterface::class);
         $blockVisitor2 = $this->prophesize(BlockVisitorInterface::class);
 
-        $blockProperty = $this->prophesize(BlockPropertyInterface::class);
-        $blockProperty->getValue()->willReturn($data);
-        $blockProperty->getLength()->willReturn(2);
+        $blockVisitor1->visit($data[0])->willReturn($data[0]);
+        $blockVisitor2->visit($data[0])->willReturn($data[0]);
 
-        $blockProperty->getProperties(0)->willReturn($titleType->reveal());
-        $blockVisitor1->visit($titleType->reveal())->willReturn($titleType->reveal());
-        $blockVisitor2->visit($titleType->reveal())->willReturn($titleType->reveal());
-
-        $blockProperty->getProperties(1)->willReturn($mediaType->reveal());
-        $blockVisitor1->visit($mediaType->reveal())->willReturn($mediaType->reveal());
-        $blockVisitor2->visit($mediaType->reveal())->willReturn($mediaType->reveal());
+        $blockVisitor1->visit($data[1])->willReturn($data[1]);
+        $blockVisitor2->visit($data[1])->willReturn($data[1]);
 
         $blockResolver = $this->createBlockResolver([$blockVisitor1->reveal(), $blockVisitor2->reveal()]);
 
-        $result = $blockResolver->resolve($data, $blockProperty->reveal(), 'en', ['webspaceKey' => 'sulu_io']);
+        $result = $blockResolver->resolve($data, $this->fieldMetadata, 'en', ['webspaceKey' => 'sulu_io']);
 
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame(
@@ -248,49 +246,22 @@ class BlockResolverTest extends TestCase
 
     public function testResolveWithSkips(): void
     {
-        if (!\class_exists(BlockVisitorInterface::class)) {
-            $this->markTestSkipped('Requires a newer sulu version with block visitors.');
-        }
+        $titleFieldMetadata = new FieldMetadata('title');
+        $titleFieldMetadata->setType('text_line');
 
-        $titleProperty = $this->prophesize(PropertyInterface::class);
-        $titleProperty->getName()->willReturn('title');
-        $titleProperty->getValue()->willReturn('test-123');
+        $titleTypeMetadata = new FormMetadata();
+        $titleTypeMetadata->setKey('title');
+        $titleTypeMetadata->addItem($titleFieldMetadata);
 
-        $titleType = $this->prophesize(BlockPropertyType::class);
-        $titleType->getName()->willReturn('title');
-        $titleType->getSettings()->willReturn(['hidden' => true]);
-        $titleType->getChildProperties()->willReturn([$titleProperty->reveal()]);
+        $mediaFieldMetadata = new FieldMetadata('media');
+        $mediaFieldMetadata->setType('media_selection');
 
-        $titleContentView = $this->prophesize(ContentView::class);
-        $titleContentView->getContent()->willReturn('test-123');
-        $titleContentView->getView()->willReturn([]);
+        $mediaTypeMetadata = new FormMetadata();
+        $mediaTypeMetadata->setKey('media');
+        $mediaTypeMetadata->addItem($mediaFieldMetadata);
 
-        $this->contentResolver->resolve(
-            'test-123',
-            $titleProperty->reveal(),
-            'en',
-            ['webspaceKey' => 'sulu_io']
-        )->willReturn($titleContentView->reveal());
-
-        $mediaProperty = $this->prophesize(PropertyInterface::class);
-        $mediaProperty->getName()->willReturn('media');
-        $mediaProperty->getValue()->willReturn(['ids' => [1, 2, 3]]);
-
-        $mediaType = $this->prophesize(BlockPropertyType::class);
-        $mediaType->getName()->willReturn('media');
-        $mediaType->getSettings()->willReturn(['hidden' => true]);
-        $mediaType->getChildProperties()->willReturn([$mediaProperty->reveal()]);
-
-        $mediaContentView = $this->prophesize(ContentView::class);
-        $mediaContentView->getContent()->willReturn(['media1', 'media2', 'media3']);
-        $mediaContentView->getView()->willReturn(['ids' => [1, 2, 3]]);
-
-        $this->contentResolver->resolve(
-            ['ids' => [1, 2, 3]],
-            $mediaProperty->reveal(),
-            'en',
-            ['webspaceKey' => 'sulu_io']
-        )->willReturn($mediaContentView->reveal());
+        $this->fieldMetadata->addType($titleTypeMetadata);
+        $this->fieldMetadata->addType($mediaTypeMetadata);
 
         $data = [
             [
@@ -308,20 +279,14 @@ class BlockResolverTest extends TestCase
         $blockVisitor1 = $this->prophesize(BlockVisitorInterface::class);
         $blockVisitor2 = $this->prophesize(BlockVisitorInterface::class);
 
-        $blockProperty = $this->prophesize(BlockPropertyInterface::class);
-        $blockProperty->getValue()->willReturn($data);
-        $blockProperty->getLength()->willReturn(2);
+        $blockVisitor1->visit($data[0])->willReturn(null);
+        $blockVisitor2->visit($data[0])->willReturn($data[0]);
 
-        $blockProperty->getProperties(0)->willReturn($titleType->reveal());
-        $blockVisitor1->visit($titleType->reveal())->willReturn(null);
-        $blockVisitor2->visit($titleType->reveal())->willReturn($titleType->reveal());
-
-        $blockProperty->getProperties(1)->willReturn($mediaType->reveal());
-        $blockVisitor1->visit($mediaType->reveal())->willReturn($mediaType->reveal());
-        $blockVisitor2->visit($mediaType->reveal())->willReturn(null);
+        $blockVisitor1->visit($data[1])->willReturn($data[1]);
+        $blockVisitor2->visit($data[1])->willReturn(null);
 
         $blockResolver = $this->createBlockResolver([$blockVisitor1->reveal(), $blockVisitor2->reveal()]);
-        $result = $blockResolver->resolve($data, $blockProperty->reveal(), 'en', ['webspaceKey' => 'sulu_io']);
+        $result = $blockResolver->resolve($data, $this->fieldMetadata, 'en', ['webspaceKey' => 'sulu_io']);
 
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame(
@@ -341,6 +306,7 @@ class BlockResolverTest extends TestCase
     {
         return new BlockResolver(
             $this->contentResolver->reveal(),
+            $this->metadataProviderRegistry,
             new \ArrayIterator($blockVisitors)
         );
     }

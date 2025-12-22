@@ -14,45 +14,47 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\DataProviderResolver;
 
 use PHPUnit\Framework\TestCase;
+use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
+use Sulu\Bundle\AdminBundle\SmartContent\Configuration\ProviderConfigurationInterface;
+use Sulu\Bundle\AdminBundle\SmartContent\SmartContentProviderInterface;
 use Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver\MediaDataProviderResolver;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializerInterface;
-use Sulu\Bundle\MediaBundle\Api\Media;
 use Sulu\Bundle\MediaBundle\Entity\MediaInterface;
-use Sulu\Component\Content\Compat\PropertyParameter;
-use Sulu\Component\Media\SmartContent\MediaDataProvider;
-use Sulu\Component\SmartContent\Configuration\ProviderConfigurationInterface;
-use Sulu\Component\SmartContent\DataProviderResult;
-use Sulu\Component\SmartContent\ResourceItemInterface;
+use Sulu\Bundle\MediaBundle\Entity\MediaRepositoryInterface;
 
 class MediaDataProviderResolverTest extends TestCase
 {
     use ProphecyTrait;
 
     /**
-     * @var MediaDataProvider|ObjectProphecy
+     * @var ObjectProphecy<SmartContentProviderInterface>
      */
-    private $mediaDataProvider;
+    private ObjectProphecy $mediaSmartContentProvider;
 
     /**
-     * @var MediaSerializerInterface|ObjectProphecy
+     * @var ObjectProphecy<MediaSerializerInterface>
      */
-    private $mediaSerializer;
+    private ObjectProphecy $mediaSerializer;
 
     /**
-     * @var MediaDataProviderResolver
+     * @var ObjectProphecy<MediaRepositoryInterface>
      */
-    private $mediaResolver;
+    private ObjectProphecy $mediaRepository;
+
+    private MediaDataProviderResolver $mediaResolver;
 
     protected function setUp(): void
     {
-        $this->mediaDataProvider = $this->prophesize(MediaDataProvider::class);
+        $this->mediaSmartContentProvider = $this->prophesize(SmartContentProviderInterface::class);
         $this->mediaSerializer = $this->prophesize(MediaSerializerInterface::class);
+        $this->mediaRepository = $this->prophesize(MediaRepositoryInterface::class);
 
         $this->mediaResolver = new MediaDataProviderResolver(
-            $this->mediaDataProvider->reveal(),
-            $this->mediaSerializer->reveal()
+            $this->mediaSmartContentProvider->reveal(),
+            $this->mediaSerializer->reveal(),
+            $this->mediaRepository->reveal(),
         );
     }
 
@@ -64,40 +66,34 @@ class MediaDataProviderResolverTest extends TestCase
     public function testGetProviderConfiguration(): void
     {
         $configuration = $this->prophesize(ProviderConfigurationInterface::class);
-        $this->mediaDataProvider->getConfiguration()->willReturn($configuration->reveal());
+        $this->mediaSmartContentProvider->getConfiguration()->willReturn($configuration->reveal());
 
         $this->assertSame($configuration->reveal(), $this->mediaResolver->getProviderConfiguration());
     }
 
     public function testGetProviderDefaultParams(): void
     {
-        $propertyParameter = $this->prophesize(PropertyParameter::class);
-        $this->mediaDataProvider->getDefaultPropertyParameter()->willReturn(['test' => $propertyParameter->reveal()]);
-
-        $this->assertSame(['test' => $propertyParameter->reveal()], $this->mediaResolver->getProviderDefaultParams());
+        $this->assertSame([], $this->mediaResolver->getProviderDefaultParams());
     }
 
     public function testResolve(): void
     {
         $media1 = $this->prophesize(MediaInterface::class);
-        $apiMedia1 = $this->prophesize(Media::class);
-        $apiMedia1->getEntity()->willReturn($media1->reveal());
-
         $media2 = $this->prophesize(MediaInterface::class);
-        $apiMedia2 = $this->prophesize(Media::class);
-        $apiMedia2->getEntity()->willReturn($media2->reveal());
 
-        $resourceItem1 = $this->prophesize(ResourceItemInterface::class);
-        $resourceItem1->getResource()->willReturn($apiMedia1->reveal());
+        // SmartContentProvider returns flat results with id/title
+        $this->mediaSmartContentProvider->findFlatBy(
+            Argument::type('array'),
+            Argument::type('array'),
+            ['locale' => 'en']
+        )->willReturn([
+            ['id' => '1', 'title' => 'Media 1'],
+            ['id' => '2', 'title' => 'Media 2'],
+        ]);
 
-        $resourceItem2 = $this->prophesize(ResourceItemInterface::class);
-        $resourceItem2->getResource()->willReturn($apiMedia2->reveal());
-
-        $providerResult = $this->prophesize(DataProviderResult::class);
-        $providerResult->getHasNextPage()->willReturn(true);
-        $providerResult->getItems()->willReturn([$resourceItem1, $resourceItem2]);
-
-        $this->mediaDataProvider->resolveResourceItems([], [], ['locale' => 'en'], 10, 1, 5)->willReturn($providerResult->reveal());
+        // Repository fetches actual entities
+        $this->mediaRepository->findMediaById(1)->willReturn($media1->reveal());
+        $this->mediaRepository->findMediaById(2)->willReturn($media2->reveal());
 
         $this->mediaSerializer->serialize($media1, 'en')->willReturn([
             'id' => 1,
@@ -111,7 +107,8 @@ class MediaDataProviderResolverTest extends TestCase
 
         $result = $this->mediaResolver->resolve([], [], ['locale' => 'en'], 10, 1, 5);
 
-        $this->assertTrue($result->getHasNextPage());
+        // hasNextPage is false because count(2) < pageSize(5)
+        $this->assertFalse($result->getHasNextPage());
         $this->assertSame(
             [
                 [
@@ -125,5 +122,19 @@ class MediaDataProviderResolverTest extends TestCase
             ],
             $result->getItems()
         );
+    }
+
+    public function testResolveEmptyResult(): void
+    {
+        $this->mediaSmartContentProvider->findFlatBy(
+            Argument::type('array'),
+            Argument::type('array'),
+            ['locale' => 'en']
+        )->willReturn([]);
+
+        $result = $this->mediaResolver->resolve([], [], ['locale' => 'en'], 10, 1, 5);
+
+        $this->assertFalse($result->getHasNextPage());
+        $this->assertSame([], $result->getItems());
     }
 }

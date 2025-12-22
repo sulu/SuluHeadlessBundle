@@ -14,12 +14,11 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver;
 
 use JMS\Serializer\SerializationContext;
-use Sulu\Bundle\ContactBundle\Api\Contact;
-use Sulu\Bundle\ContactBundle\Entity\Contact as ContactEntity;
+use Sulu\Bundle\AdminBundle\SmartContent\Configuration\ProviderConfigurationInterface;
+use Sulu\Bundle\AdminBundle\SmartContent\SmartContentProviderInterface;
+use Sulu\Bundle\ContactBundle\Entity\ContactRepositoryInterface;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\ContactSerializerInterface;
 use Sulu\Component\Content\Compat\PropertyParameter;
-use Sulu\Component\SmartContent\Configuration\ProviderConfigurationInterface;
-use Sulu\Component\SmartContent\DataProviderInterface;
 
 class ContactDataProviderResolver implements DataProviderResolverInterface
 {
@@ -28,27 +27,16 @@ class ContactDataProviderResolver implements DataProviderResolverInterface
         return 'contacts';
     }
 
-    /**
-     * @var DataProviderInterface
-     */
-    private $contactDataProvider;
-
-    /**
-     * @var ContactSerializerInterface
-     */
-    private $contactSerializer;
-
     public function __construct(
-        DataProviderInterface $contactDataProvider,
-        ContactSerializerInterface $contactSerializer
+        private SmartContentProviderInterface $contactSmartContentProvider,
+        private ContactSerializerInterface $contactSerializer,
+        private ContactRepositoryInterface $contactRepository,
     ) {
-        $this->contactDataProvider = $contactDataProvider;
-        $this->contactSerializer = $contactSerializer;
     }
 
     public function getProviderConfiguration(): ProviderConfigurationInterface
     {
-        return $this->contactDataProvider->getConfiguration();
+        return $this->contactSmartContentProvider->getConfiguration();
     }
 
     /**
@@ -56,7 +44,7 @@ class ContactDataProviderResolver implements DataProviderResolverInterface
      */
     public function getProviderDefaultParams(): array
     {
-        return $this->contactDataProvider->getDefaultPropertyParameter();
+        return [];
     }
 
     public function resolve(
@@ -65,34 +53,77 @@ class ContactDataProviderResolver implements DataProviderResolverInterface
         array $options = [],
         ?int $limit = null,
         int $page = 1,
-        ?int $pageSize = null
+        ?int $pageSize = null,
     ): DataProviderResult {
-        $providerResult = $this->contactDataProvider->resolveResourceItems(
-            $filters,
-            $propertyParameters,
-            $options,
-            $limit,
-            $page,
-            $pageSize
-        );
+        $locale = $options['locale'] ?? 'en';
 
-        /** @var string $locale */
-        $locale = $options['locale'];
+        $smartFilters = $this->convertFilters($filters, $limit, $page, $pageSize);
+        $sortBys = $this->extractSortBys($filters);
 
-        $items = [];
-        foreach ($providerResult->getItems() as $providerItem) {
-            /** @var Contact $contact */
-            $contact = $providerItem->getResource();
-            /** @var ContactEntity $contactEntity */
-            $contactEntity = $contact->getEntity();
+        $flatResults = $this->contactSmartContentProvider->findFlatBy($smartFilters, $sortBys, $options);
 
-            $items[] = $this->contactSerializer->serialize(
-                $contactEntity,
-                $locale,
-                SerializationContext::create()->setGroups(['partialContact'])
-            );
+        $ids = \array_map(fn (array $item) => (int) $item['id'], $flatResults);
+
+        if (empty($ids)) {
+            return new DataProviderResult([], false);
         }
 
-        return new DataProviderResult($items, $providerResult->getHasNextPage());
+        $items = [];
+        foreach ($ids as $id) {
+            $contact = $this->contactRepository->find($id);
+            if (null !== $contact) {
+                $items[] = $this->contactSerializer->serialize(
+                    $contact,
+                    $locale,
+                    SerializationContext::create()->setGroups(['partialContact']),
+                );
+            }
+        }
+
+        $hasNextPage = null !== $pageSize && \count($flatResults) >= $pageSize;
+
+        return new DataProviderResult($items, $hasNextPage);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function convertFilters(array $filters, ?int $limit, int $page, ?int $pageSize): array
+    {
+        $offset = 0;
+        if (null !== $pageSize && $page > 1) {
+            $offset = ($page - 1) * $pageSize;
+        }
+
+        return [
+            'categories' => $filters['categories'] ?? [],
+            'categoryOperator' => $filters['categoryOperator'] ?? 'OR',
+            'websiteCategories' => $filters['websiteCategories'] ?? [],
+            'websiteCategoryOperator' => $filters['websiteCategoriesOperator'] ?? 'OR',
+            'tags' => $filters['tags'] ?? [],
+            'tagOperator' => $filters['tagOperator'] ?? 'OR',
+            'websiteTags' => $filters['websiteTags'] ?? [],
+            'websiteTagOperator' => $filters['websiteTagsOperator'] ?? 'OR',
+            'types' => [],
+            'typesOperator' => 'OR',
+            'locale' => $filters['locale'] ?? 'en',
+            'dataSource' => $filters['dataSource'] ?? null,
+            'limit' => $pageSize ?? $limit,
+            'offset' => $offset,
+            'includeSubFolders' => true,
+            'excludeDuplicates' => $filters['exclude_duplicates'] ?? false,
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function extractSortBys(array $filters): array
+    {
+        if (!isset($filters['sortBy']) || empty($filters['sortBy'])) {
+            return [];
+        }
+
+        return [$filters['sortBy'] => $filters['sortMethod'] ?? 'asc'];
     }
 }

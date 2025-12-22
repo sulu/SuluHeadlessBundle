@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver;
 
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
-use Sulu\Component\Content\Compat\PropertyInterface;
 
 class PageTreeRouteResolver implements ContentTypeResolverInterface
 {
@@ -23,7 +23,7 @@ class PageTreeRouteResolver implements ContentTypeResolverInterface
         return 'page_tree_route';
     }
 
-    public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView
+    public function resolve(mixed $data, FieldMetadata $fieldMetadata, string $locale, array $attributes = []): ContentView
     {
         if (!\is_array($data)) {
             return new ContentView($data, []);

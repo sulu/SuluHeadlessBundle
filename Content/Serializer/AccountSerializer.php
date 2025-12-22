@@ -18,49 +18,19 @@ use Sulu\Bundle\ContactBundle\Api\Account;
 use Sulu\Bundle\ContactBundle\Contact\AccountManager;
 use Sulu\Bundle\ContactBundle\Entity\Account as EntityAccount;
 use Sulu\Bundle\ContactBundle\Entity\AccountInterface;
+use Sulu\Bundle\HttpCacheBundle\ReferenceStore\ReferenceStoreInterface;
 use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
-use Sulu\Bundle\WebsiteBundle\ReferenceStore\ReferenceStoreInterface;
 use Sulu\Component\Serializer\ArraySerializerInterface;
 
 class AccountSerializer implements AccountSerializerInterface
 {
-    /**
-     * @var AccountManager
-     */
-    private $accountManager;
-
-    /**
-     * @var ArraySerializerInterface
-     */
-    private $arraySerializer;
-
-    /**
-     * @var MediaSerializerInterface
-     */
-    private $mediaSerializer;
-
-    /**
-     * @var MediaManagerInterface
-     */
-    private $mediaManager;
-
-    /**
-     * @var ReferenceStoreInterface
-     */
-    private $referenceStore;
-
     public function __construct(
-        AccountManager $accountManager,
-        ArraySerializerInterface $arraySerializer,
-        MediaSerializerInterface $mediaSerializer,
-        MediaManagerInterface $mediaManager,
-        ReferenceStoreInterface $referenceStore
+        private AccountManager $accountManager,
+        private ArraySerializerInterface $arraySerializer,
+        private MediaSerializerInterface $mediaSerializer,
+        private MediaManagerInterface $mediaManager,
+        private ReferenceStoreInterface $referenceStore,
     ) {
-        $this->accountManager = $accountManager;
-        $this->arraySerializer = $arraySerializer;
-        $this->mediaSerializer = $mediaSerializer;
-        $this->mediaManager = $mediaManager;
-        $this->referenceStore = $referenceStore;
     }
 
     /**
@@ -88,7 +58,7 @@ class AccountSerializer implements AccountSerializerInterface
             $accountData['logo'] = $this->mediaSerializer->serialize($logo->getEntity(), $locale);
         }
 
-        $this->referenceStore->add($account->getId());
+        $this->referenceStore->add((string) $account->getId(), 'account');
 
         return $accountData;
     }

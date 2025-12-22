@@ -14,10 +14,10 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver;
 
 use JMS\Serializer\SerializationContext;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 use Sulu\Bundle\ContactBundle\Contact\ContactManager;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\ContactSerializerInterface;
-use Sulu\Component\Content\Compat\PropertyInterface;
 
 class ContactSelectionResolver implements ContentTypeResolverInterface
 {
@@ -26,25 +26,13 @@ class ContactSelectionResolver implements ContentTypeResolverInterface
         return 'contact_selection';
     }
 
-    /**
-     * @var ContactManager
-     */
-    private $contactManager;
-
-    /**
-     * @var ContactSerializerInterface
-     */
-    private $contactSerializer;
-
     public function __construct(
-        ContactManager $contactManager,
-        ContactSerializerInterface $contactSerializer
+        private ContactManager $contactManager,
+        private ContactSerializerInterface $contactSerializer,
     ) {
-        $this->contactManager = $contactManager;
-        $this->contactSerializer = $contactSerializer;
     }
 
-    public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView
+    public function resolve(mixed $data, FieldMetadata $fieldMetadata, string $locale, array $attributes = []): ContentView
     {
         if (empty($data) || !\is_array($data)) {
             return new ContentView([], ['ids' => []]);

@@ -13,68 +13,78 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver;
 
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FormMetadata;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\TypedFormMetadata;
+use Sulu\Bundle\AdminBundle\Metadata\MetadataProviderRegistry;
 use Sulu\Bundle\HeadlessBundle\Content\ContentResolverInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializerInterface;
 use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
-use Sulu\Component\Content\Compat\PropertyInterface;
 
 class ImageMapResolver implements ContentTypeResolverInterface
 {
-    /**
-     * @var MediaManagerInterface
-     */
-    private $mediaManager;
-
-    /**
-     * @var MediaSerializerInterface
-     */
-    private $mediaSerializer;
-
-    /**
-     * @var ContentResolverInterface
-     */
-    private $contentResolver;
-
     public static function getContentType(): string
     {
         return 'image_map';
     }
 
     public function __construct(
-        MediaManagerInterface $mediaManager,
-        MediaSerializerInterface $mediaSerializer,
-        ContentResolverInterface $contentResolver
+        private MediaManagerInterface $mediaManager,
+        private MediaSerializerInterface $mediaSerializer,
+        private ContentResolverInterface $contentResolver,
+        private MetadataProviderRegistry $metadataProviderRegistry,
     ) {
-        $this->mediaManager = $mediaManager;
-        $this->mediaSerializer = $mediaSerializer;
-        $this->contentResolver = $contentResolver;
     }
 
-    public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView
+    public function resolve(mixed $data, FieldMetadata $fieldMetadata, string $locale, array $attributes = []): ContentView
     {
+        if (!\is_array($data)) {
+            return new ContentView([], []);
+        }
+
         $imageId = $data['imageId'] ?? null;
         $hotspots = $data['hotspots'] ?? [];
 
         $content = [];
         $view = [];
+
         if ($imageId) {
             $media = $this->mediaManager->getById($imageId, $locale);
             $content['image'] = $this->mediaSerializer->serialize($media->getEntity(), $locale);
             $view['image'] = ['id' => $imageId];
         }
 
-        foreach ($hotspots as $i => $hotspot) {
+        $hotspotTypes = $fieldMetadata->getTypes();
+        $globalBlocksMetadata = $this->getGlobalBlocksMetadata($locale);
+
+        foreach ($hotspots as $hotspot) {
+            if (!\is_array($hotspot) || !isset($hotspot['type'])) {
+                continue;
+            }
+
+            $hotspotTypeName = $hotspot['type'];
+            $hotspotTypeMetadata = $hotspotTypes[$hotspotTypeName] ?? null;
+
+            if (!$hotspotTypeMetadata) {
+                $content['hotspots'][] = $hotspot;
+                $view['hotspots'][] = [];
+                continue;
+            }
+
+            $globalBlockType = $this->getGlobalBlockType($hotspotTypeMetadata);
+            if ($globalBlockType && isset($globalBlocksMetadata[$globalBlockType])) {
+                $hotspotTypeMetadata = $globalBlocksMetadata[$globalBlockType];
+            }
+
             $hotspotView = [];
+            $hotspotFieldMetadata = $hotspotTypeMetadata->getFlatFieldMetadata();
 
-            $propertyType = $property->initProperties($i, $hotspot['type']);
-            foreach ($propertyType->getChildProperties() as $childProperty) {
-                $key = $childProperty->getName();
-
-                $childProperty->setValue($hotspot[$key] ?? null);
-                $result = $this->contentResolver->resolve($childProperty->getValue(), $childProperty, $locale, $attributes);
-                $hotspot[$key] = $result->getContent();
-                $hotspotView[$key] = $result->getView();
+            foreach ($hotspotFieldMetadata as $fieldName => $childFieldMetadata) {
+                $fieldValue = $hotspot[$fieldName] ?? null;
+                $result = $this->contentResolver->resolve($fieldValue, $childFieldMetadata, $locale, $attributes);
+                $hotspot[$fieldName] = $result->getContent();
+                $hotspotView[$fieldName] = $result->getView();
             }
 
             $content['hotspots'][] = $hotspot;
@@ -82,5 +92,30 @@ class ImageMapResolver implements ContentTypeResolverInterface
         }
 
         return new ContentView($content, $view);
+    }
+
+    /**
+     * @return array<string, FormMetadata>
+     */
+    private function getGlobalBlocksMetadata(string $locale): array
+    {
+        $typedFormMetadata = $this->metadataProviderRegistry->getMetadataProvider('form')
+            ->getMetadata('block', $locale, []);
+
+        if (!$typedFormMetadata instanceof TypedFormMetadata) {
+            return [];
+        }
+
+        return $typedFormMetadata->getForms();
+    }
+
+    private function getGlobalBlockType(FormMetadata $formMetadata): ?string
+    {
+        $tag = $formMetadata->getTagsByName('sulu.global_block')[0] ?? null;
+
+        /** @var string|null $result */
+        $result = $tag?->getAttribute('global_block');
+
+        return $result;
     }
 }

@@ -28,10 +28,10 @@ use Sulu\Bundle\ContactBundle\Entity\PositionRepository;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\ContactSerializer;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\ContactSerializerInterface;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializerInterface;
+use Sulu\Bundle\HttpCacheBundle\ReferenceStore\ReferenceStoreInterface;
 use Sulu\Bundle\MediaBundle\Api\Media;
 use Sulu\Bundle\MediaBundle\Entity\MediaInterface;
 use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
-use Sulu\Bundle\WebsiteBundle\ReferenceStore\ReferenceStoreInterface;
 use Sulu\Component\Serializer\ArraySerializerInterface;
 
 class ContactSerializerTest extends TestCase
@@ -161,7 +161,7 @@ class ContactSerializerTest extends TestCase
             ->willReturn($contactPosition->reveal())
             ->shouldBeCalled();
 
-        $this->referenceStore->add(1)
+        $this->referenceStore->add('1', 'contact')
             ->shouldBeCalled();
 
         // call test function
@@ -233,7 +233,7 @@ class ContactSerializerTest extends TestCase
 
         $this->positionRepository->find(Argument::any())->wilLReturn($contactPosition->reveal());
 
-        $this->referenceStore->add(1)
+        $this->referenceStore->add('1', 'contact')
             ->shouldBeCalled();
 
         // call test function
@@ -278,7 +278,7 @@ class ContactSerializerTest extends TestCase
             'fullName' => 'John Doe',
         ]);
 
-        $this->referenceStore->add(1)
+        $this->referenceStore->add('1', 'contact')
             ->shouldBeCalled();
 
         // call test function

@@ -17,43 +17,44 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
-use Sulu\Bundle\ContactBundle\Api\Contact;
+use Sulu\Bundle\AdminBundle\SmartContent\Configuration\ProviderConfigurationInterface;
+use Sulu\Bundle\AdminBundle\SmartContent\SmartContentProviderInterface;
 use Sulu\Bundle\ContactBundle\Entity\ContactInterface;
+use Sulu\Bundle\ContactBundle\Entity\ContactRepositoryInterface;
 use Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver\ContactDataProviderResolver;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\ContactSerializerInterface;
-use Sulu\Component\Contact\SmartContent\ContactDataProvider;
-use Sulu\Component\Content\Compat\PropertyParameter;
-use Sulu\Component\SmartContent\Configuration\ProviderConfigurationInterface;
-use Sulu\Component\SmartContent\DataProviderResult;
-use Sulu\Component\SmartContent\ResourceItemInterface;
 
 class ContactDataProviderResolverTest extends TestCase
 {
     use ProphecyTrait;
 
     /**
-     * @var ContactDataProvider|ObjectProphecy
+     * @var ObjectProphecy<SmartContentProviderInterface>
      */
-    private $contactDataProvider;
+    private ObjectProphecy $contactSmartContentProvider;
 
     /**
-     * @var ContactSerializerInterface|ObjectProphecy
+     * @var ObjectProphecy<ContactSerializerInterface>
      */
-    private $contactSerializer;
+    private ObjectProphecy $contactSerializer;
 
     /**
-     * @var ContactDataProviderResolver
+     * @var ObjectProphecy<ContactRepositoryInterface>
      */
-    private $contactResolver;
+    private ObjectProphecy $contactRepository;
+
+    private ContactDataProviderResolver $contactResolver;
 
     protected function setUp(): void
     {
-        $this->contactDataProvider = $this->prophesize(ContactDataProvider::class);
+        $this->contactSmartContentProvider = $this->prophesize(SmartContentProviderInterface::class);
         $this->contactSerializer = $this->prophesize(ContactSerializerInterface::class);
+        $this->contactRepository = $this->prophesize(ContactRepositoryInterface::class);
 
         $this->contactResolver = new ContactDataProviderResolver(
-            $this->contactDataProvider->reveal(),
-            $this->contactSerializer->reveal()
+            $this->contactSmartContentProvider->reveal(),
+            $this->contactSerializer->reveal(),
+            $this->contactRepository->reveal(),
         );
     }
 
@@ -65,40 +66,34 @@ class ContactDataProviderResolverTest extends TestCase
     public function testGetProviderConfiguration(): void
     {
         $configuration = $this->prophesize(ProviderConfigurationInterface::class);
-        $this->contactDataProvider->getConfiguration()->willReturn($configuration->reveal());
+        $this->contactSmartContentProvider->getConfiguration()->willReturn($configuration->reveal());
 
         $this->assertSame($configuration->reveal(), $this->contactResolver->getProviderConfiguration());
     }
 
     public function testGetProviderDefaultParams(): void
     {
-        $propertyParameter = $this->prophesize(PropertyParameter::class);
-        $this->contactDataProvider->getDefaultPropertyParameter()->willReturn(['test' => $propertyParameter->reveal()]);
-
-        $this->assertSame(['test' => $propertyParameter->reveal()], $this->contactResolver->getProviderDefaultParams());
+        $this->assertSame([], $this->contactResolver->getProviderDefaultParams());
     }
 
     public function testResolve(): void
     {
         $contact1 = $this->prophesize(ContactInterface::class);
-        $apiContact1 = $this->prophesize(Contact::class);
-        $apiContact1->getEntity()->willReturn($contact1->reveal());
-
         $contact2 = $this->prophesize(ContactInterface::class);
-        $apiContact2 = $this->prophesize(Contact::class);
-        $apiContact2->getEntity()->willReturn($contact2->reveal());
 
-        $resourceItem1 = $this->prophesize(ResourceItemInterface::class);
-        $resourceItem1->getResource()->willReturn($apiContact1->reveal());
+        // SmartContentProvider returns flat results with id/title
+        $this->contactSmartContentProvider->findFlatBy(
+            Argument::type('array'),
+            Argument::type('array'),
+            ['locale' => 'en']
+        )->willReturn([
+            ['id' => '1', 'title' => 'Contact 1'],
+            ['id' => '2', 'title' => 'Contact 2'],
+        ]);
 
-        $resourceItem2 = $this->prophesize(ResourceItemInterface::class);
-        $resourceItem2->getResource()->willReturn($apiContact2->reveal());
-
-        $providerResult = $this->prophesize(DataProviderResult::class);
-        $providerResult->getHasNextPage()->willReturn(true);
-        $providerResult->getItems()->willReturn([$resourceItem1, $resourceItem2]);
-
-        $this->contactDataProvider->resolveResourceItems([], [], ['locale' => 'en'], 10, 1, 5)->willReturn($providerResult->reveal());
+        // Repository fetches actual entities
+        $this->contactRepository->find(1)->willReturn($contact1->reveal());
+        $this->contactRepository->find(2)->willReturn($contact2->reveal());
 
         $this->contactSerializer->serialize($contact1, 'en', Argument::cetera())->willReturn([
             'id' => 1,
@@ -112,7 +107,8 @@ class ContactDataProviderResolverTest extends TestCase
 
         $result = $this->contactResolver->resolve([], [], ['locale' => 'en'], 10, 1, 5);
 
-        $this->assertTrue($result->getHasNextPage());
+        // hasNextPage is true only when count >= pageSize
+        $this->assertFalse($result->getHasNextPage());
         $this->assertSame(
             [
                 [
@@ -126,5 +122,19 @@ class ContactDataProviderResolverTest extends TestCase
             ],
             $result->getItems()
         );
+    }
+
+    public function testResolveEmptyResult(): void
+    {
+        $this->contactSmartContentProvider->findFlatBy(
+            Argument::type('array'),
+            Argument::type('array'),
+            ['locale' => 'en']
+        )->willReturn([]);
+
+        $result = $this->contactResolver->resolve([], [], ['locale' => 'en'], 10, 1, 5);
+
+        $this->assertFalse($result->getHasNextPage());
+        $this->assertSame([], $result->getItems());
     }
 }

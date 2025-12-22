@@ -13,13 +13,14 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver;
 
+use Sulu\Bundle\AdminBundle\SmartContent\Configuration\ProviderConfigurationInterface;
+use Sulu\Bundle\AdminBundle\SmartContent\SmartContentProviderInterface;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
 use Sulu\Component\Content\Compat\PropertyParameter;
-use Sulu\Component\Content\Compat\StructureInterface;
-use Sulu\Component\Content\Mapper\ContentMapperInterface;
-use Sulu\Component\Content\Query\ContentQueryBuilderInterface;
-use Sulu\Component\Content\SmartContent\PageDataProvider;
-use Sulu\Component\SmartContent\Configuration\ProviderConfigurationInterface;
+use Sulu\Content\Application\ContentMerger\ContentMergerInterface;
+use Sulu\Content\Domain\Model\DimensionContentCollection;
+use Sulu\Page\Domain\Model\PageDimensionContent;
+use Sulu\Page\Domain\Repository\PageRepositoryInterface;
 
 class PageDataProviderResolver implements DataProviderResolverInterface
 {
@@ -28,48 +29,18 @@ class PageDataProviderResolver implements DataProviderResolverInterface
         return 'pages';
     }
 
-    /**
-     * @var PageDataProvider
-     */
-    private $pageDataProvider;
-
-    /**
-     * @var StructureResolverInterface
-     */
-    private $structureResolver;
-
-    /**
-     * @var ContentQueryBuilderInterface
-     */
-    private $contentQueryBuilder;
-
-    /**
-     * @var ContentMapperInterface
-     */
-    private $contentMapper;
-
-    /**
-     * @var bool
-     */
-    private $showDrafts;
-
     public function __construct(
-        PageDataProvider $pageDataProvider,
-        StructureResolverInterface $structureResolver,
-        ContentQueryBuilderInterface $contentQueryBuilder,
-        ContentMapperInterface $contentMapper,
-        bool $showDrafts
+        private SmartContentProviderInterface $pageSmartContentProvider,
+        private StructureResolverInterface $structureResolver,
+        private PageRepositoryInterface $pageRepository,
+        private ContentMergerInterface $contentMerger,
+        private bool $showDrafts,
     ) {
-        $this->pageDataProvider = $pageDataProvider;
-        $this->structureResolver = $structureResolver;
-        $this->contentQueryBuilder = $contentQueryBuilder;
-        $this->contentMapper = $contentMapper;
-        $this->showDrafts = $showDrafts;
     }
 
     public function getProviderConfiguration(): ProviderConfigurationInterface
     {
-        return $this->pageDataProvider->getConfiguration();
+        return $this->pageSmartContentProvider->getConfiguration();
     }
 
     /**
@@ -77,46 +48,45 @@ class PageDataProviderResolver implements DataProviderResolverInterface
      */
     public function getProviderDefaultParams(): array
     {
-        return $this->pageDataProvider->getDefaultPropertyParameter();
+        return [];
     }
 
-    /**
-     * @var PropertyParameter[]
-     */
     public function resolve(
         array $filters,
         array $propertyParameters,
         array $options = [],
         ?int $limit = null,
         int $page = 1,
-        ?int $pageSize = null
+        ?int $pageSize = null,
     ): DataProviderResult {
-        $providerResult = $this->pageDataProvider->resolveResourceItems(
-            $filters,
-            $propertyParameters,
-            $options,
-            $limit,
-            $page,
-            $pageSize
-        );
+        $locale = $options['locale'] ?? 'en';
+        $webspaceKey = $options['webspaceKey'] ?? null;
 
-        $pageIds = [];
-        foreach ($providerResult->getItems() as $resultItem) {
-            $pageIds[] = (string) $resultItem->getId();
+        $smartFilters = $this->convertFilters($filters, $limit, $page, $pageSize, $locale);
+        $sortBys = $this->extractSortBys($filters);
+
+        $flatResults = $this->pageSmartContentProvider->findFlatBy($smartFilters, $sortBys, $options);
+
+        $ids = \array_map(fn (array $item) => $item['id'], $flatResults);
+
+        if (empty($ids)) {
+            return new DataProviderResult([], false);
         }
+
+        $stage = $this->showDrafts ? 'draft' : 'live';
+
+        $pages = $this->pageRepository->findBy(
+            [
+                'uuids' => $ids,
+                'locale' => $locale,
+                'stage' => $stage,
+            ],
+            [],
+            [PageRepositoryInterface::GROUP_SELECT_PAGE_WEBSITE => true],
+        );
 
         /** @var PropertyParameter[] $propertiesParamValue */
         $propertiesParamValue = isset($propertyParameters['properties']) ? $propertyParameters['properties']->getValue() : [];
-
-        // the PageDataProvider resolves the data defined in the $propertiesParamValue using the default content types
-        // for example, this means that the result contains an array of media api entities instead of a raw array of ids
-        // to resolve the data with the resolvers of this bundle, we need to load the structures with the ContentMapper
-        $pageStructures = $this->loadPageStructures(
-            $pageIds,
-            $propertiesParamValue,
-            $options['webspaceKey'],
-            $options['locale']
-        );
 
         $propertyMap = [
             'title' => 'title',
@@ -129,38 +99,67 @@ class PageDataProviderResolver implements DataProviderResolverInterface
             $propertyMap[$paramName] = \is_string($paramValue) ? $paramValue : $paramName;
         }
 
-        $resolvedPages = \array_fill_keys($pageIds, null);
+        $resolvedPages = \array_fill_keys($ids, null);
 
-        foreach ($pageStructures as $pageStructure) {
-            $resolvedPages[$pageStructure->getUuid()] = $this->structureResolver->resolveProperties($pageStructure, $propertyMap, $options['locale']);
+        foreach ($pages as $pageEntity) {
+            $dimensionContentCollection = new DimensionContentCollection(
+                $pageEntity->getDimensionContents(),
+                ['locale' => $locale, 'stage' => $stage],
+                PageDimensionContent::class,
+            );
+
+            $dimensionContent = $this->contentMerger->merge($dimensionContentCollection);
+            $resolvedPages[$pageEntity->getUuid()] = $this->structureResolver->resolveProperties(
+                $dimensionContent,
+                $propertyMap,
+                $locale,
+            );
         }
 
-        return new DataProviderResult(\array_values(\array_filter($resolvedPages)), $providerResult->getHasNextPage());
+        $hasNextPage = null !== $pageSize && \count($flatResults) >= $pageSize;
+
+        return new DataProviderResult(\array_values(\array_filter($resolvedPages)), $hasNextPage);
     }
 
     /**
-     * @param string[] $pageIds
-     * @param PropertyParameter[] $propertiesParamValue
-     *
-     * @return StructureInterface[]
+     * @return array<string, mixed>
      */
-    private function loadPageStructures(array $pageIds, array $propertiesParamValue, string $webspaceKey, string $locale): array
+    private function convertFilters(array $filters, ?int $limit, int $page, ?int $pageSize, string $locale): array
     {
-        if (0 === \count($pageIds)) {
+        $offset = 0;
+        if (null !== $pageSize && $page > 1) {
+            $offset = ($page - 1) * $pageSize;
+        }
+
+        return [
+            'categories' => $filters['categories'] ?? [],
+            'categoryOperator' => $filters['categoryOperator'] ?? 'OR',
+            'websiteCategories' => $filters['websiteCategories'] ?? [],
+            'websiteCategoryOperator' => $filters['websiteCategoriesOperator'] ?? 'OR',
+            'tags' => $filters['tags'] ?? [],
+            'tagOperator' => $filters['tagOperator'] ?? 'OR',
+            'websiteTags' => $filters['websiteTags'] ?? [],
+            'websiteTagOperator' => $filters['websiteTagsOperator'] ?? 'OR',
+            'types' => $filters['types'] ?? [],
+            'typesOperator' => 'OR',
+            'locale' => $locale,
+            'dataSource' => $filters['dataSource'] ?? null,
+            'limit' => $pageSize ?? $limit,
+            'offset' => $offset,
+            'includeSubFolders' => $filters['includeSubFolders'] ?? true,
+            'excludeDuplicates' => $filters['exclude_duplicates'] ?? false,
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function extractSortBys(array $filters): array
+    {
+        if (!isset($filters['sortBy']) || empty($filters['sortBy'])) {
             return [];
         }
 
-        $this->contentQueryBuilder->init([
-            'ids' => $pageIds,
-            'properties' => $propertiesParamValue,
-            'published' => !$this->showDrafts,
-        ]);
-        list($pagesQuery) = $this->contentQueryBuilder->build($webspaceKey, [$locale]);
-
-        return $this->contentMapper->loadBySql2(
-            $pagesQuery,
-            $locale,
-            $webspaceKey
-        );
+        return [$filters['sortBy'] => $filters['sortMethod'] ?? 'asc'];
     }
 }

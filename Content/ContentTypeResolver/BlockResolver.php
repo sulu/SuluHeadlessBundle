@@ -13,11 +13,13 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver;
 
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FormMetadata;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\TypedFormMetadata;
+use Sulu\Bundle\AdminBundle\Metadata\MetadataProviderRegistry;
 use Sulu\Bundle\HeadlessBundle\Content\ContentResolverInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
-use Sulu\Component\Content\Compat\Block\BlockPropertyInterface;
-use Sulu\Component\Content\Compat\PropertyInterface;
-use Sulu\Component\Content\Types\Block\BlockVisitorInterface;
+use Sulu\Content\Application\PropertyResolver\BlockVisitor\BlockVisitorInterface;
 
 class BlockResolver implements ContentTypeResolverInterface
 {
@@ -27,60 +29,96 @@ class BlockResolver implements ContentTypeResolverInterface
     }
 
     /**
-     * @var ContentResolverInterface
+     * @param iterable<BlockVisitorInterface> $blockVisitors
      */
-    private $contentResolver;
-
-    /**
-     * @var \Traversable<BlockVisitorInterface>
-     */
-    private $blockVisitors;
-
-    /**
-     * @param \Traversable<BlockVisitorInterface> $blockVisitors
-     */
-    public function __construct(ContentResolverInterface $contentResolver, \Traversable $blockVisitors)
-    {
-        $this->contentResolver = $contentResolver;
-        $this->blockVisitors = $blockVisitors;
+    public function __construct(
+        private ContentResolverInterface $contentResolver,
+        private MetadataProviderRegistry $metadataProviderRegistry,
+        private iterable $blockVisitors = [],
+    ) {
     }
 
-    /**
-     * @param BlockPropertyInterface $property
-     */
-    public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView
+    public function resolve(mixed $data, FieldMetadata $fieldMetadata, string $locale, array $attributes = []): ContentView
     {
-        $blockPropertyTypes = [];
-        for ($i = 0; $i < $property->getLength(); ++$i) {
-            $blockPropertyType = $property->getProperties($i);
-
-            foreach ($this->blockVisitors as $blockVisitor) {
-                $blockPropertyType = $blockVisitor->visit($blockPropertyType);
-
-                if (!$blockPropertyType) {
-                    break;
-                }
-            }
-
-            if ($blockPropertyType) {
-                $blockPropertyTypes[] = $blockPropertyType;
-            }
+        if (!\is_array($data)) {
+            return new ContentView([], []);
         }
+
+        $blockTypes = $fieldMetadata->getTypes();
+
+        // Load global blocks metadata
+        $globalBlocksMetadata = $this->getGlobalBlocksMetadata($locale);
 
         $content = [];
         $view = [];
-        foreach ($blockPropertyTypes as $i => $blockPropertyType) {
-            $content[$i] = ['type' => $blockPropertyType->getName(), 'settings' => $blockPropertyType->getSettings()];
+
+        foreach ($data as $i => $blockItem) {
+            if (!\is_array($blockItem) || !isset($blockItem['type'])) {
+                continue;
+            }
+
+            foreach ($this->blockVisitors as $blockVisitor) {
+                $blockItem = $blockVisitor->visit($blockItem);
+                if (null === $blockItem) {
+                    continue 2; // Skip this block if visitor returns null
+                }
+            }
+
+            $blockTypeName = $blockItem['type'];
+            $blockTypeMetadata = $blockTypes[$blockTypeName] ?? null;
+
+            if (!$blockTypeMetadata) {
+                continue;
+            }
+
+            // Check if this block type references a global block
+            $globalBlockType = $this->getGlobalBlockType($blockTypeMetadata);
+            if ($globalBlockType && isset($globalBlocksMetadata[$globalBlockType])) {
+                $blockTypeMetadata = $globalBlocksMetadata[$globalBlockType];
+            }
+
+            $content[$i] = [
+                'type' => $blockTypeName,
+                'settings' => $blockItem['settings'] ?? [],
+            ];
             $view[$i] = [];
 
-            foreach ($blockPropertyType->getChildProperties() as $childProperty) {
-                $contentView = $this->contentResolver->resolve($childProperty->getValue(), $childProperty, $locale, $attributes);
+            $blockFieldMetadata = $blockTypeMetadata->getFlatFieldMetadata();
 
-                $content[$i][$childProperty->getName()] = $contentView->getContent();
-                $view[$i][$childProperty->getName()] = $contentView->getView();
+            foreach ($blockFieldMetadata as $fieldName => $childFieldMetadata) {
+                $fieldValue = $blockItem[$fieldName] ?? null;
+                $contentView = $this->contentResolver->resolve($fieldValue, $childFieldMetadata, $locale, $attributes);
+
+                $content[$i][$fieldName] = $contentView->getContent();
+                $view[$i][$fieldName] = $contentView->getView();
             }
         }
 
-        return new ContentView($content, $view);
+        return new ContentView(\array_values($content), \array_values($view));
+    }
+
+    /**
+     * @return array<string, FormMetadata>
+     */
+    private function getGlobalBlocksMetadata(string $locale): array
+    {
+        $typedFormMetadata = $this->metadataProviderRegistry->getMetadataProvider('form')
+            ->getMetadata('block', $locale, []);
+
+        if (!$typedFormMetadata instanceof TypedFormMetadata) {
+            return [];
+        }
+
+        return $typedFormMetadata->getForms();
+    }
+
+    private function getGlobalBlockType(FormMetadata $formMetadata): ?string
+    {
+        $tag = $formMetadata->getTagsByName('sulu.global_block')[0] ?? null;
+
+        /** @var string|null $result */
+        $result = $tag?->getAttribute('global_block');
+
+        return $result;
     }
 }

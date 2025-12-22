@@ -16,10 +16,10 @@ namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\TextEditorResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\MarkupBundle\Markup\MarkupParserInterface;
-use Sulu\Component\Content\Compat\PropertyInterface;
 
 class TextEditorResolverTest extends TestCase
 {
@@ -35,8 +35,11 @@ class TextEditorResolverTest extends TestCase
      */
     private $textEditorResolver;
 
+    private FieldMetadata $fieldMetadata;
+
     protected function setUp(): void
     {
+        $this->fieldMetadata = new FieldMetadata('text_editor');
         $this->markupParser = $this->prophesize(MarkupParserInterface::class);
 
         $this->textEditorResolver = new TextEditorResolver(
@@ -52,12 +55,11 @@ class TextEditorResolverTest extends TestCase
     public function testResolve(): void
     {
         $data = '<p>Text with a <sulu-link href="bdb4fa4a-b780-4c61-9591-8e6e029b20c8" target="_self" provider="page">link</sulu-link>.</p>';
-        $property = $this->prophesize(PropertyInterface::class);
 
         $this->markupParser->parse($data, 'en')
             ->willReturn('<p>Text with a <a href="http://headless.localhost:8004/other-page" target="_self" title="Other Page">link</a>.</p>');
 
-        $result = $this->textEditorResolver->resolve($data, $property->reveal(), 'en');
+        $result = $this->textEditorResolver->resolve($data, $this->fieldMetadata, 'en');
 
         $this->assertInstanceOf(ContentView::class, $result);
 
@@ -74,9 +76,7 @@ class TextEditorResolverTest extends TestCase
 
     public function testResolveDataIsNull(): void
     {
-        $property = $this->prophesize(PropertyInterface::class);
-
-        $result = $this->textEditorResolver->resolve(null, $property->reveal(), 'en');
+        $result = $this->textEditorResolver->resolve(null, $this->fieldMetadata, 'en');
 
         $this->assertNull($result->getContent());
 
@@ -85,11 +85,9 @@ class TextEditorResolverTest extends TestCase
 
     public function testResolveDataIsEmptyString(): void
     {
-        $property = $this->prophesize(PropertyInterface::class);
-
         $this->markupParser->parse('', 'en')->willReturn('');
 
-        $result = $this->textEditorResolver->resolve('', $property->reveal(), 'en');
+        $result = $this->textEditorResolver->resolve('', $this->fieldMetadata, 'en');
 
         $this->assertSame('', $result->getContent());
 

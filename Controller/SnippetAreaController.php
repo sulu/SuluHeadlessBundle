@@ -13,18 +13,20 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Controller;
 
-use JMS\Serializer\SerializationContext;
-use JMS\Serializer\SerializerInterface;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
 use Sulu\Bundle\HttpCacheBundle\Cache\SuluHttpCache;
 use Sulu\Bundle\HttpCacheBundle\CacheLifetime\CacheLifetimeRequestStore;
-use Sulu\Bundle\SnippetBundle\Snippet\DefaultSnippetManagerInterface;
-use Sulu\Bundle\WebsiteBundle\ReferenceStore\ReferenceStoreInterface;
-use Sulu\Component\Content\Mapper\ContentMapperInterface;
+use Sulu\Bundle\HttpCacheBundle\ReferenceStore\ReferenceStoreInterface;
 use Sulu\Component\Rest\RequestParametersTrait;
 use Sulu\Component\Webspace\Analyzer\Attributes\RequestAttributes;
 use Sulu\Component\Webspace\Webspace;
-use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException;
+use Sulu\Content\Application\ContentAggregator\ContentAggregatorInterface;
+use Sulu\Content\Domain\Model\DimensionContentInterface;
+use Sulu\Content\Infrastructure\Doctrine\DimensionContentQueryEnhancer;
+use Sulu\Snippet\Domain\Model\SnippetDimensionContentInterface;
+use Sulu\Snippet\Domain\Repository\SnippetAreaRepositoryInterface;
+use Sulu\Snippet\Domain\Repository\SnippetRepositoryInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -33,78 +35,17 @@ class SnippetAreaController
 {
     use RequestParametersTrait;
 
-    /**
-     * @var DefaultSnippetManagerInterface
-     */
-    private $defaultSnippetManager;
-
-    /**
-     * @var ContentMapperInterface
-     */
-    private $contentMapper;
-
-    /**
-     * @var StructureResolverInterface
-     */
-    private $structureResolver;
-
-    /**
-     * @var SerializerInterface
-     */
-    private $serializer;
-
-    /**
-     * @var ReferenceStoreInterface|null
-     */
-    private $snippetAreaReferenceStore;
-
-    /**
-     * @var int
-     */
-    private $maxAge;
-
-    /**
-     * @var int
-     */
-    private $sharedMaxAge;
-
-    /**
-     * @var int
-     */
-    private $cacheLifetime;
-
-    /**
-     * @var CacheLifetimeRequestStore|null
-     */
-    private $cacheLifetimeRequestStore;
-
     public function __construct(
-        DefaultSnippetManagerInterface $defaultSnippetManager,
-        ContentMapperInterface $contentMapper,
-        StructureResolverInterface $structureResolver,
-        SerializerInterface $serializer,
-        ?ReferenceStoreInterface $snippetReferenceStore,
-        int $maxAge,
-        int $sharedMaxAge,
-        int $cacheLifetime,
-        ?CacheLifetimeRequestStore $cacheLifetimeRequestStore = null
+        private SnippetAreaRepositoryInterface $snippetAreaRepository,
+        private SnippetRepositoryInterface $snippetRepository,
+        private ContentAggregatorInterface $contentAggregator,
+        private StructureResolverInterface $structureResolver,
+        private ?ReferenceStoreInterface $snippetAreaReferenceStore,
+        private int $maxAge,
+        private int $sharedMaxAge,
+        private int $cacheLifetime,
+        private ?CacheLifetimeRequestStore $cacheLifetimeRequestStore = null,
     ) {
-        $this->defaultSnippetManager = $defaultSnippetManager;
-        $this->contentMapper = $contentMapper;
-        $this->structureResolver = $structureResolver;
-        $this->serializer = $serializer;
-        $this->snippetAreaReferenceStore = $snippetReferenceStore;
-        $this->maxAge = $maxAge;
-        $this->sharedMaxAge = $sharedMaxAge;
-        $this->cacheLifetime = $cacheLifetime;
-        $this->cacheLifetimeRequestStore = $cacheLifetimeRequestStore;
-
-        if (null === $cacheLifetimeRequestStore) {
-            @\trigger_error(
-                'Instantiating the SnippetAreaController without the $cacheLifetimeRequestStore argument is deprecated!',
-                \E_USER_DEPRECATED
-            );
-        }
     }
 
     public function getAction(Request $request, string $area): Response
@@ -119,49 +60,59 @@ class SnippetAreaController
 
         $includeExtension = $this->getBooleanRequestParameter($request, 'includeExtension', false, false);
 
-        try {
-            $snippetId = $this->defaultSnippetManager->loadIdentifier($webspaceKey, $area);
-        } catch (ParameterNotFoundException $e) {
-            if ($e->getMessage() !== \sprintf('You have requested a non-existent parameter "%s".', $area)) {
-                throw $e;
-            }
+        // Find snippet area configuration
+        $snippetArea = $this->snippetAreaRepository->findOneBy([
+            'webspaceKey' => $webspaceKey,
+            'areaKey' => $area,
+        ]);
 
-            throw new NotFoundHttpException(\sprintf('Snippet area "%s" does not exist', $area));
-        }
-
-        if (!$snippetId) {
+        if (null === $snippetArea || null === $snippetArea->getSnippet()) {
             throw new NotFoundHttpException(\sprintf('No snippet found for snippet area "%s"', $area));
         }
 
-        /** @var string $webspaceKey */
-        $webspaceKey = null;
-        $snippet = $this->contentMapper->load($snippetId, $webspaceKey, $locale);
+        // Load the snippet
+        $snippet = $this->snippetRepository->findOneBy(
+            [
+                'uuid' => $snippetArea->getSnippet()->getUuid(),
+                'locale' => $locale,
+                'stage' => DimensionContentInterface::STAGE_LIVE,
+                'version' => DimensionContentInterface::CURRENT_VERSION,
+            ],
+            [
+                SnippetRepositoryInterface::SELECT_SNIPPET_CONTENT => [
+                    DimensionContentQueryEnhancer::GROUP_SELECT_CONTENT_WEBSITE => true,
+                ],
+            ]
+        );
 
-        if (!$snippet->getHasTranslation()) {
+        if (null === $snippet) {
             throw new NotFoundHttpException(\sprintf('Snippet for snippet area "%s" does not exist in locale "%s"', $area, $locale));
         }
 
+        // Aggregate dimension content
+        /** @var SnippetDimensionContentInterface $dimensionContent */
+        $dimensionContent = $this->contentAggregator->aggregate(
+            $snippet,
+            [
+                'locale' => $locale,
+                'stage' => DimensionContentInterface::STAGE_LIVE,
+                'version' => DimensionContentInterface::CURRENT_VERSION,
+            ]
+        );
+
+        // Add to reference store for cache invalidation
         if ($this->snippetAreaReferenceStore) {
-            $this->snippetAreaReferenceStore->add($area);
+            $this->snippetAreaReferenceStore->add($area, 'snippet_area');
         }
 
+        // Resolve to headless format
         $resolvedSnippet = $this->structureResolver->resolve(
-            $snippet,
+            $dimensionContent,
             $locale,
             $includeExtension
         );
 
-        $response = new Response(
-            $this->serializer->serialize(
-                $resolvedSnippet,
-                'json',
-                (new SerializationContext())->setSerializeNull(true)
-            ),
-            200,
-            [
-                'Content-Type' => 'application/json',
-            ]
-        );
+        $response = new JsonResponse($resolvedSnippet);
 
         $response->setPublic();
         $response->setMaxAge($this->maxAge);

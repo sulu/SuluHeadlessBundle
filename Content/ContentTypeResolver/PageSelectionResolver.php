@@ -13,12 +13,12 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver;
 
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
-use Sulu\Component\Content\Compat\PropertyInterface;
-use Sulu\Component\Content\Compat\PropertyParameter;
-use Sulu\Component\Content\Mapper\ContentMapperInterface;
-use Sulu\Component\Content\Query\ContentQueryBuilderInterface;
+use Sulu\Content\Application\ContentAggregator\ContentAggregatorInterface;
+use Sulu\Content\Domain\Model\DimensionContentInterface;
+use Sulu\Page\Domain\Repository\PageRepositoryInterface;
 
 class PageSelectionResolver implements ContentTypeResolverInterface
 {
@@ -27,80 +27,78 @@ class PageSelectionResolver implements ContentTypeResolverInterface
         return 'page_selection';
     }
 
-    /**
-     * @var StructureResolverInterface
-     */
-    private $structureResolver;
-
-    /**
-     * @var ContentQueryBuilderInterface
-     */
-    private $contentQueryBuilder;
-
-    /**
-     * @var ContentMapperInterface
-     */
-    private $contentMapper;
-
-    /**
-     * @var bool
-     */
-    private $showDrafts;
-
     public function __construct(
-        StructureResolverInterface $structureResolver,
-        ContentQueryBuilderInterface $contentQueryBuilder,
-        ContentMapperInterface $contentMapper,
-        bool $showDrafts
+        private StructureResolverInterface $structureResolver,
+        private PageRepositoryInterface $pageRepository,
+        private ContentAggregatorInterface $contentAggregator,
+        private bool $showDrafts,
     ) {
-        $this->structureResolver = $structureResolver;
-        $this->contentQueryBuilder = $contentQueryBuilder;
-        $this->contentMapper = $contentMapper;
-        $this->showDrafts = $showDrafts;
     }
 
-    public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView
+    public function resolve(mixed $data, FieldMetadata $fieldMetadata, string $locale, array $attributes = []): ContentView
     {
         if (empty($data) || !\is_array($data)) {
             return new ContentView([], ['ids' => []]);
         }
 
-        /** @var PropertyParameter[] $params */
-        $params = $property->getParams();
-        /** @var PropertyParameter[] $propertiesParamValue */
-        $propertiesParamValue = isset($params['properties']) ? $params['properties']->getValue() : [];
+        $propertyMap = $this->getPropertyMap($fieldMetadata);
 
-        $this->contentQueryBuilder->init([
-            'ids' => $data,
-            'properties' => $propertiesParamValue,
-            'published' => !$this->showDrafts,
-        ]);
-
-        list($pagesQuery) = $this->contentQueryBuilder->build($property->getStructure()->getWebspaceKey(), [$locale]);
-
-        $pageStructures = $this->contentMapper->loadBySql2(
-            $pagesQuery,
-            $locale,
-            $property->getStructure()->getWebspaceKey()
+        $stage = $this->showDrafts ? DimensionContentInterface::STAGE_DRAFT : DimensionContentInterface::STAGE_LIVE;
+        $pages = $this->pageRepository->findBy(
+            [
+                'uuids' => $data,
+                'locale' => $locale,
+                'stage' => $stage,
+            ],
+            [],
+            [PageRepositoryInterface::GROUP_SELECT_PAGE_WEBSITE => true],
         );
 
+        $resolvedPages = \array_fill_keys($data, null);
+        foreach ($pages as $page) {
+            $dimensionContent = $this->contentAggregator->aggregate(
+                $page,
+                ['locale' => $locale, 'stage' => $stage],
+            );
+
+            $resolvedPages[$page->getUuid()] = $this->structureResolver->resolveProperties(
+                $dimensionContent,
+                $propertyMap,
+                $locale,
+            );
+        }
+
+        return new ContentView(\array_values(\array_filter($resolvedPages)), ['ids' => $data]);
+    }
+
+    /**
+     * Get property map from field metadata options.
+     *
+     * @return array<string, string>
+     */
+    private function getPropertyMap(FieldMetadata $fieldMetadata): array
+    {
         $propertyMap = [
             'title' => 'title',
             'url' => 'url',
         ];
 
-        foreach ($propertiesParamValue as $propertiesParamEntry) {
-            $paramName = $propertiesParamEntry->getName();
-            $paramValue = $propertiesParamEntry->getValue();
-            $propertyMap[$paramName] = \is_string($paramValue) ? $paramValue : $paramName;
+        foreach ($fieldMetadata->getOptions() as $option) {
+            if ('properties' === $option->getName()) {
+                $propertiesValue = $option->getValue();
+                if (\is_array($propertiesValue)) {
+                    foreach ($propertiesValue as $entry) {
+                        if (\is_array($entry) && isset($entry['name'])) {
+                            $paramName = $entry['name'];
+                            $paramValue = $entry['value'] ?? $paramName;
+                            $propertyMap[$paramName] = \is_string($paramValue) ? $paramValue : $paramName;
+                        }
+                    }
+                }
+                break;
+            }
         }
 
-        $pages = \array_fill_keys($data, null);
-
-        foreach ($pageStructures as $pageStructure) {
-            $pages[$pageStructure->getUuid()] = $this->structureResolver->resolveProperties($pageStructure, $propertyMap, $locale);
-        }
-
-        return new ContentView(\array_values(\array_filter($pages)), ['ids' => $data]);
+        return $propertyMap;
     }
 }

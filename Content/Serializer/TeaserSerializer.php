@@ -14,44 +14,19 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Content\Serializer;
 
 use JMS\Serializer\SerializationContext;
+use Sulu\Bundle\AdminBundle\Teaser\Teaser;
+use Sulu\Bundle\HttpCacheBundle\ReferenceStore\ReferenceStoreInterface;
 use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
-use Sulu\Bundle\PageBundle\Teaser\Teaser;
-use Sulu\Bundle\WebsiteBundle\ReferenceStore\ReferenceStoreNotExistsException;
-use Sulu\Bundle\WebsiteBundle\ReferenceStore\ReferenceStorePoolInterface;
 use Sulu\Component\Serializer\ArraySerializerInterface;
 
 class TeaserSerializer implements TeaserSerializerInterface
 {
-    /**
-     * @var ArraySerializerInterface
-     */
-    private $arraySerializer;
-
-    /**
-     * @var MediaSerializerInterface
-     */
-    private $mediaSerializer;
-
-    /**
-     * @var MediaManagerInterface
-     */
-    private $mediaManager;
-
-    /**
-     * @var ReferenceStorePoolInterface
-     */
-    private $referenceStorePool;
-
     public function __construct(
-        ArraySerializerInterface $arraySerializer,
-        MediaSerializerInterface $mediaSerializer,
-        MediaManagerInterface $mediaManager,
-        ReferenceStorePoolInterface $referenceStorePool
+        private ArraySerializerInterface $arraySerializer,
+        private MediaSerializerInterface $mediaSerializer,
+        private MediaManagerInterface $mediaManager,
+        private ReferenceStoreInterface $referenceStore,
     ) {
-        $this->arraySerializer = $arraySerializer;
-        $this->mediaSerializer = $mediaSerializer;
-        $this->mediaManager = $mediaManager;
-        $this->referenceStorePool = $referenceStorePool;
     }
 
     /**
@@ -90,14 +65,6 @@ class TeaserSerializer implements TeaserSerializerInterface
             $alias = 'article';
         }
 
-        try {
-            $referenceStore = $this->referenceStorePool->getStore($alias);
-        } catch (ReferenceStoreNotExistsException $e) {
-            // @ignoreException do nothing when reference store was not found
-
-            return;
-        }
-
-        $referenceStore->add($id);
+        $this->referenceStore->add((string) $id, $alias);
     }
 }

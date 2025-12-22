@@ -14,53 +14,53 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
 
 use PHPUnit\Framework\TestCase;
-use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\PageSelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
-use Sulu\Component\Content\Compat\PropertyInterface;
-use Sulu\Component\Content\Compat\PropertyParameter;
-use Sulu\Component\Content\Compat\StructureInterface;
-use Sulu\Component\Content\Mapper\ContentMapperInterface;
-use Sulu\Component\Content\Query\ContentQueryBuilderInterface;
+use Sulu\Content\Application\ContentAggregator\ContentAggregatorInterface;
+use Sulu\Content\Domain\Model\DimensionContentInterface;
+use Sulu\Page\Domain\Model\PageDimensionContentInterface;
+use Sulu\Page\Domain\Model\PageInterface;
+use Sulu\Page\Domain\Repository\PageRepositoryInterface;
 
 class PageSelectionResolverTest extends TestCase
 {
     use ProphecyTrait;
 
     /**
-     * @var StructureResolverInterface|ObjectProphecy
+     * @var ObjectProphecy<StructureResolverInterface>
      */
-    private $structureResolver;
+    private ObjectProphecy $structureResolver;
 
     /**
-     * @var ContentQueryBuilderInterface|ObjectProphecy
+     * @var ObjectProphecy<PageRepositoryInterface>
      */
-    private $contentQueryBuilder;
+    private ObjectProphecy $pageRepository;
 
     /**
-     * @var ContentMapperInterface|ObjectProphecy
+     * @var ObjectProphecy<ContentAggregatorInterface>
      */
-    private $contentMapper;
+    private ObjectProphecy $contentAggregator;
 
-    /**
-     * @var PageSelectionResolver
-     */
-    private $pageSelectionResolver;
+    private PageSelectionResolver $pageSelectionResolver;
+
+    private FieldMetadata $fieldMetadata;
 
     protected function setUp(): void
     {
         $this->structureResolver = $this->prophesize(StructureResolverInterface::class);
-        $this->contentQueryBuilder = $this->prophesize(ContentQueryBuilderInterface::class);
-        $this->contentMapper = $this->prophesize(ContentMapperInterface::class);
+        $this->pageRepository = $this->prophesize(PageRepositoryInterface::class);
+        $this->contentAggregator = $this->prophesize(ContentAggregatorInterface::class);
+        $this->fieldMetadata = new FieldMetadata('pages');
 
         $this->pageSelectionResolver = new PageSelectionResolver(
             $this->structureResolver->reveal(),
-            $this->contentQueryBuilder->reveal(),
-            $this->contentMapper->reveal(),
-            true
+            $this->pageRepository->reveal(),
+            $this->contentAggregator->reveal(),
+            false, // showDrafts
         );
     }
 
@@ -71,107 +71,71 @@ class PageSelectionResolverTest extends TestCase
 
     public function testResolve(): void
     {
-        $structure = $this->prophesize(StructureInterface::class);
-        $structure->getWebspaceKey()->willReturn('webspace-key');
+        $locale = 'en';
 
-        /** @var PropertyInterface|ObjectProphecy $property */
-        $property = $this->prophesize(PropertyInterface::class);
-        $params = [
-            'properties' => new PropertyParameter('properties', [
-                new PropertyParameter('contentDescription', 'description'),
-                new PropertyParameter('excerptTitle', 'excerpt.title'),
-                new PropertyParameter('categories', 'excerpt.categories'),
-            ]),
-        ];
+        $page1 = $this->prophesize(PageInterface::class);
+        $page1->getUuid()->willReturn('page-id-1');
+        $page2 = $this->prophesize(PageInterface::class);
+        $page2->getUuid()->willReturn('page-id-2');
 
-        $property->getParams()->willReturn($params);
-        $property->getStructure()->willReturn($structure->reveal());
+        $dimensionContent1 = $this->prophesize(PageDimensionContentInterface::class);
+        $dimensionContent2 = $this->prophesize(PageDimensionContentInterface::class);
 
-        // expected and unexpected service calls
-        $this->contentQueryBuilder->init([
-            'ids' => ['page-id-1', 'page-id-2'],
-            'properties' => $params['properties']->getValue(),
-            'published' => false,
-        ])->shouldBeCalled();
-        $this->contentQueryBuilder->build('webspace-key', ['en'])->willReturn(['page-query-string']);
-
-        $pageStructure1 = $this->prophesize(StructureInterface::class);
-        $pageStructure1->getUuid()->willReturn('page-id-1');
-        $pageStructure2 = $this->prophesize(StructureInterface::class);
-        $pageStructure2->getUuid()->willReturn('page-id-2');
-
-        $this->contentMapper->loadBySql2(
-            'page-query-string',
-            'en',
-            'webspace-key'
-        )->willReturn([
-            $pageStructure2->reveal(),
-            $pageStructure1->reveal(),
-        ])->shouldBeCalledOnce();
-        $this->structureResolver->resolveProperties(
-            $pageStructure1->reveal(),
+        $this->pageRepository->findBy(
             [
-                'title' => 'title',
-                'url' => 'url',
-                'contentDescription' => 'description',
-                'excerptTitle' => 'excerpt.title',
-                'categories' => 'excerpt.categories',
+                'uuids' => ['page-id-1', 'page-id-2'],
+                'locale' => $locale,
+                'stage' => DimensionContentInterface::STAGE_LIVE,
             ],
-            'en'
+            [],
+            [PageRepositoryInterface::GROUP_SELECT_PAGE_WEBSITE => true],
+        )->willReturn([$page1->reveal(), $page2->reveal()]);
+
+        $this->contentAggregator->aggregate(
+            $page1->reveal(),
+            ['locale' => $locale, 'stage' => DimensionContentInterface::STAGE_LIVE],
+        )->willReturn($dimensionContent1->reveal());
+
+        $this->contentAggregator->aggregate(
+            $page2->reveal(),
+            ['locale' => $locale, 'stage' => DimensionContentInterface::STAGE_LIVE],
+        )->willReturn($dimensionContent2->reveal());
+
+        $this->structureResolver->resolveProperties(
+            $dimensionContent1->reveal(),
+            ['title' => 'title', 'url' => 'url'],
+            $locale,
         )->willReturn([
             'id' => 'page-id-1',
             'template' => 'default',
             'content' => [
                 'title' => 'Page Title 1',
                 'url' => '/page-url-1',
-                'contentDescription' => 'Page Content Description',
-                'excerptTitle' => 'Page Excerpt Title 1',
-                'categories' => [],
             ],
             'view' => [
                 'title' => [],
                 'url' => [],
-                'contentDescription' => [],
-                'excerptTitle' => [],
-                'categories' => [],
             ],
-        ])->shouldBeCalledOnce();
+        ]);
 
         $this->structureResolver->resolveProperties(
-            $pageStructure2->reveal(),
-            [
-                'title' => 'title',
-                'url' => 'url',
-                'contentDescription' => 'description',
-                'excerptTitle' => 'excerpt.title',
-                'categories' => 'excerpt.categories',
-            ],
-            'en'
+            $dimensionContent2->reveal(),
+            ['title' => 'title', 'url' => 'url'],
+            $locale,
         )->willReturn([
             'id' => 'page-id-2',
             'template' => 'default',
             'content' => [
                 'title' => 'Page Title 2',
                 'url' => '/page-url-2',
-                'contentDescription' => 'Page Content Description',
-                'excerptTitle' => 'Page Excerpt Title 2',
-                'categories' => [],
             ],
             'view' => [
                 'title' => [],
                 'url' => [],
-                'contentDescription' => [],
-                'excerptTitle' => [],
-                'categories' => [],
             ],
-        ])->shouldBeCalledOnce();
+        ]);
 
-        // call test function
-        $result = $this->pageSelectionResolver->resolve(
-            ['page-id-1', 'page-id-2'],
-            $property->reveal(),
-            'en'
-        );
+        $result = $this->pageSelectionResolver->resolve(['page-id-1', 'page-id-2'], $this->fieldMetadata, $locale, []);
 
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame(
@@ -182,16 +146,10 @@ class PageSelectionResolverTest extends TestCase
                     'content' => [
                         'title' => 'Page Title 1',
                         'url' => '/page-url-1',
-                        'contentDescription' => 'Page Content Description',
-                        'excerptTitle' => 'Page Excerpt Title 1',
-                        'categories' => [],
                     ],
                     'view' => [
                         'title' => [],
                         'url' => [],
-                        'contentDescription' => [],
-                        'excerptTitle' => [],
-                        'categories' => [],
                     ],
                 ],
                 [
@@ -200,16 +158,10 @@ class PageSelectionResolverTest extends TestCase
                     'content' => [
                         'title' => 'Page Title 2',
                         'url' => '/page-url-2',
-                        'contentDescription' => 'Page Content Description',
-                        'excerptTitle' => 'Page Excerpt Title 2',
-                        'categories' => [],
                     ],
                     'view' => [
                         'title' => [],
                         'url' => [],
-                        'contentDescription' => [],
-                        'excerptTitle' => [],
-                        'categories' => [],
                     ],
                 ],
             ],
@@ -224,41 +176,19 @@ class PageSelectionResolverTest extends TestCase
 
     public function testResolveDataIsNull(): void
     {
-        $locale = 'en';
-        $property = $this->prophesize(PropertyInterface::class);
+        $result = $this->pageSelectionResolver->resolve(null, $this->fieldMetadata, 'en', []);
 
-        // expected and unexpected service calls
-        $this->contentQueryBuilder->init(Argument::cetera())
-            ->shouldNotBeCalled();
-
-        $this->structureResolver->resolve(Argument::cetera())
-            ->shouldNotBeCalled();
-
-        // call test function
-        $result = $this->pageSelectionResolver->resolve(null, $property->reveal(), $locale);
-
+        $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame([], $result->getContent());
-
         $this->assertSame(['ids' => []], $result->getView());
     }
 
     public function testResolveDataIsEmptyArray(): void
     {
-        $locale = 'en';
-        $property = $this->prophesize(PropertyInterface::class);
+        $result = $this->pageSelectionResolver->resolve([], $this->fieldMetadata, 'en', []);
 
-        // expected and unexpected service calls
-        $this->contentQueryBuilder->init(Argument::any())
-            ->shouldNotBeCalled();
-
-        $this->structureResolver->resolve(Argument::any())
-            ->shouldNotBeCalled();
-
-        // call test function
-        $result = $this->pageSelectionResolver->resolve([], $property->reveal(), $locale);
-
+        $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame([], $result->getContent());
-
         $this->assertSame(['ids' => []], $result->getView());
     }
 }

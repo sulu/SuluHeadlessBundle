@@ -14,10 +14,10 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver;
 
 use JMS\Serializer\SerializationContext;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 use Sulu\Bundle\ContactBundle\Contact\AccountManager;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\AccountSerializerInterface;
-use Sulu\Component\Content\Compat\PropertyInterface;
 
 class SingleAccountSelectionResolver implements ContentTypeResolverInterface
 {
@@ -26,25 +26,13 @@ class SingleAccountSelectionResolver implements ContentTypeResolverInterface
         return 'single_account_selection';
     }
 
-    /**
-     * @var AccountManager
-     */
-    private $accountManager;
-
-    /**
-     * @var AccountSerializerInterface
-     */
-    private $accountSerializer;
-
     public function __construct(
-        AccountManager $accountManager,
-        AccountSerializerInterface $accountSerializer
+        private AccountManager $accountManager,
+        private AccountSerializerInterface $accountSerializer,
     ) {
-        $this->accountManager = $accountManager;
-        $this->accountSerializer = $accountSerializer;
     }
 
-    public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView
+    public function resolve(mixed $data, FieldMetadata $fieldMetadata, string $locale, array $attributes = []): ContentView
     {
         if (!\is_numeric($data)) {
             return new ContentView(null, ['id' => null]);

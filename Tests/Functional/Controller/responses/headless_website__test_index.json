@@ -1,12 +1,11 @@
 {
     "id": "@uuid@",
-    "nodeType": 1,
     "type": "page",
     "template": "default",
     "content": {
         "title": "Test",
         "url": "\/test",
-        "article": ""
+        "article": null
     },
     "view": {
         "title": [],
@@ -36,7 +35,7 @@
             "categories": [],
             "tags": [],
             "images": [],
-            "segments": "@array@.isEmpty().optional()",
+            "segments": [],
             "icon": [],
             "audience_targeting_groups": []
         }

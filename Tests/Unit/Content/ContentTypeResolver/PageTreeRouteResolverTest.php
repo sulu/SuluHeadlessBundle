@@ -15,10 +15,9 @@ namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
 
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
-use Prophecy\Prophecy\ObjectProphecy;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\PageTreeRouteResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
-use Sulu\Component\Content\Compat\PropertyInterface;
 
 class PageTreeRouteResolverTest extends TestCase
 {
@@ -29,9 +28,12 @@ class PageTreeRouteResolverTest extends TestCase
      */
     private $pageTreeRouteResolver;
 
+    private FieldMetadata $fieldMetadata;
+
     protected function setUp(): void
     {
         $this->pageTreeRouteResolver = new PageTreeRouteResolver();
+        $this->fieldMetadata = new FieldMetadata('page_tree_route');
     }
 
     public function testGetContentType(): void
@@ -50,10 +52,7 @@ class PageTreeRouteResolverTest extends TestCase
             'suffix' => '/articles/bar',
         ];
 
-        /** @var ObjectProphecy|PropertyInterface $property */
-        $property = $this->prophesize(PropertyInterface::class);
-
-        $result = $this->pageTreeRouteResolver->resolve($data, $property->reveal(), 'en');
+        $result = $this->pageTreeRouteResolver->resolve($data, $this->fieldMetadata, 'en');
 
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame('/foo/articles/bar', $result->getContent());
@@ -62,10 +61,7 @@ class PageTreeRouteResolverTest extends TestCase
 
     public function testResolveDataIsString(): void
     {
-        /** @var ObjectProphecy|PropertyInterface $property */
-        $property = $this->prophesize(PropertyInterface::class);
-
-        $result = $this->pageTreeRouteResolver->resolve('/foo/articles/bar', $property->reveal(), 'en');
+        $result = $this->pageTreeRouteResolver->resolve('/foo/articles/bar', $this->fieldMetadata, 'en');
 
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame('/foo/articles/bar', $result->getContent());
@@ -74,10 +70,7 @@ class PageTreeRouteResolverTest extends TestCase
 
     public function testResolveDataIsNull(): void
     {
-        /** @var ObjectProphecy|PropertyInterface $property */
-        $property = $this->prophesize(PropertyInterface::class);
-
-        $result = $this->pageTreeRouteResolver->resolve(null, $property->reveal(), 'en');
+        $result = $this->pageTreeRouteResolver->resolve(null, $this->fieldMetadata, 'en');
 
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertNull($result->getContent());

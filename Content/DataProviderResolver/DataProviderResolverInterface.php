@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver;
 
+use Sulu\Bundle\AdminBundle\SmartContent\Configuration\ProviderConfigurationInterface;
 use Sulu\Component\Content\Compat\PropertyParameter;
-use Sulu\Component\SmartContent\Configuration\ProviderConfigurationInterface;
 
 interface DataProviderResolverInterface
 {

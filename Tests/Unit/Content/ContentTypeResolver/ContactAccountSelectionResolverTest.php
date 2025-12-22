@@ -18,6 +18,7 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 use Sulu\Bundle\ContactBundle\Api\Account;
 use Sulu\Bundle\ContactBundle\Api\Contact;
 use Sulu\Bundle\ContactBundle\Contact\AccountManager;
@@ -28,7 +29,6 @@ use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\ContactAccountSelecti
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\AccountSerializerInterface;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\ContactSerializerInterface;
-use Sulu\Component\Content\Compat\PropertyInterface;
 
 class ContactAccountSelectionResolverTest extends TestCase
 {
@@ -59,8 +59,11 @@ class ContactAccountSelectionResolverTest extends TestCase
      */
     private $contactAccountResolver;
 
+    private FieldMetadata $fieldMetadata;
+
     protected function setUp(): void
     {
+        $this->fieldMetadata = new FieldMetadata('contact_account');
         $this->contactManager = $this->prophesize(ContactManager::class);
         $this->accountManager = $this->prophesize(AccountManager::class);
         $this->contactSerializer = $this->prophesize(ContactSerializerInterface::class);
@@ -119,8 +122,7 @@ class ContactAccountSelectionResolverTest extends TestCase
             ],
         ]);
 
-        $property = $this->prophesize(PropertyInterface::class);
-        $result = $this->contactAccountResolver->resolve($data, $property->reveal(), $locale);
+        $result = $this->contactAccountResolver->resolve($data, $this->fieldMetadata, $locale);
 
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame(
@@ -160,9 +162,8 @@ class ContactAccountSelectionResolverTest extends TestCase
     public function testResolveDataIsNull(): void
     {
         $locale = 'en';
-        $property = $this->prophesize(PropertyInterface::class);
 
-        $result = $this->contactAccountResolver->resolve(null, $property->reveal(), $locale);
+        $result = $this->contactAccountResolver->resolve(null, $this->fieldMetadata, $locale);
 
         $this->assertSame([], $result->getContent());
 
@@ -172,9 +173,8 @@ class ContactAccountSelectionResolverTest extends TestCase
     public function testResolveDataIsEmptyArray(): void
     {
         $locale = 'en';
-        $property = $this->prophesize(PropertyInterface::class);
 
-        $result = $this->contactAccountResolver->resolve([], $property->reveal(), $locale);
+        $result = $this->contactAccountResolver->resolve([], $this->fieldMetadata, $locale);
 
         $this->assertSame([], $result->getContent());
 

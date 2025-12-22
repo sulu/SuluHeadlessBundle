@@ -17,17 +17,18 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\OptionMetadata;
+use Sulu\Bundle\AdminBundle\SmartContent\Configuration\ProviderConfigurationInterface;
 use Sulu\Bundle\AudienceTargetingBundle\TargetGroup\TargetGroupStoreInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\SmartContentResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver\DataProviderResolverInterface;
 use Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver\DataProviderResult;
+use Sulu\Bundle\TagBundle\Tag\TagInterface;
 use Sulu\Bundle\TagBundle\Tag\TagManagerInterface;
 use Sulu\Component\Category\Request\CategoryRequestHandlerInterface;
-use Sulu\Component\Content\Compat\PropertyInterface;
 use Sulu\Component\Content\Compat\PropertyParameter;
-use Sulu\Component\Content\Compat\StructureInterface;
-use Sulu\Component\SmartContent\Configuration\ProviderConfigurationInterface;
 use Sulu\Component\Tag\Request\TagRequestHandlerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -71,6 +72,8 @@ class SmartContentResolverTest extends TestCase
      */
     private $smartContentResolver;
 
+    private FieldMetadata $fieldMetadata;
+
     protected function setUp(): void
     {
         $this->mediaProviderResolver = $this->prophesize(DataProviderResolverInterface::class);
@@ -88,6 +91,20 @@ class SmartContentResolverTest extends TestCase
             $this->categoryRequestHandler->reveal(),
             $this->targetGroupStore->reveal()
         );
+
+        $this->fieldMetadata = new FieldMetadata('smart_content');
+
+        // Set provider option to 'media' to match the resolver we registered
+        $providerOption = new OptionMetadata();
+        $providerOption->setName('provider');
+        $providerOption->setValue('media');
+        $this->fieldMetadata->addOption($providerOption);
+
+        // Set max_per_page option for paginated test
+        $maxPerPageOption = new OptionMetadata();
+        $maxPerPageOption->setName('max_per_page');
+        $maxPerPageOption->setValue(5);
+        $this->fieldMetadata->addOption($maxPerPageOption);
     }
 
     public function testGetContentType(): void
@@ -97,19 +114,6 @@ class SmartContentResolverTest extends TestCase
 
     public function testResolve(): void
     {
-        $property = $this->prophesize(PropertyInterface::class);
-        $property->getParams()->willReturn(['provider' => new PropertyParameter('provider', 'media')]);
-        $property->getValue()->willReturn([
-            'tags' => [111, 'tag-name-1'],
-            'categories' => [123],
-            'limitResult' => 10,
-        ]);
-
-        $structure = $this->prophesize(StructureInterface::class);
-        $structure->getUuid()->willReturn('uuid-123');
-        $structure->getWebspaceKey()->willReturn('webspace-key');
-        $property->getStructure()->willReturn($structure->reveal());
-
         $configuration = $this->prophesize(ProviderConfigurationInterface::class);
         $configuration->getSorting()->willReturn(null);
         $configuration->hasDatasource()->willReturn(true);
@@ -130,8 +134,14 @@ class SmartContentResolverTest extends TestCase
         $this->tagRequestHandler->getTags('tags')->willReturn(['tag-name-2']);
         $this->categoryRequestHandler->getCategories('categories')->willReturn([456]);
 
-        $this->tagManager->resolveTagNames(['tag-name-1'])->willReturn([222]);
-        $this->tagManager->resolveTagNames(['tag-name-2'])->willReturn([333]);
+        // Mock tag resolution via findByName
+        $tag1 = $this->prophesize(TagInterface::class);
+        $tag1->getId()->willReturn(222);
+        $this->tagManager->findByName('tag-name-1')->willReturn($tag1->reveal());
+
+        $tag2 = $this->prophesize(TagInterface::class);
+        $tag2->getId()->willReturn(333);
+        $this->tagManager->findByName('tag-name-2')->willReturn($tag2->reveal());
 
         $providerResult = $this->prophesize(DataProviderResult::class);
         $providerResult->getHasNextPage()->willReturn(false);
@@ -152,7 +162,16 @@ class SmartContentResolverTest extends TestCase
             10
         )->willReturn($providerResult->reveal());
 
-        $result = $this->smartContentResolver->resolve([], $property->reveal(), 'en');
+        $data = [
+            'tags' => [111, 'tag-name-1'],
+            'categories' => [123],
+            'limitResult' => 10,
+        ];
+
+        $result = $this->smartContentResolver->resolve($data, $this->fieldMetadata, 'en', [
+            'uuid' => 'uuid-123',
+            'webspaceKey' => 'webspace-key',
+        ]);
 
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame(
@@ -179,23 +198,6 @@ class SmartContentResolverTest extends TestCase
 
     public function testResolvePaginated(): void
     {
-        $property = $this->prophesize(PropertyInterface::class);
-        $property->getParams()->willReturn([
-            'provider' => new PropertyParameter('provider', 'media'),
-            'max_per_page' => new PropertyParameter('max_per_page', '5'),
-            'page_parameter' => new PropertyParameter('max_per_page', 'page'),
-        ]);
-        $property->getValue()->willReturn([
-            'tags' => [111, 'tag-name-1'],
-            'categories' => [123],
-            'limitResult' => 10,
-        ]);
-
-        $structure = $this->prophesize(StructureInterface::class);
-        $structure->getUuid()->willReturn('uuid-123');
-        $structure->getWebspaceKey()->willReturn('webspace-key');
-        $property->getStructure()->willReturn($structure->reveal());
-
         $configuration = $this->prophesize(ProviderConfigurationInterface::class);
         $configuration->getSorting()->willReturn(null);
         $configuration->hasDatasource()->willReturn(true);
@@ -216,11 +218,17 @@ class SmartContentResolverTest extends TestCase
         $this->tagRequestHandler->getTags('tags')->willReturn(['tag-name-2']);
         $this->categoryRequestHandler->getCategories('categories')->willReturn([456]);
 
-        $this->tagManager->resolveTagNames(['tag-name-1'])->willReturn([222]);
-        $this->tagManager->resolveTagNames(['tag-name-2'])->willReturn([333]);
+        // Mock tag resolution via findByName
+        $tag1 = $this->prophesize(TagInterface::class);
+        $tag1->getId()->willReturn(222);
+        $this->tagManager->findByName('tag-name-1')->willReturn($tag1->reveal());
+
+        $tag2 = $this->prophesize(TagInterface::class);
+        $tag2->getId()->willReturn(333);
+        $this->tagManager->findByName('tag-name-2')->willReturn($tag2->reveal());
 
         $request = $this->prophesize(Request::class);
-        $request->get('page', 1)->willReturn(2);
+        $request->get('p', 1)->willReturn(2);
         $this->requestStack->getCurrentRequest()->willReturn($request->reveal());
 
         $providerResult = $this->prophesize(DataProviderResult::class);
@@ -244,7 +252,16 @@ class SmartContentResolverTest extends TestCase
             5
         )->willReturn($providerResult->reveal());
 
-        $result = $this->smartContentResolver->resolve([], $property->reveal(), 'en');
+        $data = [
+            'tags' => [111, 'tag-name-1'],
+            'categories' => [123],
+            'limitResult' => 10,
+        ];
+
+        $result = $this->smartContentResolver->resolve($data, $this->fieldMetadata, 'en', [
+            'uuid' => 'uuid-123',
+            'webspaceKey' => 'webspace-key',
+        ]);
 
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame(
@@ -271,10 +288,14 @@ class SmartContentResolverTest extends TestCase
 
     public function testResolveMissingProviderResolver(): void
     {
-        $property = $this->prophesize(PropertyInterface::class);
-        $property->getParams()->willReturn(['provider' => new PropertyParameter('provider', 'contact')]);
+        // Create a field metadata with a non-existent provider
+        $fieldMetadata = new FieldMetadata('smart_content');
+        $providerOption = new OptionMetadata();
+        $providerOption->setName('provider');
+        $providerOption->setValue('non_existent_provider');
+        $fieldMetadata->addOption($providerOption);
 
-        $result = $this->smartContentResolver->resolve(['key' => 'value'], $property->reveal(), 'en');
+        $result = $this->smartContentResolver->resolve(['key' => 'value'], $fieldMetadata, 'en');
 
         self::assertNull($result->getContent());
         self::assertSame(['key' => 'value'], $result->getView());

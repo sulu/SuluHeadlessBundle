@@ -18,13 +18,13 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 use Sulu\Bundle\ContactBundle\Api\Contact;
 use Sulu\Bundle\ContactBundle\Contact\ContactManager;
 use Sulu\Bundle\ContactBundle\Entity\ContactInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\SingleContactSelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\ContactSerializerInterface;
-use Sulu\Component\Content\Compat\PropertyInterface;
 
 class SingleContactSelectionResolverTest extends TestCase
 {
@@ -45,6 +45,8 @@ class SingleContactSelectionResolverTest extends TestCase
      */
     private $singleContactSelectionResolver;
 
+    private FieldMetadata $fieldMetadata;
+
     protected function setUp(): void
     {
         $this->contactManager = $this->prophesize(ContactManager::class);
@@ -54,6 +56,8 @@ class SingleContactSelectionResolverTest extends TestCase
             $this->contactManager->reveal(),
             $this->contactSerializer->reveal()
         );
+
+        $this->fieldMetadata = new FieldMetadata('contact');
     }
 
     public function testGetContentType(): void
@@ -85,8 +89,7 @@ class SingleContactSelectionResolverTest extends TestCase
             ],
         ]);
 
-        $property = $this->prophesize(PropertyInterface::class);
-        $result = $this->singleContactSelectionResolver->resolve($data, $property->reveal(), $locale);
+        $result = $this->singleContactSelectionResolver->resolve($data, $this->fieldMetadata, $locale);
 
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame(
@@ -114,9 +117,8 @@ class SingleContactSelectionResolverTest extends TestCase
     public function testResolveDataIsNull(): void
     {
         $locale = 'en';
-        $property = $this->prophesize(PropertyInterface::class);
 
-        $result = $this->singleContactSelectionResolver->resolve(null, $property->reveal(), $locale);
+        $result = $this->singleContactSelectionResolver->resolve(null, $this->fieldMetadata, $locale);
 
         $this->assertNull($result->getContent());
 

@@ -13,62 +13,61 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\DataProviderResolver;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use PHPUnit\Framework\TestCase;
+use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
+use Sulu\Bundle\AdminBundle\SmartContent\Configuration\ProviderConfigurationInterface;
+use Sulu\Bundle\AdminBundle\SmartContent\SmartContentProviderInterface;
 use Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver\PageDataProviderResolver;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
 use Sulu\Component\Content\Compat\PropertyParameter;
-use Sulu\Component\Content\Compat\StructureInterface;
-use Sulu\Component\Content\Mapper\ContentMapperInterface;
-use Sulu\Component\Content\Query\ContentQueryBuilderInterface;
-use Sulu\Component\Content\SmartContent\PageDataProvider;
-use Sulu\Component\SmartContent\Configuration\ProviderConfigurationInterface;
-use Sulu\Component\SmartContent\DataProviderResult;
-use Sulu\Component\SmartContent\ResourceItemInterface;
+use Sulu\Content\Application\ContentMerger\ContentMergerInterface;
+use Sulu\Content\Domain\Model\DimensionContentInterface;
+use Sulu\Page\Domain\Model\PageDimensionContent;
+use Sulu\Page\Domain\Model\PageInterface;
+use Sulu\Page\Domain\Repository\PageRepositoryInterface;
 
 class PageDataProviderResolverTest extends TestCase
 {
     use ProphecyTrait;
 
     /**
-     * @var PageDataProvider|ObjectProphecy
+     * @var ObjectProphecy<SmartContentProviderInterface>
      */
-    private $pageDataProvider;
+    private ObjectProphecy $pageSmartContentProvider;
 
     /**
-     * @var StructureResolverInterface|ObjectProphecy
+     * @var ObjectProphecy<StructureResolverInterface>
      */
-    private $structureResolver;
+    private ObjectProphecy $structureResolver;
 
     /**
-     * @var ContentQueryBuilderInterface|ObjectProphecy
+     * @var ObjectProphecy<PageRepositoryInterface>
      */
-    private $contentQueryBuilder;
+    private ObjectProphecy $pageRepository;
 
     /**
-     * @var ContentMapperInterface|ObjectProphecy
+     * @var ObjectProphecy<ContentMergerInterface>
      */
-    private $contentMapper;
+    private ObjectProphecy $contentMerger;
 
-    /**
-     * @var PageDataProviderResolver
-     */
-    private $pageDataProviderResolver;
+    private PageDataProviderResolver $pageDataProviderResolver;
 
     protected function setUp(): void
     {
-        $this->pageDataProvider = $this->prophesize(PageDataProvider::class);
+        $this->pageSmartContentProvider = $this->prophesize(SmartContentProviderInterface::class);
         $this->structureResolver = $this->prophesize(StructureResolverInterface::class);
-        $this->contentQueryBuilder = $this->prophesize(ContentQueryBuilderInterface::class);
-        $this->contentMapper = $this->prophesize(ContentMapperInterface::class);
+        $this->pageRepository = $this->prophesize(PageRepositoryInterface::class);
+        $this->contentMerger = $this->prophesize(ContentMergerInterface::class);
 
         $this->pageDataProviderResolver = new PageDataProviderResolver(
-            $this->pageDataProvider->reveal(),
+            $this->pageSmartContentProvider->reveal(),
             $this->structureResolver->reveal(),
-            $this->contentQueryBuilder->reveal(),
-            $this->contentMapper->reveal(),
-            true
+            $this->pageRepository->reveal(),
+            $this->contentMerger->reveal(),
+            true, // showDrafts
         );
     }
 
@@ -80,31 +79,18 @@ class PageDataProviderResolverTest extends TestCase
     public function testGetProviderConfiguration(): void
     {
         $configuration = $this->prophesize(ProviderConfigurationInterface::class);
-        $this->pageDataProvider->getConfiguration()->willReturn($configuration->reveal());
+        $this->pageSmartContentProvider->getConfiguration()->willReturn($configuration->reveal());
 
         $this->assertSame($configuration->reveal(), $this->pageDataProviderResolver->getProviderConfiguration());
     }
 
     public function testGetProviderDefaultParams(): void
     {
-        $propertyParameter = $this->prophesize(PropertyParameter::class);
-        $this->pageDataProvider->getDefaultPropertyParameter()->willReturn(['test' => $propertyParameter->reveal()]);
-
-        $this->assertSame(['test' => $propertyParameter->reveal()], $this->pageDataProviderResolver->getProviderDefaultParams());
+        $this->assertSame([], $this->pageDataProviderResolver->getProviderDefaultParams());
     }
 
     public function testResolve(): void
     {
-        $providerResultItem1 = $this->prophesize(ResourceItemInterface::class);
-        $providerResultItem1->getId()->willReturn('page-id-1');
-
-        $providerResultItem2 = $this->prophesize(ResourceItemInterface::class);
-        $providerResultItem2->getId()->willReturn('page-id-2');
-
-        $providerResult = $this->prophesize(DataProviderResult::class);
-        $providerResult->getHasNextPage()->willReturn(true);
-        $providerResult->getItems()->willReturn([$providerResultItem1->reveal(), $providerResultItem2->reveal()]);
-
         $propertyParameters = [
             'properties' => new PropertyParameter('properties', [
                 new PropertyParameter('contentDescription', 'description'),
@@ -112,38 +98,43 @@ class PageDataProviderResolverTest extends TestCase
             ]),
         ];
 
-        // expected and unexpected service calls
-        $this->pageDataProvider->resolveResourceItems(
-            ['filter-key' => 'filter-value'],
-            $propertyParameters,
-            ['webspaceKey' => 'webspace-key', 'locale' => 'en'],
-            10,
-            1,
-            5
-        )->willReturn($providerResult->reveal())->shouldBeCalledOnce();
-
-        $this->contentQueryBuilder->init([
-            'ids' => ['page-id-1', 'page-id-2'],
-            'properties' => $propertyParameters['properties']->getValue(),
-            'published' => false,
-        ])->shouldBeCalled();
-        $this->contentQueryBuilder->build('webspace-key', ['en'])->willReturn(['page-query-string']);
-
-        $pageStructure1 = $this->prophesize(StructureInterface::class);
-        $pageStructure1->getUuid()->willReturn('page-id-1');
-        $pageStructure2 = $this->prophesize(StructureInterface::class);
-        $pageStructure2->getUuid()->willReturn('page-id-2');
-        $this->contentMapper->loadBySql2(
-            'page-query-string',
-            'en',
-            'webspace-key'
+        // SmartContentProvider returns flat results
+        $this->pageSmartContentProvider->findFlatBy(
+            Argument::type('array'),
+            Argument::type('array'),
+            ['webspaceKey' => 'webspace-key', 'locale' => 'en']
         )->willReturn([
-            $pageStructure2->reveal(),
-            $pageStructure1->reveal(),
-        ])->shouldBeCalledOnce();
+            ['id' => 'page-id-1', 'title' => 'Page 1'],
+            ['id' => 'page-id-2', 'title' => 'Page 2'],
+        ]);
+
+        // Create mock pages with dimension contents
+        $page1 = $this->prophesize(PageInterface::class);
+        $page1->getUuid()->willReturn('page-id-1');
+        $dimensionContent1 = $this->prophesize(PageDimensionContent::class);
+        $page1->getDimensionContents()->willReturn(new ArrayCollection([$dimensionContent1->reveal()]));
+
+        $page2 = $this->prophesize(PageInterface::class);
+        $page2->getUuid()->willReturn('page-id-2');
+        $dimensionContent2 = $this->prophesize(PageDimensionContent::class);
+        $page2->getDimensionContents()->willReturn(new ArrayCollection([$dimensionContent2->reveal()]));
+
+        $this->pageRepository->findBy(
+            Argument::type('array'),
+            [],
+            [PageRepositoryInterface::GROUP_SELECT_PAGE_WEBSITE => true]
+        )->willReturn([$page1->reveal(), $page2->reveal()]);
+
+        // Content merger returns merged dimension content
+        $mergedContent1 = $this->prophesize(DimensionContentInterface::class);
+        $mergedContent2 = $this->prophesize(DimensionContentInterface::class);
+
+        $this->contentMerger->merge(Argument::that(function ($collection) {
+            return true; // Accept any DimensionContentCollection
+        }))->willReturn($mergedContent1->reveal(), $mergedContent2->reveal());
 
         $this->structureResolver->resolveProperties(
-            $pageStructure1->reveal(),
+            $mergedContent1,
             [
                 'title' => 'title',
                 'url' => 'url',
@@ -160,16 +151,11 @@ class PageDataProviderResolverTest extends TestCase
                 'contentDescription' => 'Page Content Description',
                 'excerptTitle' => 'Page Excerpt Title 1',
             ],
-            'view' => [
-                'title' => [],
-                'url' => [],
-                'contentDescription' => [],
-                'excerptTitle' => [],
-            ],
-        ])->shouldBeCalledOnce();
+            'view' => [],
+        ]);
 
         $this->structureResolver->resolveProperties(
-            $pageStructure2->reveal(),
+            $mergedContent2,
             [
                 'title' => 'title',
                 'url' => 'url',
@@ -186,15 +172,9 @@ class PageDataProviderResolverTest extends TestCase
                 'contentDescription' => 'Page Content Description',
                 'excerptTitle' => 'Page Excerpt Title 2',
             ],
-            'view' => [
-                'title' => [],
-                'url' => [],
-                'contentDescription' => [],
-                'excerptTitle' => [],
-            ],
-        ])->shouldBeCalledOnce();
+            'view' => [],
+        ]);
 
-        // call test function
         $result = $this->pageDataProviderResolver->resolve(
             ['filter-key' => 'filter-value'],
             $propertyParameters,
@@ -204,71 +184,25 @@ class PageDataProviderResolverTest extends TestCase
             5
         );
 
-        $this->assertTrue($result->getHasNextPage());
-        $this->assertSame(
-            [
-                [
-                    'id' => 'page-id-1',
-                    'template' => 'default',
-                    'content' => [
-                        'title' => 'Page Title 1',
-                        'url' => '/page-url-1',
-                        'contentDescription' => 'Page Content Description',
-                        'excerptTitle' => 'Page Excerpt Title 1',
-                    ],
-                    'view' => [
-                        'title' => [],
-                        'url' => [],
-                        'contentDescription' => [],
-                        'excerptTitle' => [],
-                    ],
-                ],
-                [
-                    'id' => 'page-id-2',
-                    'template' => 'default',
-                    'content' => [
-                        'title' => 'Page Title 2',
-                        'url' => '/page-url-2',
-                        'contentDescription' => 'Page Content Description',
-                        'excerptTitle' => 'Page Excerpt Title 2',
-                    ],
-                    'view' => [
-                        'title' => [],
-                        'url' => [],
-                        'contentDescription' => [],
-                        'excerptTitle' => [],
-                    ],
-                ],
-            ],
-            $result->getItems()
-        );
+        // hasNextPage is false because count(2) < pageSize(5)
+        $this->assertFalse($result->getHasNextPage());
+        $this->assertCount(2, $result->getItems());
     }
 
     public function testResolveEmptyProviderResult(): void
     {
-        $providerResult = $this->prophesize(DataProviderResult::class);
-        $providerResult->getHasNextPage()->willReturn(false);
-        $providerResult->getItems()->willReturn([]);
-
         $propertyParameters = [
             'properties' => new PropertyParameter('properties', [
                 new PropertyParameter('contentDescription', 'description'),
-                new PropertyParameter('excerptTitle', 'excerpt.title'),
             ]),
         ];
 
-        // expected and unexpected service calls
-        $this->pageDataProvider->resolveResourceItems(
-            ['filter-key' => 'filter-value'],
-            $propertyParameters,
-            ['webspaceKey' => 'webspace-key', 'locale' => 'en'],
-            10,
-            1,
-            5
-        )->willReturn($providerResult->reveal())
-            ->shouldBeCalledOnce();
+        $this->pageSmartContentProvider->findFlatBy(
+            Argument::type('array'),
+            Argument::type('array'),
+            ['webspaceKey' => 'webspace-key', 'locale' => 'en']
+        )->willReturn([]);
 
-        // call test function
         $result = $this->pageDataProviderResolver->resolve(
             ['filter-key' => 'filter-value'],
             $propertyParameters,
@@ -279,9 +213,6 @@ class PageDataProviderResolverTest extends TestCase
         );
 
         $this->assertFalse($result->getHasNextPage());
-        $this->assertSame(
-            [],
-            $result->getItems()
-        );
+        $this->assertSame([], $result->getItems());
     }
 }

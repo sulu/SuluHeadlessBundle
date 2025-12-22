@@ -21,63 +21,21 @@ use Sulu\Bundle\ContactBundle\Entity\ContactTitle;
 use Sulu\Bundle\ContactBundle\Entity\ContactTitleRepository;
 use Sulu\Bundle\ContactBundle\Entity\Position;
 use Sulu\Bundle\ContactBundle\Entity\PositionRepository;
+use Sulu\Bundle\HttpCacheBundle\ReferenceStore\ReferenceStoreInterface;
 use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
-use Sulu\Bundle\WebsiteBundle\ReferenceStore\ReferenceStoreInterface;
 use Sulu\Component\Serializer\ArraySerializerInterface;
 
 class ContactSerializer implements ContactSerializerInterface
 {
-    /**
-     * @var ContactManager
-     */
-    private $contactManager;
-
-    /**
-     * @var ArraySerializerInterface
-     */
-    private $arraySerializer;
-
-    /**
-     * @var MediaManagerInterface
-     */
-    private $mediaManager;
-
-    /**
-     * @var MediaSerializerInterface
-     */
-    private $mediaSerializer;
-
-    /**
-     * @var ContactTitleRepository
-     */
-    private $contactTitleRepository;
-
-    /**
-     * @var PositionRepository
-     */
-    private $positionRepository;
-
-    /**
-     * @var ReferenceStoreInterface
-     */
-    private $referenceStore;
-
     public function __construct(
-        ContactManager $contactManager,
-        ArraySerializerInterface $arraySerializer,
-        MediaManagerInterface $mediaManager,
-        MediaSerializerInterface $mediaSerializer,
-        ContactTitleRepository $contactTitleRepository,
-        PositionRepository $positionRepository,
-        ReferenceStoreInterface $referenceStore
+        private ContactManager $contactManager,
+        private ArraySerializerInterface $arraySerializer,
+        private MediaManagerInterface $mediaManager,
+        private MediaSerializerInterface $mediaSerializer,
+        private ContactTitleRepository $contactTitleRepository,
+        private PositionRepository $positionRepository,
+        private ReferenceStoreInterface $referenceStore,
     ) {
-        $this->contactManager = $contactManager;
-        $this->arraySerializer = $arraySerializer;
-        $this->mediaManager = $mediaManager;
-        $this->mediaSerializer = $mediaSerializer;
-        $this->contactTitleRepository = $contactTitleRepository;
-        $this->positionRepository = $positionRepository;
-        $this->referenceStore = $referenceStore;
     }
 
     /**
@@ -119,7 +77,7 @@ class ContactSerializer implements ContactSerializerInterface
             $contactData['avatar'] = $this->mediaSerializer->serialize($avatar->getEntity(), $locale);
         }
 
-        $this->referenceStore->add($contact->getId());
+        $this->referenceStore->add((string) $contact->getId(), 'contact');
 
         return $contactData;
     }

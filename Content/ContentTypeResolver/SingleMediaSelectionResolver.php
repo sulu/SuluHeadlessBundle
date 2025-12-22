@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver;
 
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
-use Sulu\Component\Content\Compat\PropertyInterface;
 
 class SingleMediaSelectionResolver implements ContentTypeResolverInterface
 {
@@ -23,24 +23,19 @@ class SingleMediaSelectionResolver implements ContentTypeResolverInterface
         return 'single_media_selection';
     }
 
-    /**
-     * @var ContentTypeResolverInterface
-     */
-    private $mediaSelectionResolver;
-
-    public function __construct(ContentTypeResolverInterface $mediaSelectionResolver)
-    {
-        $this->mediaSelectionResolver = $mediaSelectionResolver;
+    public function __construct(
+        private ContentTypeResolverInterface $mediaSelectionResolver,
+    ) {
     }
 
-    public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView
+    public function resolve(mixed $data, FieldMetadata $fieldMetadata, string $locale, array $attributes = []): ContentView
     {
         if (empty($data) || !\is_array($data)) {
             return new ContentView(null, ['id' => null]);
         }
 
         $ids = \array_key_exists('id', $data) && \is_numeric($data['id']) ? [(int) $data['id']] : [];
-        $content = $this->mediaSelectionResolver->resolve(['ids' => $ids], $property, $locale, $attributes);
+        $content = $this->mediaSelectionResolver->resolve(['ids' => $ids], $fieldMetadata, $locale, $attributes);
 
         return new ContentView($content->getContent()[0] ?? null, \array_merge(['id' => null], $data));
     }

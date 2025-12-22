@@ -15,6 +15,7 @@ namespace Sulu\Bundle\HeadlessBundle\Tests\Application;
 
 use Sulu\Bundle\HeadlessBundle\SuluHeadlessBundle;
 use Sulu\Bundle\TestBundle\Kernel\SuluTestKernel;
+use Sulu\Snippet\Infrastructure\Symfony\HttpKernel\SuluSnippetBundle;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 
@@ -27,6 +28,7 @@ class Kernel extends SuluTestKernel
     {
         /** @var BundleInterface[] $bundles */
         $bundles = parent::registerBundles();
+        $bundles[] = new SuluSnippetBundle();
         $bundles[] = new SuluHeadlessBundle();
 
         return $bundles;

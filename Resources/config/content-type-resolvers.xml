@@ -19,9 +19,9 @@
             lazy="true"
         >
             <argument type="service" id="sulu_headless.structure_resolver"/>
-            <argument type="service" id="sulu_page.smart_content.data_provider.content.query_builder"/>
-            <argument type="service" id="sulu.content.mapper"/>
-            <argument>%sulu_document_manager.show_drafts%</argument>
+            <argument type="service" id="Sulu\Page\Domain\Repository\PageRepositoryInterface"/>
+            <argument type="service" id="sulu_content.content_merger"/>
+            <argument type="expression">container.hasParameter('sulu.preview') ? parameter('sulu.preview') : false</argument>
 
             <tag name="sulu_headless.content_type_resolver"/>
         </service>
@@ -31,9 +31,10 @@
             class="Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\SnippetSelectionResolver"
             lazy="true"
         >
-            <argument type="service" id="sulu.content.mapper"/>
+            <argument type="service" id="Sulu\Snippet\Domain\Repository\SnippetRepositoryInterface"/>
             <argument type="service" id="sulu_headless.structure_resolver"/>
-            <argument type="service" id="sulu_snippet.default_snippet.manager"/>
+            <argument type="service" id="sulu_content.content_merger"/>
+            <argument type="service" id="sulu_snippet.snippet_area_repository"/>
 
             <tag name="sulu_headless.content_type_resolver"/>
         </service>
@@ -128,7 +129,8 @@
             lazy="true"
         >
             <argument type="service" id="sulu_headless.content_resolver"/>
-            <argument type="tagged" tag="sulu_content.block_visitor" />
+            <argument type="service" id="sulu_admin.metadata_provider_registry"/>
+            <argument type="tagged_iterator" tag="sulu_content.block_visitor"/>
 
             <tag name="sulu_headless.content_type_resolver"/>
         </service>
@@ -174,7 +176,7 @@
             class="Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\TeaserSelectionResolver"
             lazy="true"
         >
-            <argument type="service" id="sulu_page.teaser.manager"/>
+            <argument type="service" id="sulu_admin.teaser_manager"/>
             <argument type="service" id="sulu_headless.serializer.teaser"/>
 
             <tag name="sulu_headless.content_type_resolver"/>
@@ -207,15 +209,8 @@
             <argument type="service" id="sulu_media.media_manager"/>
             <argument type="service" id="sulu_headless.serializer.media"/>
             <argument type="service" id="sulu_headless.content_resolver"/>
+            <argument type="service" id="sulu_admin.metadata_provider_registry"/>
 
-            <tag name="sulu_headless.content_type_resolver"/>
-        </service>
-
-        <service
-            id="sulu_headless.content_resolver.resource_locator"
-            class="Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\ResourceLocatorResolver"
-            lazy="true"
-        >
             <tag name="sulu_headless.content_type_resolver"/>
         </service>
 

@@ -13,13 +13,14 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver;
 
+use Sulu\Bundle\AdminBundle\SmartContent\Configuration\ProviderConfigurationInterface;
+use Sulu\Bundle\AdminBundle\SmartContent\SmartContentProviderInterface;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
 use Sulu\Component\Content\Compat\PropertyParameter;
-use Sulu\Component\Content\Compat\StructureInterface;
-use Sulu\Component\Content\Mapper\ContentMapperInterface;
-use Sulu\Component\Content\Query\ContentQueryBuilderInterface;
-use Sulu\Component\SmartContent\Configuration\ProviderConfigurationInterface;
-use Sulu\Component\SmartContent\DataProviderInterface;
+use Sulu\Content\Application\ContentMerger\ContentMergerInterface;
+use Sulu\Content\Domain\Model\DimensionContentCollection;
+use Sulu\Snippet\Domain\Model\SnippetDimensionContent;
+use Sulu\Snippet\Domain\Repository\SnippetRepositoryInterface;
 
 class SnippetDataProviderResolver implements DataProviderResolverInterface
 {
@@ -28,41 +29,17 @@ class SnippetDataProviderResolver implements DataProviderResolverInterface
         return 'snippets';
     }
 
-    /**
-     * @var DataProviderInterface
-     */
-    private $snippetDataProvider;
-
-    /**
-     * @var StructureResolverInterface
-     */
-    private $structureResolver;
-
-    /**
-     * @var ContentQueryBuilderInterface
-     */
-    private $contentQueryBuilder;
-
-    /**
-     * @var ContentMapperInterface
-     */
-    private $contentMapper;
-
     public function __construct(
-        DataProviderInterface $snippetDataProvider,
-        StructureResolverInterface $structureResolver,
-        ContentQueryBuilderInterface $contentQueryBuilder,
-        ContentMapperInterface $contentMapper
+        private SmartContentProviderInterface $snippetSmartContentProvider,
+        private StructureResolverInterface $structureResolver,
+        private SnippetRepositoryInterface $snippetRepository,
+        private ContentMergerInterface $contentMerger,
     ) {
-        $this->snippetDataProvider = $snippetDataProvider;
-        $this->structureResolver = $structureResolver;
-        $this->contentQueryBuilder = $contentQueryBuilder;
-        $this->contentMapper = $contentMapper;
     }
 
     public function getProviderConfiguration(): ProviderConfigurationInterface
     {
-        return $this->snippetDataProvider->getConfiguration();
+        return $this->snippetSmartContentProvider->getConfiguration();
     }
 
     /**
@@ -70,51 +47,43 @@ class SnippetDataProviderResolver implements DataProviderResolverInterface
      */
     public function getProviderDefaultParams(): array
     {
-        return $this->snippetDataProvider->getDefaultPropertyParameter();
+        return [];
     }
 
-    /**
-     * @var PropertyParameter[]
-     */
     public function resolve(
         array $filters,
         array $propertyParameters,
         array $options = [],
         ?int $limit = null,
-        int $snippet = 1,
-        ?int $snippetSize = null
+        int $page = 1,
+        ?int $pageSize = null,
     ): DataProviderResult {
-        $providerResult = $this->snippetDataProvider->resolveResourceItems(
-            $filters,
-            $propertyParameters,
-            $options,
-            $limit,
-            $snippet,
-            $snippetSize
-        );
+        $locale = $options['locale'] ?? 'en';
 
-        $snippetIds = [];
-        foreach ($providerResult->getItems() as $resultItem) {
-            $snippetIds[] = (string) $resultItem->getId();
+        $smartFilters = $this->convertFilters($filters, $limit, $page, $pageSize, $locale);
+        $sortBys = $this->extractSortBys($filters);
+
+        $flatResults = $this->snippetSmartContentProvider->findFlatBy($smartFilters, $sortBys, $options);
+
+        $ids = \array_map(fn (array $item) => $item['id'], $flatResults);
+
+        if (empty($ids)) {
+            return new DataProviderResult([], false);
         }
+
+        $snippets = $this->snippetRepository->findBy(
+            [
+                'uuids' => $ids,
+                'locale' => $locale,
+                'stage' => 'live',
+                'load_ghost_content' => true,
+            ],
+            [],
+            [SnippetRepositoryInterface::GROUP_SELECT_SNIPPET_WEBSITE => true],
+        );
 
         /** @var PropertyParameter[] $propertiesParamValue */
         $propertiesParamValue = isset($propertyParameters['properties']) ? $propertyParameters['properties']->getValue() : [];
-
-        /** @var string $webspaceKey */
-        $webspaceKey = $options['webspaceKey'];
-        /** @var string $locale */
-        $locale = $options['locale'];
-
-        // the SnippetDataProvider resolves the data defined in the $propertiesParamValue using the default content types
-        // for example, this means that the result contains an array of media api entities instead of a raw array of ids
-        // to resolve the data with the resolvers of this bundle, we need to load the structures with the ContentMapper
-        $snippetStructures = $this->loadSnippetStructures(
-            $snippetIds,
-            $propertiesParamValue,
-            $webspaceKey,
-            $locale
-        );
 
         $propertyMap = [
             'title' => 'title',
@@ -126,37 +95,67 @@ class SnippetDataProviderResolver implements DataProviderResolverInterface
             $propertyMap[$paramName] = \is_string($paramValue) ? $paramValue : $paramName;
         }
 
-        $resolvedSnippets = \array_fill_keys($snippetIds, null);
+        $resolvedSnippets = \array_fill_keys($ids, null);
 
-        foreach ($snippetStructures as $snippetStructure) {
-            $resolvedSnippets[$snippetStructure->getUuid()] = $this->structureResolver->resolveProperties($snippetStructure, $propertyMap, $locale);
+        foreach ($snippets as $snippetEntity) {
+            $dimensionContentCollection = new DimensionContentCollection(
+                $snippetEntity->getDimensionContents(),
+                ['locale' => $locale, 'stage' => 'live'],
+                SnippetDimensionContent::class,
+            );
+
+            $dimensionContent = $this->contentMerger->merge($dimensionContentCollection);
+            $resolvedSnippets[$snippetEntity->getUuid()] = $this->structureResolver->resolveProperties(
+                $dimensionContent,
+                $propertyMap,
+                $locale,
+            );
         }
 
-        return new DataProviderResult(\array_values(\array_filter($resolvedSnippets)), $providerResult->getHasNextPage());
+        $hasNextPage = null !== $pageSize && \count($flatResults) >= $pageSize;
+
+        return new DataProviderResult(\array_values(\array_filter($resolvedSnippets)), $hasNextPage);
     }
 
     /**
-     * @param string[] $snippetIds
-     * @param PropertyParameter[] $propertiesParamValue
-     *
-     * @return StructureInterface[]
+     * @return array<string, mixed>
      */
-    private function loadSnippetStructures(array $snippetIds, array $propertiesParamValue, string $webspaceKey, string $locale): array
+    private function convertFilters(array $filters, ?int $limit, int $page, ?int $pageSize, string $locale): array
     {
-        if (0 === \count($snippetIds)) {
+        $offset = 0;
+        if (null !== $pageSize && $page > 1) {
+            $offset = ($page - 1) * $pageSize;
+        }
+
+        return [
+            'categories' => $filters['categories'] ?? [],
+            'categoryOperator' => $filters['categoryOperator'] ?? 'OR',
+            'websiteCategories' => $filters['websiteCategories'] ?? [],
+            'websiteCategoryOperator' => $filters['websiteCategoriesOperator'] ?? 'OR',
+            'tags' => $filters['tags'] ?? [],
+            'tagOperator' => $filters['tagOperator'] ?? 'OR',
+            'websiteTags' => $filters['websiteTags'] ?? [],
+            'websiteTagOperator' => $filters['websiteTagsOperator'] ?? 'OR',
+            'types' => $filters['types'] ?? [],
+            'typesOperator' => 'OR',
+            'locale' => $locale,
+            'dataSource' => $filters['dataSource'] ?? null,
+            'limit' => $pageSize ?? $limit,
+            'offset' => $offset,
+            'includeSubFolders' => true,
+            'excludeDuplicates' => $filters['exclude_duplicates'] ?? false,
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function extractSortBys(array $filters): array
+    {
+        if (!isset($filters['sortBy']) || empty($filters['sortBy'])) {
             return [];
         }
 
-        $this->contentQueryBuilder->init([
-            'ids' => $snippetIds,
-            'properties' => $propertiesParamValue,
-        ]);
-        [$snippetsQuery] = $this->contentQueryBuilder->build($webspaceKey, [$locale]);
-
-        return $this->contentMapper->loadBySql2(
-            $snippetsQuery,
-            $locale,
-            $webspaceKey
-        );
+        return [$filters['sortBy'] => $filters['sortMethod'] ?? 'asc'];
     }
 }

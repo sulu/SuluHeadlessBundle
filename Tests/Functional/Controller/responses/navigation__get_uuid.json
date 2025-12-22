@@ -4,15 +4,13 @@
             {
                 "id": "@uuid@",
                 "uuid": "@uuid@",
-                "nodeType": 1,
                 "publishedState": true,
                 "published": "@string@.isDateTime()",
                 "title": "Test 1A",
                 "locale": "de",
                 "webspaceKey": "sulu_io",
                 "template": "default",
-                "parent": "@uuid@",
-                "path": "@string@.match(\"/test-1/test-1a\").optional()",
+                "parent": "@null@||@uuid@",
                 "url": "/test-1a",
                 "urls": {
                     "de": "/test-1a"
@@ -24,21 +22,19 @@
                 "changed": "@string@.isDateTime()",
                 "creator": null,
                 "created": "@string@.isDateTime()",
-                "order": 20,
+                "order": "@integer@",
                 "children": []
             },
             {
                 "id": "@uuid@",
                 "uuid": "@uuid@",
-                "nodeType": 1,
                 "publishedState": true,
                 "published": "@string@.isDateTime()",
                 "title": "Test 1B",
                 "locale": "de",
                 "webspaceKey": "sulu_io",
                 "template": "default",
-                "parent": "@uuid@",
-                "path": "@string@.match(\"/test-1/test-1b\").optional()",
+                "parent": "@null@||@uuid@",
                 "url": "/test-1b",
                 "urls": {
                     "de": "/test-1b"
@@ -50,7 +46,7 @@
                 "changed": "@string@.isDateTime()",
                 "creator": null,
                 "created": "@string@.isDateTime()",
-                "order": 30,
+                "order": "@integer@",
                 "children": []
             }
         ]

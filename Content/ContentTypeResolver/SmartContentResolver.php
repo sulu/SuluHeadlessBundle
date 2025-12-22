@@ -13,12 +13,13 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver;
 
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\OptionMetadata;
 use Sulu\Bundle\AudienceTargetingBundle\TargetGroup\TargetGroupStoreInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver\DataProviderResolverInterface;
 use Sulu\Bundle\TagBundle\Tag\TagManagerInterface;
 use Sulu\Component\Category\Request\CategoryRequestHandlerInterface;
-use Sulu\Component\Content\Compat\PropertyInterface;
 use Sulu\Component\Content\Compat\PropertyParameter;
 use Sulu\Component\SmartContent\DataProviderAliasInterface;
 use Sulu\Component\Tag\Request\TagRequestHandlerInterface;
@@ -34,71 +35,39 @@ class SmartContentResolver implements ContentTypeResolverInterface
     /**
      * @var DataProviderResolverInterface[]
      */
-    private $resolvers;
-
-    /**
-     * @var RequestStack
-     */
-    private $requestStack;
-
-    /**
-     * @var TagManagerInterface
-     */
-    private $tagManager;
-
-    /**
-     * @var TagRequestHandlerInterface
-     */
-    private $tagRequestHandler;
-
-    /**
-     * @var CategoryRequestHandlerInterface
-     */
-    private $categoryRequestHandler;
-
-    /**
-     * @var ?TargetGroupStoreInterface
-     */
-    private $targetGroupStore;
+    private array $resolvers;
 
     /**
      * @param \Traversable<DataProviderResolverInterface> $resolvers
      */
     public function __construct(
         \Traversable $resolvers,
-        TagManagerInterface $tagManager,
-        RequestStack $requestStack,
-        TagRequestHandlerInterface $tagRequestHandler,
-        CategoryRequestHandlerInterface $categoryRequestHandler,
-        ?TargetGroupStoreInterface $targetGroupStore = null
+        private TagManagerInterface $tagManager,
+        private RequestStack $requestStack,
+        private TagRequestHandlerInterface $tagRequestHandler,
+        private CategoryRequestHandlerInterface $categoryRequestHandler,
+        private ?TargetGroupStoreInterface $targetGroupStore = null,
     ) {
         $this->resolvers = \iterator_to_array($resolvers);
-        $this->tagManager = $tagManager;
-        $this->requestStack = $requestStack;
-        $this->tagRequestHandler = $tagRequestHandler;
-        $this->categoryRequestHandler = $categoryRequestHandler;
-        $this->targetGroupStore = $targetGroupStore;
     }
 
-    public function resolve($result, PropertyInterface $property, string $locale, array $attributes = []): ContentView
+    public function resolve(mixed $data, FieldMetadata $fieldMetadata, string $locale, array $attributes = []): ContentView
     {
         // gather data provider and effective parameters
-        $providerResolver = $this->getProviderResolver($property);
+        $providerResolver = $this->getProviderResolver($fieldMetadata);
 
         if (null === $providerResolver) {
-            // Return null if no provider is registered
-            return new ContentView(null, \is_array($result) ? $result : []);
+            return new ContentView(null, \is_array($data) ? $data : []);
         }
 
         /** @var PropertyParameter[] $params */
         $params = \array_merge(
             $this->getDefaultParams($providerResolver),
-            $property->getParams()
+            $this->convertOptionsToParams($fieldMetadata->getOptions())
         );
 
-        // prepare filters
-        $filters = $property->getValue();
-        $filters['excluded'] = [$property->getStructure()->getUuid()];
+        $filters = \is_array($data) ? $data : [];
+        $filters['excluded'] = isset($attributes['uuid']) ? [$attributes['uuid']] : [];
 
         // default value for the tag/category filter is an empty array
         if (!\array_key_exists('tags', $filters) || null === $filters['tags']) {
@@ -134,7 +103,7 @@ class SmartContentResolver implements ContentTypeResolverInterface
         $page = 1;
         $limit = $configuration->hasLimit() ? $filters['limitResult'] ?? null : null;
         $options = [
-            'webspaceKey' => $property->getStructure()->getWebspaceKey(),
+            'webspaceKey' => $attributes['webspaceKey'] ?? null,
             'locale' => $locale,
         ];
 
@@ -171,17 +140,38 @@ class SmartContentResolver implements ContentTypeResolverInterface
         return new ContentView($result->getItems(), $viewData);
     }
 
-    private function getProviderResolver(PropertyInterface $property): ?DataProviderResolverInterface
+    private function getProviderResolver(FieldMetadata $fieldMetadata): ?DataProviderResolverInterface
     {
-        $params = $property->getParams();
+        $options = $fieldMetadata->getOptions();
 
         $providerAlias = 'pages';
-        if (\array_key_exists('provider', $params)) {
-            /** @var string $providerAlias */
-            $providerAlias = $params['provider']->getValue();
+        foreach ($options as $option) {
+            if ('provider' === $option->getName()) {
+                $providerAlias = (string) $option->getValue();
+                break;
+            }
         }
 
         return $this->resolvers[$providerAlias] ?? null;
+    }
+
+    /**
+     * @param array<OptionMetadata> $options
+     *
+     * @return array<string, PropertyParameter>
+     */
+    private function convertOptionsToParams(array $options): array
+    {
+        $params = [];
+        foreach ($options as $option) {
+            $name = $option->getName();
+            if (null !== $name) {
+                $value = $option->getValue();
+                $params[$name] = new PropertyParameter($name, $value);
+            }
+        }
+
+        return $params;
     }
 
     /**
@@ -195,20 +185,17 @@ class SmartContentResolver implements ContentTypeResolverInterface
             return [];
         }
 
-        // a tag identifier might be a name or an id
         $ids = [];
-        $names = [];
 
         foreach ($tagIdentifiers as $tagIdentifier) {
             if (\is_numeric($tagIdentifier)) {
-                $ids[] = $tagIdentifier;
+                $ids[] = (int) $tagIdentifier;
             } else {
-                $names[] = $tagIdentifier;
+                $tag = $this->tagManager->findByName($tagIdentifier);
+                if ($tag) {
+                    $ids[] = $tag->getId();
+                }
             }
-        }
-
-        if (!empty($names)) {
-            $ids = \array_merge($ids, $this->tagManager->resolveTagNames($names));
         }
 
         return $ids;

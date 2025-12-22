@@ -18,13 +18,13 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 use Sulu\Bundle\ContactBundle\Api\Account;
 use Sulu\Bundle\ContactBundle\Contact\AccountManager;
 use Sulu\Bundle\ContactBundle\Entity\AccountInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\SingleAccountSelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\AccountSerializerInterface;
-use Sulu\Component\Content\Compat\PropertyInterface;
 
 class SingleAccountSelectionResolverTest extends TestCase
 {
@@ -45,10 +45,13 @@ class SingleAccountSelectionResolverTest extends TestCase
      */
     private $singleAccountSelectionResolver;
 
+    private FieldMetadata $fieldMetadata;
+
     protected function setUp(): void
     {
         $this->accountManager = $this->prophesize(AccountManager::class);
         $this->accountSerializer = $this->prophesize(AccountSerializerInterface::class);
+        $this->fieldMetadata = new FieldMetadata('account');
 
         $this->singleAccountSelectionResolver = new SingleAccountSelectionResolver(
             $this->accountManager->reveal(),
@@ -83,8 +86,7 @@ class SingleAccountSelectionResolverTest extends TestCase
             ],
         ]);
 
-        $property = $this->prophesize(PropertyInterface::class);
-        $result = $this->singleAccountSelectionResolver->resolve($data, $property->reveal(), $locale);
+        $result = $this->singleAccountSelectionResolver->resolve($data, $this->fieldMetadata, $locale);
 
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame(
@@ -110,9 +112,8 @@ class SingleAccountSelectionResolverTest extends TestCase
     public function testResolveDataIsNull(): void
     {
         $locale = 'en';
-        $property = $this->prophesize(PropertyInterface::class);
 
-        $result = $this->singleAccountSelectionResolver->resolve(null, $property->reveal(), $locale);
+        $result = $this->singleAccountSelectionResolver->resolve(null, $this->fieldMetadata, $locale);
 
         $this->assertNull($result->getContent());
 

@@ -18,12 +18,12 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 use Sulu\Bundle\CategoryBundle\Category\CategoryManagerInterface;
 use Sulu\Bundle\CategoryBundle\Entity\CategoryInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\CategorySelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\CategorySerializerInterface;
-use Sulu\Component\Content\Compat\PropertyInterface;
 
 class CategorySelectionResolverTest extends TestCase
 {
@@ -44,10 +44,13 @@ class CategorySelectionResolverTest extends TestCase
      */
     private $categorySelectionResolver;
 
+    private FieldMetadata $fieldMetadata;
+
     protected function setUp(): void
     {
         $this->categoryManager = $this->prophesize(CategoryManagerInterface::class);
         $this->categorySerializer = $this->prophesize(CategorySerializerInterface::class);
+        $this->fieldMetadata = new FieldMetadata('categories');
 
         $this->categorySelectionResolver = new CategorySelectionResolver(
             $this->categoryManager->reveal(),
@@ -86,9 +89,7 @@ class CategorySelectionResolverTest extends TestCase
             ],
         ]);
 
-        $property = $this->prophesize(PropertyInterface::class);
-
-        $result = $this->categorySelectionResolver->resolve([1], $property->reveal(), $locale);
+        $result = $this->categorySelectionResolver->resolve([1], $this->fieldMetadata, $locale);
 
         $this->assertInstanceOf(ContentView::class, $result);
 
@@ -120,9 +121,8 @@ class CategorySelectionResolverTest extends TestCase
     public function testResolveDataIsNull(): void
     {
         $locale = 'en';
-        $property = $this->prophesize(PropertyInterface::class);
 
-        $result = $this->categorySelectionResolver->resolve(null, $property->reveal(), $locale);
+        $result = $this->categorySelectionResolver->resolve(null, $this->fieldMetadata, $locale);
 
         $this->assertSame([], $result->getContent());
 
@@ -132,9 +132,8 @@ class CategorySelectionResolverTest extends TestCase
     public function testResolveDataIsEmptyArray(): void
     {
         $locale = 'en';
-        $property = $this->prophesize(PropertyInterface::class);
 
-        $result = $this->categorySelectionResolver->resolve([], $property->reveal(), $locale);
+        $result = $this->categorySelectionResolver->resolve([], $this->fieldMetadata, $locale);
 
         $this->assertSame([], $result->getContent());
 

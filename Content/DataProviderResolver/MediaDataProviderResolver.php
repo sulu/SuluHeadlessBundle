@@ -13,11 +13,12 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver;
 
+use Sulu\Bundle\AdminBundle\SmartContent\Configuration\ProviderConfigurationInterface;
+use Sulu\Bundle\AdminBundle\SmartContent\SmartContentProviderInterface;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializerInterface;
-use Sulu\Bundle\MediaBundle\Api\Media;
+use Sulu\Bundle\MediaBundle\Entity\MediaInterface;
+use Sulu\Bundle\MediaBundle\Entity\MediaRepositoryInterface;
 use Sulu\Component\Content\Compat\PropertyParameter;
-use Sulu\Component\Media\SmartContent\MediaDataProvider;
-use Sulu\Component\SmartContent\Configuration\ProviderConfigurationInterface;
 
 class MediaDataProviderResolver implements DataProviderResolverInterface
 {
@@ -26,27 +27,16 @@ class MediaDataProviderResolver implements DataProviderResolverInterface
         return 'media';
     }
 
-    /**
-     * @var MediaDataProvider
-     */
-    private $mediaDataProvider;
-
-    /**
-     * @var MediaSerializerInterface
-     */
-    private $mediaSerializer;
-
     public function __construct(
-        MediaDataProvider $mediaDataProvider,
-        MediaSerializerInterface $mediaSerializer
+        private SmartContentProviderInterface $mediaSmartContentProvider,
+        private MediaSerializerInterface $mediaSerializer,
+        private MediaRepositoryInterface $mediaRepository,
     ) {
-        $this->mediaDataProvider = $mediaDataProvider;
-        $this->mediaSerializer = $mediaSerializer;
     }
 
     public function getProviderConfiguration(): ProviderConfigurationInterface
     {
-        return $this->mediaDataProvider->getConfiguration();
+        return $this->mediaSmartContentProvider->getConfiguration();
     }
 
     /**
@@ -54,7 +44,7 @@ class MediaDataProviderResolver implements DataProviderResolverInterface
      */
     public function getProviderDefaultParams(): array
     {
-        return $this->mediaDataProvider->getDefaultPropertyParameter();
+        return [];
     }
 
     public function resolve(
@@ -63,24 +53,84 @@ class MediaDataProviderResolver implements DataProviderResolverInterface
         array $options = [],
         ?int $limit = null,
         int $page = 1,
-        ?int $pageSize = null
+        ?int $pageSize = null,
     ): DataProviderResult {
-        $providerResult = $this->mediaDataProvider->resolveResourceItems(
-            $filters,
-            $propertyParameters,
-            $options,
-            $limit,
-            $page,
-            $pageSize
-        );
+        $locale = $options['locale'] ?? 'en';
 
-        $items = [];
-        foreach ($providerResult->getItems() as $providerItem) {
-            /** @var Media $media */
-            $media = $providerItem->getResource();
-            $items[] = $this->mediaSerializer->serialize($media->getEntity(), $options['locale']);
+        // Convert filters to the new format expected by SmartContentProviderInterface
+        $smartFilters = $this->convertFilters($filters, $limit, $page, $pageSize);
+        $sortBys = $this->extractSortBys($filters);
+
+        // Get IDs from smart content provider
+        $flatResults = $this->mediaSmartContentProvider->findFlatBy($smartFilters, $sortBys, $options);
+
+        $ids = \array_map(fn (array $item) => (int) $item['id'], $flatResults);
+
+        if (empty($ids)) {
+            return new DataProviderResult([], false);
         }
 
-        return new DataProviderResult($items, $providerResult->getHasNextPage());
+        // Load and serialize media items
+        $items = [];
+        foreach ($ids as $id) {
+            /** @var MediaInterface|null $media */
+            $media = $this->mediaRepository->findMediaById($id);
+            if (null !== $media) {
+                $items[] = $this->mediaSerializer->serialize($media, $locale);
+            }
+        }
+
+        // Determine if there's a next page
+        $hasNextPage = false;
+        if (null !== $pageSize && \count($flatResults) >= $pageSize) {
+            $hasNextPage = true;
+        }
+
+        return new DataProviderResult($items, $hasNextPage);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function convertFilters(array $filters, ?int $limit, int $page, ?int $pageSize): array
+    {
+        $offset = 0;
+        if (null !== $pageSize && $page > 1) {
+            $offset = ($page - 1) * $pageSize;
+        }
+
+        return [
+            'categories' => $filters['categories'] ?? [],
+            'categoryOperator' => $filters['categoryOperator'] ?? 'OR',
+            'websiteCategories' => $filters['websiteCategories'] ?? [],
+            'websiteCategoryOperator' => $filters['websiteCategoriesOperator'] ?? 'OR',
+            'tags' => $filters['tags'] ?? [],
+            'tagOperator' => $filters['tagOperator'] ?? 'OR',
+            'websiteTags' => $filters['websiteTags'] ?? [],
+            'websiteTagOperator' => $filters['websiteTagsOperator'] ?? 'OR',
+            'types' => $filters['types'] ?? [],
+            'typesOperator' => 'OR',
+            'locale' => $filters['locale'] ?? 'en',
+            'dataSource' => $filters['dataSource'] ?? null,
+            'limit' => $pageSize ?? $limit,
+            'offset' => $offset,
+            'includeSubFolders' => $filters['includeSubFolders'] ?? true,
+            'excludeDuplicates' => $filters['exclude_duplicates'] ?? false,
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function extractSortBys(array $filters): array
+    {
+        if (!isset($filters['sortBy']) || empty($filters['sortBy'])) {
+            return [];
+        }
+
+        $sortBy = $filters['sortBy'];
+        $sortMethod = $filters['sortMethod'] ?? 'asc';
+
+        return [$sortBy => $sortMethod];
     }
 }

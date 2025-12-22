@@ -17,43 +17,44 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
-use Sulu\Bundle\ContactBundle\Api\Account;
+use Sulu\Bundle\AdminBundle\SmartContent\Configuration\ProviderConfigurationInterface;
+use Sulu\Bundle\AdminBundle\SmartContent\SmartContentProviderInterface;
 use Sulu\Bundle\ContactBundle\Entity\AccountInterface;
+use Sulu\Bundle\ContactBundle\Entity\AccountRepositoryInterface;
 use Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver\AccountDataProviderResolver;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\AccountSerializerInterface;
-use Sulu\Component\Contact\SmartContent\AccountDataProvider;
-use Sulu\Component\Content\Compat\PropertyParameter;
-use Sulu\Component\SmartContent\Configuration\ProviderConfigurationInterface;
-use Sulu\Component\SmartContent\DataProviderResult;
-use Sulu\Component\SmartContent\ResourceItemInterface;
 
 class AccountDataProviderResolverTest extends TestCase
 {
     use ProphecyTrait;
 
     /**
-     * @var AccountDataProvider|ObjectProphecy
+     * @var ObjectProphecy<SmartContentProviderInterface>
      */
-    private $accountDataProvider;
+    private ObjectProphecy $accountSmartContentProvider;
 
     /**
-     * @var AccountSerializerInterface|ObjectProphecy
+     * @var ObjectProphecy<AccountSerializerInterface>
      */
-    private $accountSerializer;
+    private ObjectProphecy $accountSerializer;
 
     /**
-     * @var AccountDataProviderResolver
+     * @var ObjectProphecy<AccountRepositoryInterface>
      */
-    private $accountResolver;
+    private ObjectProphecy $accountRepository;
+
+    private AccountDataProviderResolver $accountResolver;
 
     protected function setUp(): void
     {
-        $this->accountDataProvider = $this->prophesize(AccountDataProvider::class);
+        $this->accountSmartContentProvider = $this->prophesize(SmartContentProviderInterface::class);
         $this->accountSerializer = $this->prophesize(AccountSerializerInterface::class);
+        $this->accountRepository = $this->prophesize(AccountRepositoryInterface::class);
 
         $this->accountResolver = new AccountDataProviderResolver(
-            $this->accountDataProvider->reveal(),
-            $this->accountSerializer->reveal()
+            $this->accountSmartContentProvider->reveal(),
+            $this->accountSerializer->reveal(),
+            $this->accountRepository->reveal(),
         );
     }
 
@@ -65,40 +66,34 @@ class AccountDataProviderResolverTest extends TestCase
     public function testGetProviderConfiguration(): void
     {
         $configuration = $this->prophesize(ProviderConfigurationInterface::class);
-        $this->accountDataProvider->getConfiguration()->willReturn($configuration->reveal());
+        $this->accountSmartContentProvider->getConfiguration()->willReturn($configuration->reveal());
 
         $this->assertSame($configuration->reveal(), $this->accountResolver->getProviderConfiguration());
     }
 
     public function testGetProviderDefaultParams(): void
     {
-        $propertyParameter = $this->prophesize(PropertyParameter::class);
-        $this->accountDataProvider->getDefaultPropertyParameter()->willReturn(['test' => $propertyParameter->reveal()]);
-
-        $this->assertSame(['test' => $propertyParameter->reveal()], $this->accountResolver->getProviderDefaultParams());
+        $this->assertSame([], $this->accountResolver->getProviderDefaultParams());
     }
 
     public function testResolve(): void
     {
         $account1 = $this->prophesize(AccountInterface::class);
-        $apiAccount1 = $this->prophesize(Account::class);
-        $apiAccount1->getEntity()->willReturn($account1->reveal());
-
         $account2 = $this->prophesize(AccountInterface::class);
-        $apiAccount2 = $this->prophesize(Account::class);
-        $apiAccount2->getEntity()->willReturn($account2->reveal());
 
-        $resourceItem1 = $this->prophesize(ResourceItemInterface::class);
-        $resourceItem1->getResource()->willReturn($apiAccount1->reveal());
+        // SmartContentProvider returns flat results with id/title
+        $this->accountSmartContentProvider->findFlatBy(
+            Argument::type('array'),
+            Argument::type('array'),
+            ['locale' => 'en']
+        )->willReturn([
+            ['id' => '1', 'title' => 'Account 1'],
+            ['id' => '2', 'title' => 'Account 2'],
+        ]);
 
-        $resourceItem2 = $this->prophesize(ResourceItemInterface::class);
-        $resourceItem2->getResource()->willReturn($apiAccount2->reveal());
-
-        $providerResult = $this->prophesize(DataProviderResult::class);
-        $providerResult->getHasNextPage()->willReturn(true);
-        $providerResult->getItems()->willReturn([$resourceItem1, $resourceItem2]);
-
-        $this->accountDataProvider->resolveResourceItems([], [], ['locale' => 'en'], 10, 1, 5)->willReturn($providerResult->reveal());
+        // Repository fetches actual entities
+        $this->accountRepository->find(1)->willReturn($account1->reveal());
+        $this->accountRepository->find(2)->willReturn($account2->reveal());
 
         $this->accountSerializer->serialize($account1, 'en', Argument::cetera())->willReturn([
             'id' => 1,
@@ -112,7 +107,8 @@ class AccountDataProviderResolverTest extends TestCase
 
         $result = $this->accountResolver->resolve([], [], ['locale' => 'en'], 10, 1, 5);
 
-        $this->assertTrue($result->getHasNextPage());
+        // hasNextPage is true only when count >= pageSize
+        $this->assertFalse($result->getHasNextPage());
         $this->assertSame(
             [
                 [
@@ -126,5 +122,19 @@ class AccountDataProviderResolverTest extends TestCase
             ],
             $result->getItems()
         );
+    }
+
+    public function testResolveEmptyResult(): void
+    {
+        $this->accountSmartContentProvider->findFlatBy(
+            Argument::type('array'),
+            Argument::type('array'),
+            ['locale' => 'en']
+        )->willReturn([]);
+
+        $result = $this->accountResolver->resolve([], [], ['locale' => 'en'], 10, 1, 5);
+
+        $this->assertFalse($result->getHasNextPage());
+        $this->assertSame([], $result->getItems());
     }
 }

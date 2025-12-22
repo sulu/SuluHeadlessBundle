@@ -16,10 +16,10 @@ namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\CollectionSelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\SingleCollectionSelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
-use Sulu\Component\Content\Compat\PropertyInterface;
 
 class SingleCollectionSelectionResolverTest extends TestCase
 {
@@ -35,9 +35,12 @@ class SingleCollectionSelectionResolverTest extends TestCase
      */
     private $collectionSelectionResolver;
 
+    private FieldMetadata $fieldMetadata;
+
     protected function setUp(): void
     {
         $this->collectionSelectionResolver = $this->prophesize(CollectionSelectionResolver::class);
+        $this->fieldMetadata = new FieldMetadata('collection');
 
         $this->singleCollectionSelectionResolver = new SingleCollectionSelectionResolver(
             $this->collectionSelectionResolver->reveal()
@@ -51,8 +54,7 @@ class SingleCollectionSelectionResolverTest extends TestCase
 
     public function testResolve(): void
     {
-        $property = $this->prophesize(PropertyInterface::class);
-        $this->collectionSelectionResolver->resolve([1], $property, 'en', [])->willReturn(
+        $this->collectionSelectionResolver->resolve([1], $this->fieldMetadata, 'en', [])->willReturn(
             new ContentView(
                 [
                     [
@@ -66,7 +68,7 @@ class SingleCollectionSelectionResolverTest extends TestCase
             )
         );
 
-        $result = $this->singleCollectionSelectionResolver->resolve(1, $property->reveal(), 'en');
+        $result = $this->singleCollectionSelectionResolver->resolve(1, $this->fieldMetadata, 'en');
 
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame(
@@ -87,9 +89,8 @@ class SingleCollectionSelectionResolverTest extends TestCase
     public function testResolveDataIsNull(): void
     {
         $locale = 'en';
-        $property = $this->prophesize(PropertyInterface::class);
 
-        $result = $this->singleCollectionSelectionResolver->resolve(null, $property->reveal(), $locale);
+        $result = $this->singleCollectionSelectionResolver->resolve(null, $this->fieldMetadata, $locale);
 
         $this->assertNull($result->getContent());
 

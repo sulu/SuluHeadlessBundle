@@ -13,42 +13,37 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver;
 
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
-use Sulu\Component\Content\Compat\PropertyInterface;
 
 class SingleSnippetSelectionResolver implements ContentTypeResolverInterface
 {
-    /**
-     * @var ContentTypeResolverInterface
-     */
-    private $snippetSelectionResolver;
-
-    public function __construct(ContentTypeResolverInterface $snippetSelectionResolver)
-    {
-        $this->snippetSelectionResolver = $snippetSelectionResolver;
-    }
-
     public static function getContentType(): string
     {
         return 'single_snippet_selection';
     }
 
-    public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView
+    public function __construct(
+        private ContentTypeResolverInterface $snippetSelectionResolver,
+    ) {
+    }
+
+    public function resolve(mixed $data, FieldMetadata $fieldMetadata, string $locale, array $attributes = []): ContentView
     {
         $snippetId = $data ?: null;
 
         $contentView = $this->snippetSelectionResolver->resolve(
             \is_string($snippetId) ? [$snippetId] : null,
-            $property,
+            $fieldMetadata,
             $locale,
-            $attributes
+            $attributes,
         );
         $content = $contentView->getContent();
         $view = $contentView->getView();
 
         return new ContentView(
             $content[0] ?? null,
-            ['id' => $view['ids'][0] ?? null]
+            ['id' => $view['ids'][0] ?? null],
         );
     }
 }

@@ -17,11 +17,11 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
+use Sulu\Bundle\AdminBundle\Teaser\Teaser;
+use Sulu\Bundle\AdminBundle\Teaser\TeaserManagerInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\TeaserSelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\TeaserSerializerInterface;
-use Sulu\Bundle\PageBundle\Teaser\Teaser;
-use Sulu\Bundle\PageBundle\Teaser\TeaserManagerInterface;
-use Sulu\Component\Content\Compat\PropertyInterface;
 
 class TeaserSelectionResolverTest extends TestCase
 {
@@ -42,8 +42,11 @@ class TeaserSelectionResolverTest extends TestCase
      */
     private $teaserSelectionResolver;
 
+    private FieldMetadata $fieldMetadata;
+
     protected function setUp(): void
     {
+        $this->fieldMetadata = new FieldMetadata('teaser_selection');
         $this->teaserManager = $this->prophesize(TeaserManagerInterface::class);
         $this->teaserSerializer = $this->prophesize(TeaserSerializerInterface::class);
 
@@ -79,9 +82,6 @@ class TeaserSelectionResolverTest extends TestCase
             'presentAs' => 'two-columns',
             'items' => $items,
         ];
-
-        /** @var PropertyInterface|ObjectProphecy $property */
-        $property = $this->prophesize(PropertyInterface::class);
 
         $pageTeaser = $this->prophesize(Teaser::class);
         $articleTeaser = $this->prophesize(Teaser::class);
@@ -137,7 +137,7 @@ class TeaserSelectionResolverTest extends TestCase
             'media' => null,
         ]);
 
-        $result = $this->teaserSelectionResolver->resolve($value, $property->reveal(), $locale);
+        $result = $this->teaserSelectionResolver->resolve($value, $this->fieldMetadata, $locale);
 
         self::assertSame([
             [
@@ -190,13 +190,10 @@ class TeaserSelectionResolverTest extends TestCase
         $locale = 'en';
         $value = null;
 
-        /** @var PropertyInterface|ObjectProphecy $property */
-        $property = $this->prophesize(PropertyInterface::class);
-
         $this->teaserManager->find(Argument::any())->shouldNotBeCalled();
         $this->teaserSerializer->serialize(Argument::any())->shouldNotBeCalled();
 
-        $result = $this->teaserSelectionResolver->resolve($value, $property->reveal(), $locale);
+        $result = $this->teaserSelectionResolver->resolve($value, $this->fieldMetadata, $locale);
 
         self::assertSame([], $result->getContent());
         self::assertSame([

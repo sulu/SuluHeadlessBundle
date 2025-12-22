@@ -16,29 +16,15 @@ namespace Sulu\Bundle\HeadlessBundle\Content;
 class ContentView
 {
     /**
-     * @var mixed
-     */
-    private $content;
-
-    /**
-     * @var mixed[]
-     */
-    private $view;
-
-    /**
-     * @param mixed $content
      * @param mixed[] $view
      */
-    public function __construct($content, array $view = [])
-    {
-        $this->content = $content;
-        $this->view = $view;
+    public function __construct(
+        private mixed $content,
+        private array $view = [],
+    ) {
     }
 
-    /**
-     * @return mixed
-     */
-    public function getContent()
+    public function getContent(): mixed
     {
         return $this->content;
     }

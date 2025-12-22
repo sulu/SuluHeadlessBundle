@@ -4,7 +4,6 @@
             {
                 "id": "@uuid@",
                 "uuid": "@uuid@",
-                "nodeType": 1,
                 "changed": "@string@.isDateTime()",
                 "changer": null,
                 "created": "@string@.isDateTime()",
@@ -15,8 +14,7 @@
                 "locale": "de",
                 "webspaceKey": "sulu_io",
                 "template": "default",
-                "parent": "@uuid@",
-                "path": "@string@.match(\"/test-1\").optional()",
+                "parent": "@null@||@uuid@",
                 "url": "\/test-1",
                 "urls": {
                     "de": "\/test-1"
@@ -24,7 +22,7 @@
                 "lastModified": null,
                 "author": null,
                 "authored": "@string@.isDateTime()",
-                "order": 20,
+                "order": "@integer@",
                 "excerpt": {
                     "title": "",
                     "more": "",
@@ -41,7 +39,6 @@
             {
                 "id": "@uuid@",
                 "uuid": "@uuid@",
-                "nodeType": 1,
                 "changed": "@string@.isDateTime()",
                 "changer": null,
                 "created": "@string@.isDateTime()",
@@ -52,8 +49,7 @@
                 "locale": "de",
                 "webspaceKey": "sulu_io",
                 "template": "default",
-                "parent": "@uuid@",
-                "path": "@string@.match(\"/test-2\").optional()",
+                "parent": "@null@||@uuid@",
                 "url": "\/test-2",
                 "urls": {
                     "de": "\/test-2"
@@ -61,7 +57,7 @@
                 "lastModified": null,
                 "author": null,
                 "authored": "@string@.isDateTime()",
-                "order": 30,
+                "order": "@integer@",
                 "excerpt": {
                     "title": "",
                     "more": "",
@@ -110,4 +106,3 @@
         ]
     }
 }
-

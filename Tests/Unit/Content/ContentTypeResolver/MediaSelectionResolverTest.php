@@ -17,13 +17,13 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\MediaSelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializerInterface;
 use Sulu\Bundle\MediaBundle\Api\Media;
 use Sulu\Bundle\MediaBundle\Entity\MediaInterface;
 use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
-use Sulu\Component\Content\Compat\PropertyInterface;
 
 class MediaSelectionResolverTest extends TestCase
 {
@@ -44,10 +44,13 @@ class MediaSelectionResolverTest extends TestCase
      */
     private $mediaResolver;
 
+    private FieldMetadata $fieldMetadata;
+
     protected function setUp(): void
     {
         $this->mediaManager = $this->prophesize(MediaManagerInterface::class);
         $this->mediaSerializer = $this->prophesize(MediaSerializerInterface::class);
+        $this->fieldMetadata = new FieldMetadata('media');
 
         $this->mediaResolver = new MediaSelectionResolver(
             $this->mediaManager->reveal(),
@@ -64,7 +67,6 @@ class MediaSelectionResolverTest extends TestCase
     {
         $locale = 'en';
         $data = ['ids' => [1, 2]];
-        $property = $this->prophesize(PropertyInterface::class);
 
         // expected and unexpected service calls
         $media1 = $this->prophesize(MediaInterface::class);
@@ -93,7 +95,7 @@ class MediaSelectionResolverTest extends TestCase
         ])->shouldBeCalled();
 
         // call test function
-        $result = $this->mediaResolver->resolve($data, $property->reveal(), $locale);
+        $result = $this->mediaResolver->resolve($data, $this->fieldMetadata, $locale);
 
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame(
@@ -121,7 +123,6 @@ class MediaSelectionResolverTest extends TestCase
     {
         $data = null;
         $locale = 'en';
-        $property = $this->prophesize(PropertyInterface::class);
 
         // expected and unexpected service calls
         $this->mediaManager->getByIds(Argument::cetera())
@@ -130,7 +131,7 @@ class MediaSelectionResolverTest extends TestCase
             ->shouldNotBeCalled();
 
         // call test function
-        $result = $this->mediaResolver->resolve($data, $property->reveal(), $locale);
+        $result = $this->mediaResolver->resolve($data, $this->fieldMetadata, $locale);
 
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame([], $result->getContent());
@@ -141,7 +142,6 @@ class MediaSelectionResolverTest extends TestCase
     {
         $data = [];
         $locale = 'en';
-        $property = $this->prophesize(PropertyInterface::class);
 
         // expected and unexpected service calls
         $this->mediaManager->getByIds(Argument::cetera())
@@ -150,7 +150,7 @@ class MediaSelectionResolverTest extends TestCase
             ->shouldNotBeCalled();
 
         // call test function
-        $result = $this->mediaResolver->resolve($data, $property->reveal(), $locale);
+        $result = $this->mediaResolver->resolve($data, $this->fieldMetadata, $locale);
 
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame([], $result->getContent());
@@ -161,7 +161,6 @@ class MediaSelectionResolverTest extends TestCase
     {
         $dataWithoutIdsKey = ['unrelatedKey' => 'unrelatedValue'];
         $locale = 'en';
-        $property = $this->prophesize(PropertyInterface::class);
 
         // expected and unexpected service calls
         $this->mediaManager->getByIds(Argument::cetera())
@@ -170,7 +169,7 @@ class MediaSelectionResolverTest extends TestCase
             ->shouldNotBeCalled();
 
         // call test function
-        $result = $this->mediaResolver->resolve($dataWithoutIdsKey, $property->reveal(), $locale);
+        $result = $this->mediaResolver->resolve($dataWithoutIdsKey, $this->fieldMetadata, $locale);
 
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame([], $result->getContent());

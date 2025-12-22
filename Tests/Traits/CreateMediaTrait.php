@@ -22,21 +22,30 @@ use Sulu\Bundle\MediaBundle\Entity\FileVersion;
 use Sulu\Bundle\MediaBundle\Entity\FileVersionMeta;
 use Sulu\Bundle\MediaBundle\Entity\Media;
 use Sulu\Bundle\MediaBundle\Entity\MediaInterface;
-use Sulu\Bundle\MediaBundle\Entity\MediaType;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 trait CreateMediaTrait
 {
-    private static function createCollection(string $title, string $locale): CollectionInterface
+    protected static function createCollection(string $title, string $locale): CollectionInterface
     {
         $manager = static::getContainer()->get('doctrine.orm.entity_manager');
 
         $collection = new Collection();
 
         /** @var CollectionType|null $collectionType */
-        $collectionType = $manager->getRepository(CollectionType::class)->find(1);
+        $collectionType = $manager->getRepository(CollectionType::class)
+            ->findOneBy(['key' => 'default']);
+
         if (!$collectionType) {
-            throw new \RuntimeException('CollectionType "1" not found. Maybe sulu fixtures missing?');
+            $collectionType = $manager->getRepository(CollectionType::class)->find(1);
+        }
+
+        if (!$collectionType) {
+            $collectionType = new CollectionType();
+            $collectionType->setId(1);
+            $collectionType->setName('Default');
+            $collectionType->setKey('default');
+            $manager->persist($collectionType);
         }
 
         $collection->setType($collectionType);
@@ -54,7 +63,7 @@ trait CreateMediaTrait
         return $collection;
     }
 
-    private static function createMedia(
+    protected static function createMedia(
         string $title,
         CollectionInterface $collection,
         string $locale
@@ -70,12 +79,6 @@ trait CreateMediaTrait
             $fileName
         );
 
-        $mediaType = $manager->getRepository(MediaType::class)->find(2);
-
-        if (!$mediaType instanceof MediaType) {
-            throw new \RuntimeException('MediaType "2" not found. Maybe sulu fixtures missing?');
-        }
-
         $media = new Media();
 
         $file = new File();
@@ -83,7 +86,7 @@ trait CreateMediaTrait
             ->setMedia($media);
 
         $media->addFile($file)
-            ->setType($mediaType)
+            ->setType(MediaInterface::TYPE_IMAGE)
             ->setCollection($collection);
 
         $fileVersion = new FileVersion();

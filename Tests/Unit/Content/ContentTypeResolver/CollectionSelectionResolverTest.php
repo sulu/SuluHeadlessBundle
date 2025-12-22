@@ -16,12 +16,12 @@ namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\CollectionSelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\CollectionSerializerInterface;
 use Sulu\Bundle\MediaBundle\Entity\CollectionInterface;
 use Sulu\Bundle\MediaBundle\Entity\CollectionRepository;
-use Sulu\Component\Content\Compat\PropertyInterface;
 
 class CollectionSelectionResolverTest extends TestCase
 {
@@ -42,10 +42,13 @@ class CollectionSelectionResolverTest extends TestCase
      */
     private $collectionSelectionResolver;
 
+    private FieldMetadata $fieldMetadata;
+
     protected function setUp(): void
     {
         $this->collectionRepository = $this->prophesize(CollectionRepository::class);
         $this->collectionSerializer = $this->prophesize(CollectionSerializerInterface::class);
+        $this->fieldMetadata = new FieldMetadata('collections');
 
         $this->collectionSelectionResolver = new CollectionSelectionResolver(
             $this->collectionRepository->reveal(),
@@ -65,7 +68,7 @@ class CollectionSelectionResolverTest extends TestCase
         $collection1 = $this->prophesize(CollectionInterface::class);
         $collection1->getId()->willReturn(1);
         $collection2 = $this->prophesize(CollectionInterface::class);
-        $collection1->getId()->willReturn(2);
+        $collection2->getId()->willReturn(2);
 
         $this->collectionRepository->findBy(['id' => [1, 2]])->shouldBeCalled()->willReturn([
             $collection2->reveal(),
@@ -88,9 +91,7 @@ class CollectionSelectionResolverTest extends TestCase
                 'description' => 'description-1',
             ]);
 
-        $property = $this->prophesize(PropertyInterface::class);
-
-        $result = $this->collectionSelectionResolver->resolve([1, 2], $property->reveal(), $locale);
+        $result = $this->collectionSelectionResolver->resolve([1, 2], $this->fieldMetadata, $locale);
 
         $this->assertInstanceOf(ContentView::class, $result);
 
@@ -121,9 +122,8 @@ class CollectionSelectionResolverTest extends TestCase
     public function testResolveDataIsNull(): void
     {
         $locale = 'en';
-        $property = $this->prophesize(PropertyInterface::class);
 
-        $result = $this->collectionSelectionResolver->resolve(null, $property->reveal(), $locale);
+        $result = $this->collectionSelectionResolver->resolve(null, $this->fieldMetadata, $locale);
 
         $this->assertSame([], $result->getContent());
 
@@ -133,9 +133,8 @@ class CollectionSelectionResolverTest extends TestCase
     public function testResolveDataIsEmptyArray(): void
     {
         $locale = 'en';
-        $property = $this->prophesize(PropertyInterface::class);
 
-        $result = $this->collectionSelectionResolver->resolve([], $property->reveal(), $locale);
+        $result = $this->collectionSelectionResolver->resolve([], $this->fieldMetadata, $locale);
 
         $this->assertSame([], $result->getContent());
 

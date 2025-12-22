@@ -13,19 +13,17 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Content;
 
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\ContentTypeResolverInterface;
-use Sulu\Component\Content\Compat\PropertyInterface;
 
 class ContentResolver implements ContentResolverInterface
 {
     /**
-     * @var ContentTypeResolverInterface[]
+     * @var array<string, ContentTypeResolverInterface>
      */
-    private $resolvers;
+    private array $resolvers;
 
     /**
-     * ContentResolver constructor.
-     *
      * @param \Traversable<ContentTypeResolverInterface> $resolvers
      */
     public function __construct(\Traversable $resolvers)
@@ -33,12 +31,14 @@ class ContentResolver implements ContentResolverInterface
         $this->resolvers = \iterator_to_array($resolvers);
     }
 
-    public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView
+    public function resolve(mixed $data, FieldMetadata $fieldMetadata, string $locale, array $attributes = []): ContentView
     {
-        if (!\array_key_exists($property->getContentTypeName(), $this->resolvers)) {
+        $type = $fieldMetadata->getType();
+
+        if (!\array_key_exists($type, $this->resolvers)) {
             return new ContentView($data);
         }
 
-        return $this->resolvers[$property->getContentTypeName()]->resolve($data, $property, $locale, $attributes);
+        return $this->resolvers[$type]->resolve($data, $fieldMetadata, $locale, $attributes);
     }
 }

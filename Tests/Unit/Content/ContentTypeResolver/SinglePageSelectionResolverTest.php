@@ -16,10 +16,10 @@ namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\PageSelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\SinglePageSelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
-use Sulu\Component\Content\Compat\PropertyInterface;
 
 class SinglePageSelectionResolverTest extends TestCase
 {
@@ -35,9 +35,12 @@ class SinglePageSelectionResolverTest extends TestCase
      */
     private $pageSelectionResolver;
 
+    private FieldMetadata $fieldMetadata;
+
     protected function setUp(): void
     {
         $this->pageSelectionResolver = $this->prophesize(PageSelectionResolver::class);
+        $this->fieldMetadata = new FieldMetadata('page');
 
         $this->singlePageSelectionResolver = new SinglePageSelectionResolver(
             $this->pageSelectionResolver->reveal()
@@ -51,9 +54,8 @@ class SinglePageSelectionResolverTest extends TestCase
 
     public function testResolve(): void
     {
-        $property = $this->prophesize(PropertyInterface::class);
         $uuid = '2c55ea29-a5ba-4847-90ce-038b86384ab5';
-        $this->pageSelectionResolver->resolve([$uuid], $property, 'en', [])->willReturn(
+        $this->pageSelectionResolver->resolve([$uuid], $this->fieldMetadata, 'en', [])->willReturn(
             new ContentView(
                 [
                     [
@@ -76,7 +78,7 @@ class SinglePageSelectionResolverTest extends TestCase
             )
         );
 
-        $result = $this->singlePageSelectionResolver->resolve($uuid, $property->reveal(), 'en');
+        $result = $this->singlePageSelectionResolver->resolve($uuid, $this->fieldMetadata, 'en');
 
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame(
@@ -108,9 +110,8 @@ class SinglePageSelectionResolverTest extends TestCase
     public function testResolveDataIsNull(): void
     {
         $locale = 'en';
-        $property = $this->prophesize(PropertyInterface::class);
 
-        $result = $this->singlePageSelectionResolver->resolve(null, $property->reveal(), $locale);
+        $result = $this->singlePageSelectionResolver->resolve(null, $this->fieldMetadata, $locale);
 
         $this->assertNull($result->getContent());
 

@@ -18,13 +18,13 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 use Sulu\Bundle\ContactBundle\Api\Account;
 use Sulu\Bundle\ContactBundle\Contact\AccountManager;
 use Sulu\Bundle\ContactBundle\Entity\AccountInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\AccountSelectionResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\AccountSerializerInterface;
-use Sulu\Component\Content\Compat\PropertyInterface;
 
 class AccountSelectionResolverTest extends TestCase
 {
@@ -45,6 +45,8 @@ class AccountSelectionResolverTest extends TestCase
      */
     private $accountSelectionResolver;
 
+    private FieldMetadata $fieldMetadata;
+
     protected function setUp(): void
     {
         $this->accountManager = $this->prophesize(AccountManager::class);
@@ -54,6 +56,8 @@ class AccountSelectionResolverTest extends TestCase
             $this->accountManager->reveal(),
             $this->accountSerializer->reveal()
         );
+
+        $this->fieldMetadata = new FieldMetadata('accounts');
     }
 
     public function testGetContentType(): void
@@ -85,8 +89,7 @@ class AccountSelectionResolverTest extends TestCase
             ]
         );
 
-        $property = $this->prophesize(PropertyInterface::class);
-        $result = $this->accountSelectionResolver->resolve($data, $property->reveal(), $locale);
+        $result = $this->accountSelectionResolver->resolve($data, $this->fieldMetadata, $locale);
 
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame(
@@ -155,8 +158,7 @@ class AccountSelectionResolverTest extends TestCase
             ]
         );
 
-        $property = $this->prophesize(PropertyInterface::class);
-        $result = $this->accountSelectionResolver->resolve($data, $property->reveal(), $locale);
+        $result = $this->accountSelectionResolver->resolve($data, $this->fieldMetadata, $locale);
 
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame(
@@ -204,9 +206,8 @@ class AccountSelectionResolverTest extends TestCase
     public function testResolveDataIsNull(): void
     {
         $locale = 'en';
-        $property = $this->prophesize(PropertyInterface::class);
 
-        $result = $this->accountSelectionResolver->resolve(null, $property->reveal(), $locale);
+        $result = $this->accountSelectionResolver->resolve(null, $this->fieldMetadata, $locale);
 
         $this->assertSame([], $result->getContent());
 
@@ -216,9 +217,8 @@ class AccountSelectionResolverTest extends TestCase
     public function testResolveDataIsEmptyArray(): void
     {
         $locale = 'en';
-        $property = $this->prophesize(PropertyInterface::class);
 
-        $result = $this->accountSelectionResolver->resolve([], $property->reveal(), $locale);
+        $result = $this->accountSelectionResolver->resolve([], $this->fieldMetadata, $locale);
 
         $this->assertSame([], $result->getContent());
 

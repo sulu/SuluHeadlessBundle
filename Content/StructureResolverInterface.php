@@ -13,28 +13,35 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Content;
 
-use Sulu\Component\Content\Compat\StructureInterface;
+use Sulu\Content\Domain\Model\DimensionContentInterface;
 
 interface StructureResolverInterface
 {
     /**
-     * @return mixed[]
+     * Resolve a dimension content to a JSON-serializable array.
+     *
+     * @param array<string, string>|null $properties Optional property map to resolve only specific properties
+     *
+     * @return array<string, mixed>
      */
     public function resolve(
-        StructureInterface $structure,
+        DimensionContentInterface $dimensionContent,
         string $locale,
-        bool $includeExtension = true
+        bool $includeExtension = true,
+        ?array $properties = null,
     ): array;
 
     /**
-     * @param string[] $propertyMap
+     * Resolve only specific properties from the dimension content.
      *
-     * @return mixed[]
+     * @param array<string, string> $propertyMap Map of target property names to source property names
+     *
+     * @return array<string, mixed>
      */
     public function resolveProperties(
-        StructureInterface $structure,
+        DimensionContentInterface $dimensionContent,
         array $propertyMap,
         string $locale,
-        bool $includeExtension = false
+        bool $includeExtension = false,
     ): array;
 }

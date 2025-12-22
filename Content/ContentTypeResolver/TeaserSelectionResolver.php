@@ -13,11 +13,11 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver;
 
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
+use Sulu\Bundle\AdminBundle\Teaser\Teaser;
+use Sulu\Bundle\AdminBundle\Teaser\TeaserManagerInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\TeaserSerializerInterface;
-use Sulu\Bundle\PageBundle\Teaser\Teaser;
-use Sulu\Bundle\PageBundle\Teaser\TeaserManagerInterface;
-use Sulu\Component\Content\Compat\PropertyInterface;
 
 class TeaserSelectionResolver implements ContentTypeResolverInterface
 {
@@ -26,23 +26,13 @@ class TeaserSelectionResolver implements ContentTypeResolverInterface
         return 'teaser_selection';
     }
 
-    /**
-     * @var TeaserManagerInterface
-     */
-    private $teaserManager;
-
-    /**
-     * @var TeaserSerializerInterface
-     */
-    private $teaserSerializer;
-
-    public function __construct(TeaserManagerInterface $teaserManager, TeaserSerializerInterface $teaserSerializer)
-    {
-        $this->teaserManager = $teaserManager;
-        $this->teaserSerializer = $teaserSerializer;
+    public function __construct(
+        private TeaserManagerInterface $teaserManager,
+        private TeaserSerializerInterface $teaserSerializer,
+    ) {
     }
 
-    public function resolve($data, PropertyInterface $property, string $locale, array $attributes = []): ContentView
+    public function resolve(mixed $data, FieldMetadata $fieldMetadata, string $locale, array $attributes = []): ContentView
     {
         $value = \array_merge(
             [

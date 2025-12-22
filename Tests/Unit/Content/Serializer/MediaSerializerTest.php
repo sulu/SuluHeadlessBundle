@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\Serializer;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use JMS\Serializer\SerializationContext;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
@@ -20,6 +21,7 @@ use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializer;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializerInterface;
+use Sulu\Bundle\HttpCacheBundle\ReferenceStore\ReferenceStoreInterface;
 use Sulu\Bundle\MediaBundle\Api\Media;
 use Sulu\Bundle\MediaBundle\Entity\File;
 use Sulu\Bundle\MediaBundle\Entity\FileVersion;
@@ -28,7 +30,6 @@ use Sulu\Bundle\MediaBundle\Media\FormatCache\FormatCacheInterface;
 use Sulu\Bundle\MediaBundle\Media\FormatCache\LocalFormatCache;
 use Sulu\Bundle\MediaBundle\Media\ImageConverter\ImageConverterInterface;
 use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
-use Sulu\Bundle\WebsiteBundle\ReferenceStore\ReferenceStoreInterface;
 use Sulu\Component\Serializer\ArraySerializerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -119,7 +120,7 @@ class MediaSerializerTest extends TestCase
             ->willReturn(['png'])
             ->shouldBeCalled();
 
-        $this->referenceStore->add(1)
+        $this->referenceStore->add('1', 'media')
             ->shouldBeCalled();
 
         // call test function
@@ -166,7 +167,7 @@ class MediaSerializerTest extends TestCase
             ->willReturn([])
             ->shouldBeCalled();
 
-        $this->referenceStore->add(1)
+        $this->referenceStore->add('1', 'media')
             ->shouldBeCalled();
 
         // call test function
@@ -197,7 +198,7 @@ class MediaSerializerTest extends TestCase
         $previewMediaFile->getFileVersion(1)->willReturn($previewMediaFileVersion->reveal())->shouldBeCalled();
 
         $previewMedia = $this->prophesize(MediaInterface::class);
-        $previewMedia->getFiles()->willReturn([$previewMediaFile->reveal()])->shouldBeCalled();
+        $previewMedia->getFiles()->willReturn(new ArrayCollection([$previewMediaFile->reveal()]))->shouldBeCalled();
 
         $previewMedia->getId()->willReturn(1)->shouldBeCalled();
         $media->getPreviewImage()->willReturn($previewMedia->reveal())->shouldBeCalled();
@@ -225,7 +226,7 @@ class MediaSerializerTest extends TestCase
             ->willReturn(['png'])
             ->shouldBeCalled();
 
-        $this->referenceStore->add(1)
+        $this->referenceStore->add('1', 'media')
             ->shouldBeCalled();
 
         // call test function
@@ -276,7 +277,7 @@ class MediaSerializerTest extends TestCase
             ->willReturn(['png'])
             ->shouldBeCalled();
 
-        $this->referenceStore->add(1)
+        $this->referenceStore->add('1', 'media')
             ->shouldBeCalled();
 
         // call test function
