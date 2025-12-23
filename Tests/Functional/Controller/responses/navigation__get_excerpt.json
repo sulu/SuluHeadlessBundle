@@ -28,11 +28,9 @@
                     "more": "",
                     "description": "",
                     "categories": [],
-                    "audience_targeting_groups": [],
                     "tags": [],
-                    "segments": "@array@.isEmpty().optional()",
-                    "icon": [],
-                    "images": []
+                    "icon": null,
+                    "images": null
                 },
                 "children": []
             },
@@ -63,43 +61,34 @@
                     "more": "",
                     "description": "",
                     "categories": [],
-                    "audience_targeting_groups": [],
                     "tags": [],
-                    "segments": "@array@.isEmpty().optional()",
-                    "icon": [
-                        {
-                            "id": "@integer@",
-                            "locale": "de",
-                            "collection": "@integer@",
-                            "size": "@integer@",
-                            "mimeType": "image/png",
-                            "title": "Test Image",
-                            "description": "",
-                            "version": 1,
-                            "subVersion": 0,
-                            "name": "test-image.png",
-                            "type": {
-                                "name": "image",
-                                "id": 2
-                            },
-                            "isImage": true,
-                            "isVideo": false,
-                            "isAudio": false,
-                            "isDocument": false,
-                            "publishLanguages": [],
-                            "contentLanguages": [],
-                            "tags": [],
-                            "url": "@string@",
-                            "changed": "@string@.isDateTime()",
-                            "created": "@string@.isDateTime()",
-                            "properties": [],
-                            "categories": [],
-                            "targetGroups": [],
-                            "formatUri": "@string@.matchRegex('/^\\/uploads\\/media\\/{format}\\/\\d{2}\\/\\d+-test-image\\.{extension}\\?v=1-0$/')",
-                            "formatPreferredExtension": "png"
-                        }
-                    ],
-                    "images": []
+                    "icon": {
+                        "id": "@integer@",
+                        "locale": "de",
+                        "collection": "@integer@",
+                        "size": "@integer@",
+                        "mimeType": "image/png",
+                        "title": "Test Image",
+                        "description": "",
+                        "version": 1,
+                        "subVersion": 0,
+                        "name": "test-image.png",
+                        "type": "image",
+                        "isImage": true,
+                        "isVideo": false,
+                        "isAudio": false,
+                        "isDocument": false,
+                        "tags": [],
+                        "url": "@string@",
+                        "changed": "@string@.isDateTime()",
+                        "created": "@string@.isDateTime()",
+                        "properties": [],
+                        "categories": [],
+                        "targetGroups": [],
+                        "formatUri": "@string@.matchRegex('/^\\/uploads\\/media\\/{format}\\/\\d{2}\\/\\d+-test-image\\.{extension}\\?v=1-0$/')",
+                        "formatPreferredExtension": "png"
+                    },
+                    "images": null
                 },
                 "children": []
             }

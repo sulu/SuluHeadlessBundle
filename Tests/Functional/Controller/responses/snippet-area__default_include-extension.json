@@ -11,16 +11,11 @@
         "excerpt": {
             "audience_targeting_groups": [],
             "categories": [],
-            "description": "",
-            "icon": [],
-            "images": [],
-            "more": "",
             "segments": [],
             "tags": [
                 "tag1",
                 "tag2"
-            ],
-            "title": ""
+            ]
         }
     },
     "id": "@uuid@",

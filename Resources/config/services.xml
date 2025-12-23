@@ -4,6 +4,11 @@
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
     <services>
         <service
+            id="sulu_headless.property_path_parser"
+            class="Sulu\Bundle\HeadlessBundle\Content\Resolver\PropertyPathParser"
+        />
+
+        <service
             id="sulu_headless.structure_resolver"
             class="Sulu\Bundle\HeadlessBundle\Content\StructureResolver"
             public="true"
@@ -11,6 +16,7 @@
             <argument type="service" id="sulu_admin.form_metadata_provider"/>
             <argument type="service" id="sulu_headless.content_resolver"/>
             <argument type="service" id="sulu_http_cache.reference_store"/>
+            <argument type="service" id="sulu_headless.property_path_parser"/>
         </service>
         <service id="Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface" alias="sulu_headless.structure_resolver"/>
 

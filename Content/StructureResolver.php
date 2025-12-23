@@ -16,6 +16,7 @@ namespace Sulu\Bundle\HeadlessBundle\Content;
 use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FormMetadata;
 use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\TypedFormMetadata;
 use Sulu\Bundle\AdminBundle\Metadata\MetadataProviderInterface;
+use Sulu\Bundle\HeadlessBundle\Content\Resolver\PropertyPathParser;
 use Sulu\Bundle\HttpCacheBundle\ReferenceStore\ReferenceStoreInterface;
 use Sulu\Content\Domain\Model\AuthorInterface;
 use Sulu\Content\Domain\Model\DimensionContentInterface;
@@ -31,6 +32,7 @@ class StructureResolver implements StructureResolverInterface
         private MetadataProviderInterface $formMetadataProvider,
         private ContentResolverInterface $contentResolver,
         private ReferenceStoreInterface $referenceStore,
+        private PropertyPathParser $propertyPathParser,
     ) {
     }
 
@@ -60,18 +62,25 @@ class StructureResolver implements StructureResolverInterface
         // Build attributes with context for resolvers
         $attributes = $this->buildAttributes($dimensionContent);
 
+        // Parse property paths if filtering
+        $propertyFilter = null;
+        if (null !== $properties) {
+            $propertyFilter = $this->propertyPathParser->groupByContext($properties);
+        }
+
         // Resolve template content
         $content = [];
         $view = [];
 
         if ($dimensionContent instanceof TemplateInterface && null !== $templateKey) {
+            $templateFilter = $propertyFilter['template'] ?? null;
             [$content, $view] = $this->resolveTemplateContent(
                 $dimensionContent,
                 $templateType,
                 $templateKey,
                 $locale,
                 $attributes,
-                $properties,
+                $templateFilter,
             );
         }
 
@@ -84,9 +93,14 @@ class StructureResolver implements StructureResolverInterface
             'view' => $view,
         ];
 
-        // Add extension data if requested
+        // Add extension data if requested (with property filtering support)
         if ($includeExtension) {
-            $data['extension'] = $this->resolveExtensions($dimensionContent, $locale, $attributes);
+            $data['extension'] = $this->resolveExtensions(
+                $dimensionContent,
+                $locale,
+                $attributes,
+                $propertyFilter
+            );
         }
 
         // Add author/timestamps if available
@@ -98,39 +112,25 @@ class StructureResolver implements StructureResolverInterface
             $data['authored'] = $authored?->format(\DateTimeImmutable::ISO8601);
         }
 
-        // Add audit trail from resource if available
-        // Wrapped in try/catch to handle uninitialized typed properties
-        try {
-            if (\method_exists($resource, 'getChanger')) {
-                $changer = $resource->getChanger();
-                $data['changer'] = $changer?->getId();
-            }
-        } catch (\Error) {
-            // Property not initialized
+        // Add audit trail from resource if available (trust interface contracts)
+        if (\method_exists($resource, 'getChanger')) {
+            $changer = $resource->getChanger();
+            $data['changer'] = $changer?->getId();
         }
-        try {
-            if (\method_exists($resource, 'getChanged')) {
-                $changed = $resource->getChanged();
-                $data['changed'] = $changed?->format(\DateTimeImmutable::ISO8601);
-            }
-        } catch (\Error) {
-            // Property not initialized
+
+        if (\method_exists($resource, 'getChanged')) {
+            $changed = $resource->getChanged();
+            $data['changed'] = $changed?->format(\DateTimeImmutable::ISO8601);
         }
-        try {
-            if (\method_exists($resource, 'getCreator')) {
-                $creator = $resource->getCreator();
-                $data['creator'] = $creator?->getId();
-            }
-        } catch (\Error) {
-            // Property not initialized
+
+        if (\method_exists($resource, 'getCreator')) {
+            $creator = $resource->getCreator();
+            $data['creator'] = $creator?->getId();
         }
-        try {
-            if (\method_exists($resource, 'getCreated')) {
-                $created = $resource->getCreated();
-                $data['created'] = $created?->format(\DateTimeImmutable::ISO8601);
-            }
-        } catch (\Error) {
-            // Property not initialized
+
+        if (\method_exists($resource, 'getCreated')) {
+            $created = $resource->getCreated();
+            $data['created'] = $created?->format(\DateTimeImmutable::ISO8601);
         }
 
         return $data;
@@ -241,6 +241,7 @@ class StructureResolver implements StructureResolverInterface
      * Resolve extension data (excerpt, seo) using the form metadata system.
      *
      * @param array<string, mixed> $attributes
+     * @param array<string, array<string, string>>|null $propertyFilter Optional property filter grouped by context
      *
      * @return array<string, mixed>
      */
@@ -248,31 +249,38 @@ class StructureResolver implements StructureResolverInterface
         DimensionContentInterface $dimensionContent,
         string $locale,
         array $attributes,
+        ?array $propertyFilter = null,
     ): array {
         $extensions = [];
 
         // Resolve excerpt data using form metadata with instanceOf option to merge forms
         if ($dimensionContent instanceof ExcerptInterface) {
+            $excerptFilter = $propertyFilter['excerpt'] ?? null;
             $extensions['excerpt'] = $this->resolveExcerptData(
                 $dimensionContent,
                 $locale,
                 $attributes,
+                $excerptFilter,
             );
         } elseif ($dimensionContent instanceof TaxonomyInterface) {
             // Snippets only implement TaxonomyInterface, not ExcerptInterface
+            $excerptFilter = $propertyFilter['excerpt'] ?? null;
             $extensions['excerpt'] = $this->resolveTaxonomyOnlyData(
                 $dimensionContent,
                 $locale,
                 $attributes,
+                $excerptFilter,
             );
         }
 
         // Resolve SEO data using form metadata with instanceOf option to merge forms
         if ($dimensionContent instanceof SeoInterface) {
+            $seoFilter = $propertyFilter['seo'] ?? null;
             $extensions['seo'] = $this->resolveSeoData(
                 $dimensionContent,
                 $locale,
                 $attributes,
+                $seoFilter,
             );
         }
 
@@ -283,6 +291,7 @@ class StructureResolver implements StructureResolverInterface
      * Resolve excerpt data dynamically using merged form metadata.
      *
      * @param array<string, mixed> $attributes
+     * @param array<string, string>|null $fieldFilter Optional field filter (target => source field names)
      *
      * @return array<string, mixed>
      */
@@ -290,6 +299,7 @@ class StructureResolver implements StructureResolverInterface
         ExcerptInterface $dimensionContent,
         string $locale,
         array $attributes,
+        ?array $fieldFilter = null,
     ): array {
         $excerptData = $dimensionContent->getExcerptData();
 
@@ -317,13 +327,14 @@ class StructureResolver implements StructureResolverInterface
             return $rawData;
         }
 
-        return $this->resolveFormFields($formMetadata, $rawData, $locale, $attributes);
+        return $this->resolveFormFields($formMetadata, $rawData, $locale, $attributes, $fieldFilter);
     }
 
     /**
      * Resolve taxonomy-only data for entities that implement TaxonomyInterface but not ExcerptInterface.
      *
      * @param array<string, mixed> $attributes
+     * @param array<string, string>|null $fieldFilter Optional field filter (target => source field names)
      *
      * @return array<string, mixed>
      */
@@ -331,25 +342,35 @@ class StructureResolver implements StructureResolverInterface
         TaxonomyInterface $dimensionContent,
         string $locale,
         array $attributes,
+        ?array $fieldFilter = null,
     ): array {
-        // Snippets only have taxonomy data, provide all expected excerpt fields for compatibility
-        return [
-            'title' => '',
-            'more' => '',
-            'description' => '',
+        $data = [
             'categories' => $dimensionContent->getExcerptCategoryIds(),
             'tags' => $dimensionContent->getExcerptTagNames(),
             'audience_targeting_groups' => $dimensionContent->getExcerptAudienceTargetGroupIds(),
             'segments' => $dimensionContent->getExcerptSegment() ?? [],
-            'icon' => [],
-            'images' => [],
         ];
+
+        // Apply field filter if provided
+        if (null !== $fieldFilter) {
+            $filteredData = [];
+            foreach ($fieldFilter as $targetKey => $sourceKey) {
+                if (\array_key_exists($sourceKey, $data)) {
+                    $filteredData[$targetKey] = $data[$sourceKey];
+                }
+            }
+
+            return $filteredData;
+        }
+
+        return $data;
     }
 
     /**
      * Resolve SEO data dynamically using merged form metadata.
      *
      * @param array<string, mixed> $attributes
+     * @param array<string, string>|null $fieldFilter Optional field filter (target => source field names)
      *
      * @return array<string, mixed>
      */
@@ -357,6 +378,7 @@ class StructureResolver implements StructureResolverInterface
         SeoInterface $dimensionContent,
         string $locale,
         array $attributes,
+        ?array $fieldFilter = null,
     ): array {
         $seoData = $dimensionContent->getSeoData();
 
@@ -381,7 +403,7 @@ class StructureResolver implements StructureResolverInterface
             return $rawData;
         }
 
-        return $this->resolveFormFields($formMetadata, $rawData, $locale, $attributes);
+        return $this->resolveFormFields($formMetadata, $rawData, $locale, $attributes, $fieldFilter);
     }
 
     /**
@@ -389,6 +411,7 @@ class StructureResolver implements StructureResolverInterface
      *
      * @param array<string, mixed> $data
      * @param array<string, mixed> $attributes
+     * @param array<string, string>|null $fieldFilter Optional field filter (target => source field names)
      *
      * @return array<string, mixed>
      */
@@ -397,6 +420,7 @@ class StructureResolver implements StructureResolverInterface
         array $data,
         string $locale,
         array $attributes,
+        ?array $fieldFilter = null,
     ): array {
         $fieldMetadataList = $formMetadata->getFlatFieldMetadata();
         $resolved = [];
@@ -404,23 +428,50 @@ class StructureResolver implements StructureResolverInterface
         // Field types that are display-only and should not be included in output
         $displayOnlyTypes = ['search_result'];
 
-        foreach ($fieldMetadataList as $fieldName => $fieldMetadata) {
+        // If field filter provided, build the fields to resolve
+        $fieldsToResolve = [];
+        if (null !== $fieldFilter) {
+            foreach ($fieldFilter as $targetKey => $sourceKey) {
+                // Find the metadata for this source key
+                if (\array_key_exists($sourceKey, $fieldMetadataList)) {
+                    $fieldsToResolve[$targetKey] = [
+                        'metadata' => $fieldMetadataList[$sourceKey],
+                        'sourceKey' => $sourceKey,
+                    ];
+                }
+            }
+        } else {
+            // No filter - resolve all fields
+            foreach ($fieldMetadataList as $fieldName => $fieldMetadata) {
+                $fieldsToResolve[$fieldName] = [
+                    'metadata' => $fieldMetadata,
+                    'sourceKey' => $fieldName,
+                ];
+            }
+        }
+
+        foreach ($fieldsToResolve as $outputKey => $fieldInfo) {
+            $fieldMetadata = $fieldInfo['metadata'];
+            $sourceKey = $fieldInfo['sourceKey'];
+
             // Skip display-only fields
             if (\in_array($fieldMetadata->getType(), $displayOnlyTypes, true)) {
                 continue;
             }
 
             // Handle prefixed field names (e.g., excerpt/title -> title, seo/description -> description)
-            $dataKey = $fieldName;
-            if (\str_contains($fieldName, '/')) {
-                $parts = \explode('/', $fieldName);
+            $dataKey = $sourceKey;
+            if (\str_contains($sourceKey, '/')) {
+                $parts = \explode('/', $sourceKey);
                 $dataKey = \end($parts);
             }
 
-            // Map output field names to expected format
-            $outputKey = $this->mapFieldName($dataKey);
+            // Map output field name if no filter (when filtering, use target key as-is)
+            if (null === $fieldFilter) {
+                $outputKey = $this->mapFieldName($dataKey);
+            }
 
-            $value = $data[$dataKey] ?? $data[$fieldName] ?? null;
+            $value = $data[$dataKey] ?? $data[$sourceKey] ?? null;
             $contentView = $this->contentResolver->resolve($value, $fieldMetadata, $locale, $attributes);
             $content = $contentView->getContent();
 

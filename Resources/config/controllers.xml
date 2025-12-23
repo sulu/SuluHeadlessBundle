@@ -9,7 +9,11 @@
             public="true"
         >
             <argument type="service" id="sulu_page.navigation_repository"/>
+            <argument type="service" id="jms_serializer.serializer"/>
             <argument type="service" id="sulu_http_cache.reference_store"/>
+            <argument type="service" id="sulu_core.webspace.request_analyzer"/>
+            <argument type="service" id="sulu_headless.serializer.media"/>
+            <argument type="service" id="sulu_headless.serializer.category"/>
             <argument>%sulu_http_cache.cache.max_age%</argument>
             <argument>%sulu_http_cache.cache.shared_max_age%</argument>
             <argument>%sulu_headless.navigation.cache_lifetime%</argument>

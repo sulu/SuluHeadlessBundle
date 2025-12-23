@@ -16,6 +16,7 @@ namespace Sulu\Bundle\HeadlessBundle\Tests\Application;
 use Sulu\Bundle\HeadlessBundle\SuluHeadlessBundle;
 use Sulu\Bundle\TestBundle\Kernel\SuluTestKernel;
 use Sulu\Snippet\Infrastructure\Symfony\HttpKernel\SuluSnippetBundle;
+use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 
@@ -31,13 +32,19 @@ class Kernel extends SuluTestKernel
         $bundles[] = new SuluSnippetBundle();
         $bundles[] = new SuluHeadlessBundle();
 
+        // Register SecurityBundle for website context (already registered for admin in parent)
+        if (self::CONTEXT_WEBSITE === $this->getContext()) {
+            $bundles[] = new SecurityBundle();
+        }
+
         return $bundles;
     }
 
     public function registerContainerConfiguration(LoaderInterface $loader): void
     {
         parent::registerContainerConfiguration($loader);
-        $loader->load(__DIR__ . '/config/config.yml');
+
+        $loader->load(__DIR__ . '/config/config_' . $this->getContext() . '.yml');
     }
 
     public function getProjectDir(): string
