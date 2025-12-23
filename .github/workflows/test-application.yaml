@@ -14,7 +14,7 @@ jobs:
 
         env:
             COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            DATABASE_URL: mysql://root:root@127.0.0.1:3306/su_headless_test?serverVersion=5.7
+            DATABASE_URL: mysql://root:root@127.0.0.1:3306/su_headless_test?serverVersion=8.0
             DATABASE_CHARSET: utf8mb4
             DATABASE_COLLATE: utf8mb4_unicode_ci
 
@@ -29,6 +29,13 @@ jobs:
                       env:
                           SYMFONY_DEPRECATIONS_HELPER: weak
 
+                    - php-version: '8.2'
+                      coverage: true
+                      dependency-versions: 'highest'
+                      tools: 'composer:v2'
+                      env:
+                          SYMFONY_DEPRECATIONS_HELPER: weak
+
                     - php-version: '8.3'
                       coverage: false
                       dependency-versions: 'highest'
@@ -37,10 +44,10 @@ jobs:
                           SYMFONY_DEPRECATIONS_HELPER: weak
 
                     - php-version: '8.4'
-                      coverage: true
+                      coverage: false
                       dependency-versions: 'highest'
                       tools: 'composer:v2'
-                      composer-options: '--ignore-platform-reqs'
+                      composer-stability: 'dev'
                       env:
                           SYMFONY_DEPRECATIONS_HELPER: weak
 
@@ -48,13 +55,13 @@ jobs:
                       coverage: false
                       dependency-versions: 'highest'
                       tools: 'composer:v2'
-                      composer-options: '--ignore-platform-reqs'
+                      composer-stability: 'dev'
                       env:
                           SYMFONY_DEPRECATIONS_HELPER: weak
 
         services:
             mysql:
-                image: mysql:5.7
+                image: mysql:8.0
                 env:
                     MYSQL_ROOT_PASSWORD: root
                 ports:
@@ -78,6 +85,10 @@ jobs:
               # testing lowest versions.
               run: composer remove "*php-cs-fixer*" "*phpstan*" "*rector*" --dev --no-update
 
+            - name: Set composer stability
+              if: ${{ matrix.composer-stability }}
+              run: composer config minimum-stability ${{ matrix.composer-stability }}
+
             - name: Install composer dependencies
               uses: ramsey/composer-install@v3
               with:
@@ -88,10 +99,10 @@ jobs:
               run: composer bootstrap-test-environment
 
             - name: Execute unit test cases
-              run: composer test -- Tests/Unit --coverage-php var/coverage.php --coverage-html coverage-report --log-junit var/junit.xml --config ${{ matrix.phpunit-config || 'phpunit.xml.dist' }}
+              run: composer test -- Tests/Unit --coverage-php var/coverage.php --coverage-html coverage-report --log-junit var/junit.xml --config phpunit.xml.dist
 
             - name: Execute functional test cases
-              run: composer test -- Tests/Functional --log-junit var/junit.xml --config ${{ matrix.phpunit-config || 'phpunit.xml.dist' }}
+              run: composer test -- Tests/Functional --log-junit var/junit.xml --config phpunit.xml.dist
 
             - name: Check code coverage
               if: ${{ matrix.coverage }}
@@ -103,7 +114,7 @@ jobs:
 
         env:
             COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            DATABASE_URL: mysql://root:root@127.0.0.1:3306/su_headless_test?serverVersion=5.7
+            DATABASE_URL: mysql://root:root@127.0.0.1:3306/su_headless_test?serverVersion=8.0
             DATABASE_CHARSET: utf8mb4
             DATABASE_COLLATE: utf8mb4_unicode_ci
 
