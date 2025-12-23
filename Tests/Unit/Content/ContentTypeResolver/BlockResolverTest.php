@@ -44,7 +44,6 @@ class BlockResolverTest extends TestCase
     {
         $this->contentResolver = $this->prophesize(ContentResolverInterface::class);
 
-        // Set up a mock form metadata provider that returns empty global blocks
         $formMetadataProvider = $this->prophesize(MetadataProviderInterface::class);
         $typedFormMetadata = new TypedFormMetadata();
         $formMetadataProvider->getMetadata('block', 'en', [])->willReturn($typedFormMetadata);
@@ -80,27 +79,19 @@ class BlockResolverTest extends TestCase
         $this->fieldMetadata->addType($titleTypeMetadata);
         $this->fieldMetadata->addType($mediaTypeMetadata);
 
-        $titleContentView = $this->prophesize(ContentView::class);
-        $titleContentView->getContent()->willReturn('test-123');
-        $titleContentView->getView()->willReturn([]);
-
         $this->contentResolver->resolve(
             'test-123',
             $titleFieldMetadata,
             'en',
             ['webspaceKey' => 'sulu_io']
-        )->willReturn($titleContentView->reveal());
-
-        $mediaContentView = $this->prophesize(ContentView::class);
-        $mediaContentView->getContent()->willReturn(['media1', 'media2', 'media3']);
-        $mediaContentView->getView()->willReturn(['ids' => [1, 2, 3]]);
+        )->willReturn(new ContentView('test-123', []));
 
         $this->contentResolver->resolve(
             ['ids' => [1, 2, 3]],
             $mediaFieldMetadata,
             'en',
             ['webspaceKey' => 'sulu_io']
-        )->willReturn($mediaContentView->reveal());
+        )->willReturn(new ContentView(['media1', 'media2', 'media3'], ['ids' => [1, 2, 3]]));
 
         $data = [
             [
@@ -167,27 +158,19 @@ class BlockResolverTest extends TestCase
         $this->fieldMetadata->addType($titleTypeMetadata);
         $this->fieldMetadata->addType($mediaTypeMetadata);
 
-        $titleContentView = $this->prophesize(ContentView::class);
-        $titleContentView->getContent()->willReturn('test-123');
-        $titleContentView->getView()->willReturn([]);
-
         $this->contentResolver->resolve(
             'test-123',
             $titleFieldMetadata,
             'en',
             ['webspaceKey' => 'sulu_io']
-        )->willReturn($titleContentView->reveal());
-
-        $mediaContentView = $this->prophesize(ContentView::class);
-        $mediaContentView->getContent()->willReturn(['media1', 'media2', 'media3']);
-        $mediaContentView->getView()->willReturn(['ids' => [1, 2, 3]]);
+        )->willReturn(new ContentView('test-123', []));
 
         $this->contentResolver->resolve(
             ['ids' => [1, 2, 3]],
             $mediaFieldMetadata,
             'en',
             ['webspaceKey' => 'sulu_io']
-        )->willReturn($mediaContentView->reveal());
+        )->willReturn(new ContentView(['media1', 'media2', 'media3'], ['ids' => [1, 2, 3]]));
 
         $data = [
             [
@@ -297,6 +280,74 @@ class BlockResolverTest extends TestCase
             [],
             $result->getView()
         );
+    }
+
+    public function testResolveWithInvalidBlockItem(): void
+    {
+        $data = [
+            'not-an-array',
+            ['no-type' => 'missing type field'],
+        ];
+
+        $blockResolver = $this->createBlockResolver();
+        $result = $blockResolver->resolve($data, $this->fieldMetadata, 'en', []);
+
+        $this->assertInstanceOf(ContentView::class, $result);
+        $this->assertSame([], $result->getContent());
+        $this->assertSame([], $result->getView());
+    }
+
+    public function testResolveWithUnknownBlockType(): void
+    {
+        $data = [
+            [
+                'type' => 'unknown_type',
+                'title' => 'Test',
+            ],
+        ];
+
+        $blockResolver = $this->createBlockResolver();
+        $result = $blockResolver->resolve($data, $this->fieldMetadata, 'en', []);
+
+        $this->assertInstanceOf(ContentView::class, $result);
+        $this->assertSame([], $result->getContent());
+        $this->assertSame([], $result->getView());
+    }
+
+    public function testResolveWithNonTypedFormMetadata(): void
+    {
+        $formMetadataProvider = $this->prophesize(MetadataProviderInterface::class);
+        $formMetadataProvider->getMetadata('block', 'en', [])->willReturn(new FormMetadata());
+
+        $container = new Container();
+        $container->set('form', $formMetadataProvider->reveal());
+        $metadataProviderRegistry = new MetadataProviderRegistry($container);
+
+        $titleFieldMetadata = new FieldMetadata('title');
+        $titleFieldMetadata->setType('text_line');
+
+        $titleTypeMetadata = new FormMetadata();
+        $titleTypeMetadata->setKey('title');
+        $titleTypeMetadata->addItem($titleFieldMetadata);
+
+        $this->fieldMetadata->addType($titleTypeMetadata);
+
+        $this->contentResolver->resolve('Test', $titleFieldMetadata, 'en', [])
+            ->willReturn(new ContentView('Test', []));
+
+        $resolver = new BlockResolver(
+            $this->contentResolver->reveal(),
+            $metadataProviderRegistry,
+        );
+
+        $data = [
+            ['type' => 'title', 'title' => 'Test'],
+        ];
+
+        $result = $resolver->resolve($data, $this->fieldMetadata, 'en', []);
+
+        $this->assertInstanceOf(ContentView::class, $result);
+        $this->assertCount(1, $result->getContent());
     }
 
     /**

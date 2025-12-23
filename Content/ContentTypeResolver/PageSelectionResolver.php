@@ -72,8 +72,6 @@ class PageSelectionResolver implements ContentTypeResolverInterface
     }
 
     /**
-     * Get property map from field metadata options.
-     *
      * @return array<string, string>
      */
     private function getPropertyMap(FieldMetadata $fieldMetadata): array

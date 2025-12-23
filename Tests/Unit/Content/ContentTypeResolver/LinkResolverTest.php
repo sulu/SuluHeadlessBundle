@@ -113,4 +113,66 @@ class LinkResolverTest extends TestCase
             'locale' => 'en',
         ], $result->getView());
     }
+
+    public function testResolveWithEmptyData(): void
+    {
+        $providerPool = $this->prophesize(LinkProviderPoolInterface::class);
+        $linkResolver = new LinkResolver($providerPool->reveal());
+
+        $result = $linkResolver->resolve([], $this->fieldMetadata, 'en');
+
+        $this->assertNull($result->getContent());
+        $this->assertSame([], $result->getView());
+    }
+
+    public function testResolveWithNullData(): void
+    {
+        $providerPool = $this->prophesize(LinkProviderPoolInterface::class);
+        $linkResolver = new LinkResolver($providerPool->reveal());
+
+        $result = $linkResolver->resolve(null, $this->fieldMetadata, 'en');
+
+        $this->assertNull($result->getContent());
+        $this->assertSame([], $result->getView());
+    }
+
+    public function testResolveWithMissingHref(): void
+    {
+        $providerPool = $this->prophesize(LinkProviderPoolInterface::class);
+        $linkResolver = new LinkResolver($providerPool->reveal());
+
+        $result = $linkResolver->resolve([
+            'provider' => 'page',
+            'locale' => 'en',
+        ], $this->fieldMetadata, 'en');
+
+        $this->assertNull($result->getContent());
+        $this->assertSame([
+            'provider' => 'page',
+            'locale' => 'en',
+        ], $result->getView());
+    }
+
+    public function testResolveWithEmptyLinkItems(): void
+    {
+        $providerPool = $this->prophesize(LinkProviderPoolInterface::class);
+        $provider = $this->prophesize(LinkProviderInterface::class);
+        $linkResolver = new LinkResolver($providerPool->reveal());
+
+        $providerPool->getProvider('page')
+            ->shouldBeCalled()
+            ->willReturn($provider->reveal());
+
+        $provider->preload(['non-existent-id'], 'en')
+            ->shouldBeCalled()
+            ->willReturn([]);
+
+        $result = $linkResolver->resolve([
+            'provider' => 'page',
+            'href' => 'non-existent-id',
+            'locale' => 'en',
+        ], $this->fieldMetadata, 'en');
+
+        $this->assertNull($result->getContent());
+    }
 }

@@ -300,4 +300,49 @@ class SmartContentResolverTest extends TestCase
         self::assertNull($result->getContent());
         self::assertSame(['key' => 'value'], $result->getView());
     }
+
+    public function testResolvePaginatedWithNullRequest(): void
+    {
+        $configuration = $this->prophesize(ProviderConfigurationInterface::class);
+        $configuration->getSorting()->willReturn(null);
+        $configuration->hasDatasource()->willReturn(false);
+        $configuration->hasTags()->willReturn(false);
+        $configuration->hasCategories()->willReturn(false);
+        $configuration->hasSorting()->willReturn(false);
+        $configuration->hasLimit()->willReturn(true);
+        $configuration->hasPagination()->willReturn(true);
+        $configuration->hasPresentAs()->willReturn(false);
+        $configuration->hasAudienceTargeting()->willReturn(false);
+        $configuration->getDatasourceResourceKey()->willReturn(null);
+        $configuration->getDatasourceAdapter()->willReturn(null);
+        $this->mediaProviderResolver->getProviderConfiguration()->willReturn($configuration->reveal());
+        $this->mediaProviderResolver->getProviderDefaultParams()->willReturn([]);
+
+        $this->tagRequestHandler->getTags('tags')->willReturn([]);
+        $this->categoryRequestHandler->getCategories('categories')->willReturn([]);
+
+        $this->requestStack->getCurrentRequest()->willReturn(null);
+
+        $providerResult = $this->prophesize(DataProviderResult::class);
+        $providerResult->getHasNextPage()->willReturn(false);
+        $providerResult->getItems()->willReturn([]);
+        $this->mediaProviderResolver->resolve(
+            Argument::any(),
+            Argument::any(),
+            Argument::any(),
+            Argument::any(),
+            1,
+            5
+        )->willReturn($providerResult->reveal());
+
+        $maxPerPageOption = new OptionMetadata();
+        $maxPerPageOption->setName('max_per_page');
+        $maxPerPageOption->setValue(5);
+        $this->fieldMetadata->addOption($maxPerPageOption);
+
+        $result = $this->smartContentResolver->resolve([], $this->fieldMetadata, 'en', []);
+
+        $this->assertInstanceOf(ContentView::class, $result);
+        $this->assertSame(1, $result->getView()['page']);
+    }
 }

@@ -63,7 +63,6 @@ class ImageMapResolverTest extends TestCase
         $this->mediaSerializer = $this->prophesize(MediaSerializerInterface::class);
         $this->contentResolver = $this->prophesize(ContentResolverInterface::class);
 
-        // Set up a mock form metadata provider that returns empty global blocks
         $formMetadataProvider = $this->prophesize(MetadataProviderInterface::class);
         $typedFormMetadata = new TypedFormMetadata();
         $formMetadataProvider->getMetadata('block', 'en', [])->willReturn($typedFormMetadata);
@@ -153,7 +152,6 @@ class ImageMapResolverTest extends TestCase
                 'locale' => 'en',
             ]);
 
-        // Set up basic hotspot type with title and description fields
         $basicType = new FormMetadata();
         $basicType->setKey('basic');
 
@@ -165,7 +163,6 @@ class ImageMapResolverTest extends TestCase
         $descriptionField->setType('text_area');
         $basicType->addItem($descriptionField);
 
-        // Set up advanced hotspot type with media and block fields
         $advancedType = new FormMetadata();
         $advancedType->setKey('advanced');
 
@@ -177,11 +174,9 @@ class ImageMapResolverTest extends TestCase
         $blockField->setType('block');
         $advancedType->addItem($blockField);
 
-        // Add types to fieldMetadata
         $this->fieldMetadata->addType($basicType);
         $this->fieldMetadata->addType($advancedType);
 
-        // Set up content resolver expectations for basic hotspot fields
         $contentViewTextLine = new ContentView('Test Point', []);
         $contentViewTextArea = new ContentView('Test Point description', []);
 
@@ -193,7 +188,6 @@ class ImageMapResolverTest extends TestCase
             ->shouldBeCalled()
             ->willReturn($contentViewTextArea);
 
-        // Set up content resolver expectations for advanced hotspot fields
         $contentViewMedia = new ContentView(['id' => 1, 'locale' => 'en'], ['id' => 1]);
         $blockValue = [
             [
@@ -324,5 +318,91 @@ class ImageMapResolverTest extends TestCase
 
         self::assertSame([], $result->getContent());
         self::assertSame([], $result->getView());
+    }
+
+    public function testResolveWithInvalidHotspot(): void
+    {
+        $locale = 'en';
+        $data = [
+            'hotspots' => [
+                'not-an-array',
+                ['no-type' => 'missing type field'],
+            ],
+        ];
+
+        $result = $this->imageMapResolver->resolve($data, $this->fieldMetadata, $locale);
+
+        self::assertSame([], $result->getContent());
+        self::assertSame([], $result->getView());
+    }
+
+    public function testResolveWithUnknownHotspotType(): void
+    {
+        $locale = 'en';
+        $data = [
+            'hotspots' => [
+                [
+                    'type' => 'unknown_type',
+                    'title' => 'Test',
+                ],
+            ],
+        ];
+
+        $result = $this->imageMapResolver->resolve($data, $this->fieldMetadata, $locale);
+
+        self::assertSame([
+            'hotspots' => [
+                [
+                    'type' => 'unknown_type',
+                    'title' => 'Test',
+                ],
+            ],
+        ], $result->getContent());
+        self::assertSame([
+            'hotspots' => [
+                [],
+            ],
+        ], $result->getView());
+    }
+
+    public function testResolveWithNonTypedFormMetadata(): void
+    {
+        $formMetadataProvider = $this->prophesize(MetadataProviderInterface::class);
+        $formMetadataProvider->getMetadata('block', 'en', [])->willReturn(new FormMetadata());
+
+        $container = new Container();
+        $container->set('form', $formMetadataProvider->reveal());
+        $metadataProviderRegistry = new MetadataProviderRegistry($container);
+
+        $resolver = new ImageMapResolver(
+            $this->mediaManager->reveal(),
+            $this->mediaSerializer->reveal(),
+            $this->contentResolver->reveal(),
+            $metadataProviderRegistry,
+        );
+
+        $basicType = new FormMetadata();
+        $basicType->setKey('basic');
+        $titleField = new FieldMetadata('title');
+        $titleField->setType('text_line');
+        $basicType->addItem($titleField);
+        $this->fieldMetadata->addType($basicType);
+
+        $this->contentResolver->resolve('Test', $titleField, 'en', [])
+            ->willReturn(new ContentView('Test', []));
+
+        $data = [
+            'hotspots' => [
+                ['type' => 'basic', 'title' => 'Test'],
+            ],
+        ];
+
+        $result = $resolver->resolve($data, $this->fieldMetadata, 'en');
+
+        self::assertSame([
+            'hotspots' => [
+                ['type' => 'basic', 'title' => 'Test'],
+            ],
+        ], $result->getContent());
     }
 }
