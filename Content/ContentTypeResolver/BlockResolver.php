@@ -46,7 +46,6 @@ class BlockResolver implements ContentTypeResolverInterface
 
         $blockTypes = $fieldMetadata->getTypes();
 
-        // Load global blocks metadata
         $globalBlocksMetadata = $this->getGlobalBlocksMetadata($locale);
 
         $content = [];
@@ -71,7 +70,6 @@ class BlockResolver implements ContentTypeResolverInterface
                 continue;
             }
 
-            // Check if this block type references a global block
             $globalBlockType = $this->getGlobalBlockType($blockTypeMetadata);
             if ($globalBlockType && isset($globalBlocksMetadata[$globalBlockType])) {
                 $blockTypeMetadata = $globalBlocksMetadata[$globalBlockType];

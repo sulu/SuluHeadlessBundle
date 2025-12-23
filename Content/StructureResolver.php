@@ -19,7 +19,6 @@ use Sulu\Bundle\AdminBundle\Metadata\MetadataProviderInterface;
 use Sulu\Bundle\HttpCacheBundle\ReferenceStore\ReferenceStoreInterface;
 use Sulu\Component\Persistence\Model\AuditableInterface;
 use Sulu\Content\Domain\Model\AuthorInterface;
-use Sulu\Content\Domain\Model\ContentRichEntityInterface;
 use Sulu\Content\Domain\Model\DimensionContentInterface;
 use Sulu\Content\Domain\Model\ExcerptInterface;
 use Sulu\Content\Domain\Model\SeoInterface;
@@ -38,7 +37,6 @@ class StructureResolver implements StructureResolverInterface
     }
 
     /**
-     * @param DimensionContentInterface<ContentRichEntityInterface> $dimensionContent
      * @param array<string, string>|null $properties
      */
     public function resolve(
@@ -111,7 +109,6 @@ class StructureResolver implements StructureResolverInterface
     }
 
     /**
-     * @param DimensionContentInterface<ContentRichEntityInterface> $dimensionContent
      * @param array<string, string> $propertyMap
      */
     public function resolveProperties(
@@ -147,7 +144,6 @@ class StructureResolver implements StructureResolverInterface
         $fieldMetadataList = $formMetadata->getFlatFieldMetadata();
         $templateData = $dimensionContent->getTemplateData();
 
-        // Filter by properties if specified
         if (null !== $properties) {
             $filteredFieldMetadata = [];
             $filteredTemplateData = [];
@@ -174,8 +170,6 @@ class StructureResolver implements StructureResolverInterface
     }
 
     /**
-     * @param DimensionContentInterface<ContentRichEntityInterface> $dimensionContent
-     *
      * @return array<string, mixed>
      */
     private function buildAttributes(DimensionContentInterface $dimensionContent): array
@@ -204,7 +198,6 @@ class StructureResolver implements StructureResolverInterface
     }
 
     /**
-     * @param DimensionContentInterface<ContentRichEntityInterface> $dimensionContent
      * @param array<string, mixed> $attributes
      * @param array<string, string>|null $properties
      *
@@ -360,7 +353,6 @@ class StructureResolver implements StructureResolverInterface
         $fieldMetadataList = $formMetadata->getFlatFieldMetadata();
         $resolved = [];
 
-        // Field types that are display-only and should not be included in output
         $displayOnlyTypes = ['search_result'];
 
         $fieldsToResolve = [];
@@ -413,7 +405,6 @@ class StructureResolver implements StructureResolverInterface
 
     private function getEmptyValue(string $fieldType): mixed
     {
-        // Types that should return empty array when null
         $arrayTypes = [
             'single_media_selection',
             'media_selection',

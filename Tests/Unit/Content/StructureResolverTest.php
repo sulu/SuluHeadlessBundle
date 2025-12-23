@@ -23,7 +23,6 @@ use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\TypedFormMetadata;
 use Sulu\Bundle\AdminBundle\Metadata\MetadataProviderInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentResolverInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
-use Sulu\Bundle\HeadlessBundle\Content\Resolver\PropertyPathParser;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolver;
 use Sulu\Bundle\HttpCacheBundle\ReferenceStore\ReferenceStoreInterface;
 use Sulu\Page\Domain\Model\Page;
@@ -48,8 +47,6 @@ class StructureResolverTest extends TestCase
      */
     private ObjectProphecy $referenceStore;
 
-    private PropertyPathParser $propertyPathParser;
-
     private StructureResolver $structureResolver;
 
     protected function setUp(): void
@@ -57,13 +54,11 @@ class StructureResolverTest extends TestCase
         $this->formMetadataProvider = $this->prophesize(MetadataProviderInterface::class);
         $this->contentResolver = $this->prophesize(ContentResolverInterface::class);
         $this->referenceStore = $this->prophesize(ReferenceStoreInterface::class);
-        $this->propertyPathParser = new PropertyPathParser();
 
         $this->structureResolver = new StructureResolver(
             $this->formMetadataProvider->reveal(),
             $this->contentResolver->reveal(),
             $this->referenceStore->reveal(),
-            $this->propertyPathParser,
         );
     }
 

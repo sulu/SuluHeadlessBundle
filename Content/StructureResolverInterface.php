@@ -13,14 +13,11 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Content;
 
-use Sulu\Content\Domain\Model\ContentRichEntityInterface;
 use Sulu\Content\Domain\Model\DimensionContentInterface;
 
 interface StructureResolverInterface
 {
     /**
-     * @param DimensionContentInterface<ContentRichEntityInterface> $dimensionContent
-     *
      * @return array<string, mixed>
      */
     public function resolve(
@@ -30,7 +27,6 @@ interface StructureResolverInterface
     ): array;
 
     /**
-     * @param DimensionContentInterface<ContentRichEntityInterface> $dimensionContent
      * @param array<string, string> $propertyMap
      *
      * @return array<string, mixed>

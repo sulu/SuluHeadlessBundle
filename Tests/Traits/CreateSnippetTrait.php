@@ -47,19 +47,16 @@ trait CreateSnippetTrait
 
         $messageBus = static::getContainer()->get('sulu_message_bus');
 
-        // Build snippet data in Sulu 3.0 format
         $snippetData = [
             'locale' => $locale,
             'template' => $data['template'] ?? 'default',
             'title' => $data['title'],
         ];
 
-        // Add SEO data if provided
         if (isset($data['seo']) && \is_array($data['seo'])) {
             $snippetData['seo'] = $data['seo'];
         }
 
-        // Add excerpt/taxonomy data - Sulu 3.0 expects flat keys like excerptTags, excerptCategories
         if (isset($data['excerpt']) && \is_array($data['excerpt'])) {
             $excerptData = $data['excerpt'];
             if (isset($excerptData['tags']) && \is_array($excerptData['tags'])) {
@@ -70,7 +67,6 @@ trait CreateSnippetTrait
             }
         }
 
-        // Merge any additional template-specific data
         $reservedKeys = ['title', 'template', 'seo', 'excerpt'];
         foreach ($data as $key => $value) {
             if (!\in_array($key, $reservedKeys, true)) {
@@ -78,7 +74,6 @@ trait CreateSnippetTrait
             }
         }
 
-        // Create snippet
         $envelope = $messageBus->dispatch(
             new Envelope(
                 new CreateSnippetMessage(data: $snippetData),
@@ -92,7 +87,6 @@ trait CreateSnippetTrait
         /** @var Snippet $snippet */
         $snippet = $handledStamps[0]->getResult();
 
-        // Publish the snippet
         $messageBus->dispatch(
             new Envelope(
                 new ApplyWorkflowTransitionSnippetMessage(

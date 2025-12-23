@@ -44,7 +44,6 @@ class HeadlessWebsiteController extends ContentController
     ): Response {
         $requestFormat = $request->getRequestFormat() ?? 'html';
 
-        // For JSON requests, use the headless structure resolver
         if ('json' === $requestFormat) {
             $locale = $object->getLocale() ?? 'en';
             $headlessData = $this->resolveHeadlessData($object, $locale);
@@ -59,8 +58,6 @@ class HeadlessWebsiteController extends ContentController
             return $response;
         }
 
-        // For HTML requests, delegate to parent controller
-        // but also provide headless data to the template
         return parent::indexAction($request, $object, $view, $preview, $partial);
     }
 
@@ -73,7 +70,6 @@ class HeadlessWebsiteController extends ContentController
     {
         $parameters = parent::resolveSuluParameters($object, $webspaceKey, $normalize);
 
-        // Add headless data to template parameters for hybrid rendering
         $locale = $object->getLocale() ?? 'en';
         $parameters['headless'] = $this->resolveHeadlessData($object, $locale);
 

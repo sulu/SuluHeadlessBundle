@@ -174,33 +174,33 @@ parameters:
 			count: 1
 			path: Content/DataProviderResolver/SnippetDataProviderResolver.php
 
-		# Generic interface type issues (DimensionContentInterface and ContentRichEntityInterface have nested generics)
+		# Generic interface type issues (DimensionContentInterface has nested generics)
 		-
-			message: "#^Method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Content\\\\StructureResolver\\:\\:resolve\\(\\) has parameter \\$dimensionContent with generic interface Sulu\\\\Content\\\\Domain\\\\Model\\\\ContentRichEntityInterface but does not specify its types\\: T$#"
+			message: "#^Method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Content\\\\StructureResolver\\:\\:resolve\\(\\) has parameter \\$dimensionContent with generic interface Sulu\\\\Content\\\\Domain\\\\Model\\\\DimensionContentInterface but does not specify its types\\: T$#"
 			count: 1
 			path: Content/StructureResolver.php
 
 		-
-			message: "#^Method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Content\\\\StructureResolver\\:\\:resolveProperties\\(\\) has parameter \\$dimensionContent with generic interface Sulu\\\\Content\\\\Domain\\\\Model\\\\ContentRichEntityInterface but does not specify its types\\: T$#"
+			message: "#^Method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Content\\\\StructureResolver\\:\\:resolveProperties\\(\\) has parameter \\$dimensionContent with generic interface Sulu\\\\Content\\\\Domain\\\\Model\\\\DimensionContentInterface but does not specify its types\\: T$#"
 			count: 1
 			path: Content/StructureResolver.php
 
 		-
-			message: "#^Method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Content\\\\StructureResolver\\:\\:buildAttributes\\(\\) has parameter \\$dimensionContent with generic interface Sulu\\\\Content\\\\Domain\\\\Model\\\\ContentRichEntityInterface but does not specify its types\\: T$#"
+			message: "#^Method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Content\\\\StructureResolver\\:\\:buildAttributes\\(\\) has parameter \\$dimensionContent with generic interface Sulu\\\\Content\\\\Domain\\\\Model\\\\DimensionContentInterface but does not specify its types\\: T$#"
 			count: 1
 			path: Content/StructureResolver.php
 
 		-
-			message: "#^Method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Content\\\\StructureResolver\\:\\:resolveExtensions\\(\\) has parameter \\$dimensionContent with generic interface Sulu\\\\Content\\\\Domain\\\\Model\\\\ContentRichEntityInterface but does not specify its types\\: T$#"
+			message: "#^Method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Content\\\\StructureResolver\\:\\:resolveExtensions\\(\\) has parameter \\$dimensionContent with generic interface Sulu\\\\Content\\\\Domain\\\\Model\\\\DimensionContentInterface but does not specify its types\\: T$#"
 			count: 1
 			path: Content/StructureResolver.php
 
 		-
-			message: "#^Method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Content\\\\StructureResolverInterface\\:\\:resolve\\(\\) has parameter \\$dimensionContent with generic interface Sulu\\\\Content\\\\Domain\\\\Model\\\\ContentRichEntityInterface but does not specify its types\\: T$#"
+			message: "#^Method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Content\\\\StructureResolverInterface\\:\\:resolve\\(\\) has parameter \\$dimensionContent with generic interface Sulu\\\\Content\\\\Domain\\\\Model\\\\DimensionContentInterface but does not specify its types\\: T$#"
 			count: 1
 			path: Content/StructureResolverInterface.php
 
 		-
-			message: "#^Method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Content\\\\StructureResolverInterface\\:\\:resolveProperties\\(\\) has parameter \\$dimensionContent with generic interface Sulu\\\\Content\\\\Domain\\\\Model\\\\ContentRichEntityInterface but does not specify its types\\: T$#"
+			message: "#^Method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Content\\\\StructureResolverInterface\\:\\:resolveProperties\\(\\) has parameter \\$dimensionContent with generic interface Sulu\\\\Content\\\\Domain\\\\Model\\\\DimensionContentInterface but does not specify its types\\: T$#"
 			count: 1
 			path: Content/StructureResolverInterface.php

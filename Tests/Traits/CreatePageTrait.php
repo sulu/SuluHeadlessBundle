@@ -50,7 +50,6 @@ trait CreatePageTrait
 
         $messageBus = static::getContainer()->get('sulu_message_bus');
 
-        // Build page data in Sulu 3.0 format
         $pageData = [
             'locale' => $locale,
             'template' => $data['template'] ?? 'default',
@@ -58,22 +57,18 @@ trait CreatePageTrait
             'url' => $data['url'] ?? '/' . \strtolower($data['title']),
         ];
 
-        // Add SEO data if provided
         if (isset($data['seo']) && \is_array($data['seo'])) {
             $pageData['seo'] = $data['seo'];
         }
 
-        // Add excerpt data if provided
         if (isset($data['excerpt']) && \is_array($data['excerpt'])) {
             $pageData['excerpt'] = $data['excerpt'];
         }
 
-        // Add navigation contexts if provided
         if (isset($data['navigationContexts']) && \is_array($data['navigationContexts'])) {
             $pageData['navigationContexts'] = $data['navigationContexts'];
         }
 
-        // Merge any additional template-specific data
         $reservedKeys = ['title', 'url', 'template', 'seo', 'excerpt', 'navigationContexts', 'published', 'parentId'];
         foreach ($data as $key => $value) {
             if (!\in_array($key, $reservedKeys, true)) {
@@ -84,7 +79,6 @@ trait CreatePageTrait
         /** @var string $parentId */
         $parentId = $data['parentId'] ?? CreatePageMessageHandler::HOMEPAGE_PARENT_ID;
 
-        // Create page
         $envelope = $messageBus->dispatch(
             new Envelope(
                 new CreatePageMessage(
@@ -102,7 +96,6 @@ trait CreatePageTrait
         /** @var Page $page */
         $page = $handledStamps[0]->getResult();
 
-        // Publish if requested (default is true for backward compatibility)
         if ($data['published'] ?? true) {
             $messageBus->dispatch(
                 new Envelope(

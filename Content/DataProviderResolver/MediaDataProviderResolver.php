@@ -57,11 +57,9 @@ class MediaDataProviderResolver implements DataProviderResolverInterface
     ): DataProviderResult {
         $locale = $options['locale'] ?? 'en';
 
-        // Convert filters to the new format expected by SmartContentProviderInterface
         $smartFilters = $this->convertFilters($filters, $limit, $page, $pageSize);
         $sortBys = $this->extractSortBys($filters);
 
-        // Get IDs from smart content provider
         $flatResults = $this->mediaSmartContentProvider->findFlatBy($smartFilters, $sortBys, $options);
 
         $ids = \array_map(fn (array $item) => (int) $item['id'], $flatResults);
@@ -70,7 +68,6 @@ class MediaDataProviderResolver implements DataProviderResolverInterface
             return new DataProviderResult([], false);
         }
 
-        // Load and serialize media items
         $items = [];
         foreach ($ids as $id) {
             /** @var MediaInterface|null $media */
@@ -80,7 +77,6 @@ class MediaDataProviderResolver implements DataProviderResolverInterface
             }
         }
 
-        // Determine if there's a next page
         $hasNextPage = false;
         if (null !== $pageSize && \count($flatResults) >= $pageSize) {
             $hasNextPage = true;

@@ -18,12 +18,7 @@ use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 interface ContentResolverInterface
 {
     /**
-     * Resolve content data using the appropriate content type resolver.
-     *
-     * @param mixed $data The raw data from DimensionContent->getTemplateData()
-     * @param FieldMetadata $fieldMetadata The field metadata from FormMetadata
-     * @param string $locale The current locale
-     * @param array<string, mixed> $attributes Context attributes (webspaceKey, uuid, isShadow, etc.)
+     * @param array<string, mixed> $attributes
      */
     public function resolve(mixed $data, FieldMetadata $fieldMetadata, string $locale, array $attributes = []): ContentView;
 }

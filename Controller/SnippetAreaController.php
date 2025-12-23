@@ -60,7 +60,6 @@ class SnippetAreaController
 
         $includeExtension = $this->getBooleanRequestParameter($request, 'includeExtension', false, false);
 
-        // Find snippet area configuration
         $snippetArea = $this->snippetAreaRepository->findOneBy([
             'webspaceKey' => $webspaceKey,
             'areaKey' => $area,
@@ -70,7 +69,6 @@ class SnippetAreaController
             throw new NotFoundHttpException(\sprintf('No snippet found for snippet area "%s"', $area));
         }
 
-        // Load the snippet
         $snippet = $this->snippetRepository->findOneBy(
             [
                 'uuid' => $snippetArea->getSnippet()->getUuid(),
@@ -89,7 +87,6 @@ class SnippetAreaController
             throw new NotFoundHttpException(\sprintf('Snippet for snippet area "%s" does not exist in locale "%s"', $area, $locale));
         }
 
-        // Aggregate dimension content
         /** @var SnippetDimensionContentInterface $dimensionContent */
         $dimensionContent = $this->contentAggregator->aggregate(
             $snippet,
@@ -100,12 +97,10 @@ class SnippetAreaController
             ]
         );
 
-        // Add to reference store for cache invalidation
         if ($this->snippetAreaReferenceStore) {
             $this->snippetAreaReferenceStore->add($area, 'snippet_area');
         }
 
-        // Resolve to headless format
         $resolvedSnippet = $this->structureResolver->resolve(
             $dimensionContent,
             $locale,
