@@ -88,9 +88,9 @@ class PageSelectionResolver implements ContentTypeResolverInterface
                 $propertiesValue = $option->getValue();
                 if (\is_array($propertiesValue)) {
                     foreach ($propertiesValue as $entry) {
-                        if (\is_array($entry) && isset($entry['name'])) {
-                            $paramName = $entry['name'];
-                            $paramValue = $entry['value'] ?? $paramName;
+                        $paramName = $entry->getName();
+                        if (\is_string($paramName)) {
+                            $paramValue = $entry->getValue() ?? $paramName;
                             $propertyMap[$paramName] = \is_string($paramValue) ? $paramValue : $paramName;
                         }
                     }

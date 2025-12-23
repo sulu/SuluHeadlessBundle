@@ -21,6 +21,7 @@ use Sulu\Bundle\HttpCacheBundle\Cache\SuluHttpCache;
 use Sulu\Bundle\HttpCacheBundle\ReferenceStore\ReferenceStoreInterface;
 use Sulu\Component\Rest\ListBuilder\CollectionRepresentation;
 use Sulu\Component\Webspace\Analyzer\RequestAnalyzerInterface;
+use Sulu\Component\Webspace\Segment;
 use Sulu\Page\Domain\Repository\NavigationRepositoryInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -44,19 +45,20 @@ class NavigationController
     public function getAction(Request $request, string $context): Response
     {
         $webspace = $this->requestAnalyzer->getWebspace();
-        if (null === $webspace) {
-            throw new \RuntimeException('No webspace found in request');
-        }
         $locale = $request->getLocale();
         $uuid = $request->query->get('uuid');
         $depth = $request->query->getInt('depth', 1);
         $flat = $request->query->getBoolean('flat');
         $excerpt = $request->query->getBoolean('excerpt');
 
+        /** @var Segment|null $segment */
+        $segment = $this->requestAnalyzer->getSegment();
+        $segmentKey = $segment?->getKey();
+
         $navigation = $this->loadNavigation(
             $webspace->getKey(),
             $locale,
-            $this->requestAnalyzer->getSegment()?->getKey(),
+            $segmentKey,
             $depth,
             $flat,
             $context,
@@ -175,10 +177,11 @@ class NavigationController
         $transformed['creator'] = $item['creator'] ?? null;
         $transformed['urls'] = $item['urls'] ?? [$locale => $item['url'] ?? ''];
 
-        if ($excerpt && isset($item['excerpt'])) {
+        if ($excerpt && isset($item['excerpt']) && \is_array($item['excerpt'])) {
             $transformed['excerpt'] = $this->transformExcerpt($item['excerpt'], $locale);
         }
 
+        /** @var array<int, array<string, mixed>> $children */
         $children = $item['children'] ?? [];
         $transformed['children'] = $this->transformNavigationItems($children, $locale, $excerpt);
 
@@ -192,15 +195,23 @@ class NavigationController
      */
     protected function transformExcerpt(array $excerptData, string $locale): array
     {
+        $icon = $excerptData['icon'] ?? null;
+        $images = $excerptData['images'] ?? null;
+        $categories = $excerptData['categories'] ?? [];
+
         return [
             'title' => $excerptData['title'] ?? '',
             'description' => $excerptData['description'] ?? '',
             'more' => $excerptData['more'] ?? '',
-            'icon' => isset($excerptData['icon']) ? $this->mediaSerializer->serialize($excerptData['icon']->getEntity(), $locale) : null,
-            'images' => isset($excerptData['images']) ? $this->mediaSerializer->serialize($excerptData['images']->getEntity(), $locale) : null,
-            'categories' => !empty($excerptData['categories']) ? \array_map(
+            'icon' => \is_object($icon) && \method_exists($icon, 'getEntity')
+                ? $this->mediaSerializer->serialize($icon->getEntity(), $locale)
+                : null,
+            'images' => \is_object($images) && \method_exists($images, 'getEntity')
+                ? $this->mediaSerializer->serialize($images->getEntity(), $locale)
+                : null,
+            'categories' => \is_array($categories) ? \array_map(
                 fn ($category) => $this->categorySerializer->serialize($category->getEntity(), $locale),
-                $excerptData['categories']
+                $categories
             ) : [],
             'tags' => $excerptData['tags'] ?? [],
         ];
@@ -248,12 +259,12 @@ class NavigationController
         return $properties;
     }
 
-    protected function formatDate(string|\DateTimeInterface|null $date): ?string
+    protected function formatDate(mixed $date): ?string
     {
         if ($date instanceof \DateTimeInterface) {
             return $date->format(\DateTimeInterface::ATOM);
         }
 
-        return $date;
+        return \is_string($date) ? $date : null;
     }
 }

@@ -106,7 +106,7 @@ class StructureResolverTest extends TestCase
             ->willReturn(new ContentView(['media1', 'media2'], ['ids' => [1, 2, 3]]));
 
         // Reference store
-        $this->referenceStore->add('123-123-123', 'page')->shouldBeCalled();
+        $this->referenceStore->add('123-123-123', 'pages')->shouldBeCalled();
 
         /** @var array{id: string, type: string, template: string, content: array<string, mixed>, view: array<string, mixed>} $result */
         $result = $this->structureResolver->resolve($dimensionContent, 'en', false);
@@ -145,21 +145,21 @@ class StructureResolverTest extends TestCase
 
         $this->formMetadataProvider->getMetadata('page', 'en', [])->willReturn($typedFormMetadata->reveal());
 
-        // Excerpt form metadata
-        $excerptTitleField = new FieldMetadata('title');
+        // Excerpt form metadata (field names are prefixed with 'excerpt/')
+        $excerptTitleField = new FieldMetadata('excerpt/title');
         $excerptTitleField->setType('text_line');
 
         $excerptFormMetadata = $this->prophesize(FormMetadata::class);
-        $excerptFormMetadata->getFlatFieldMetadata()->willReturn(['title' => $excerptTitleField]);
+        $excerptFormMetadata->getFlatFieldMetadata()->willReturn(['excerpt/title' => $excerptTitleField]);
 
         $this->formMetadataProvider->getMetadata('content_excerpt', 'en', Argument::type('array'))->willReturn($excerptFormMetadata->reveal());
 
-        // SEO form metadata
-        $seoTitleField = new FieldMetadata('title');
+        // SEO form metadata (field names are prefixed with 'seo/')
+        $seoTitleField = new FieldMetadata('seo/title');
         $seoTitleField->setType('text_line');
 
         $seoFormMetadata = $this->prophesize(FormMetadata::class);
-        $seoFormMetadata->getFlatFieldMetadata()->willReturn(['title' => $seoTitleField]);
+        $seoFormMetadata->getFlatFieldMetadata()->willReturn(['seo/title' => $seoTitleField]);
 
         $this->formMetadataProvider->getMetadata('content_seo', 'en', Argument::type('array'))->willReturn($seoFormMetadata->reveal());
 
@@ -171,7 +171,7 @@ class StructureResolverTest extends TestCase
         $this->contentResolver->resolve('SEO Title', $seoTitleField, 'en', Argument::type('array'))
             ->willReturn(new ContentView('SEO Title', []));
 
-        $this->referenceStore->add('123-123-123', 'page')->shouldBeCalled();
+        $this->referenceStore->add('123-123-123', 'pages')->shouldBeCalled();
 
         /** @var array{extension: array{excerpt: array<string, mixed>, seo: array<string, mixed>}} $result */
         $result = $this->structureResolver->resolve($dimensionContent, 'en', true);
@@ -219,7 +219,7 @@ class StructureResolverTest extends TestCase
         $this->contentResolver->resolve('Test Title', $titleField, 'en', Argument::type('array'))
             ->willReturn(new ContentView('Test Title', []));
 
-        $this->referenceStore->add('123-123-123', 'page')->shouldBeCalled();
+        $this->referenceStore->add('123-123-123', 'pages')->shouldBeCalled();
 
         // Only request title, mapped to 'myTitle'
         /** @var array{id: string, content: array<string, mixed>} $result */
@@ -245,7 +245,7 @@ class StructureResolverTest extends TestCase
         $dimensionContent = new PageDimensionContent($page);
         // No template key set
 
-        $this->referenceStore->add('123-123-123', 'page')->shouldBeCalled();
+        $this->referenceStore->add('123-123-123', 'pages')->shouldBeCalled();
 
         $result = $this->structureResolver->resolve($dimensionContent, 'en', false);
 

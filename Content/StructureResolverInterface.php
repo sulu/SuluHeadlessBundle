@@ -13,14 +13,13 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Content;
 
+use Sulu\Content\Domain\Model\ContentRichEntityInterface;
 use Sulu\Content\Domain\Model\DimensionContentInterface;
 
 interface StructureResolverInterface
 {
     /**
-     * Resolve a dimension content to a JSON-serializable array.
-     *
-     * @param array<string, string>|null $properties Optional property map to resolve only specific properties
+     * @param DimensionContentInterface<ContentRichEntityInterface> $dimensionContent
      *
      * @return array<string, mixed>
      */
@@ -28,13 +27,11 @@ interface StructureResolverInterface
         DimensionContentInterface $dimensionContent,
         string $locale,
         bool $includeExtension = true,
-        ?array $properties = null,
     ): array;
 
     /**
-     * Resolve only specific properties from the dimension content.
-     *
-     * @param array<string, string> $propertyMap Map of target property names to source property names
+     * @param DimensionContentInterface<ContentRichEntityInterface> $dimensionContent
+     * @param array<string, string> $propertyMap
      *
      * @return array<string, mixed>
      */

@@ -147,7 +147,10 @@ class SmartContentResolver implements ContentTypeResolverInterface
         $providerAlias = 'pages';
         foreach ($options as $option) {
             if ('provider' === $option->getName()) {
-                $providerAlias = (string) $option->getValue();
+                $value = $option->getValue();
+                if (\is_string($value) || \is_int($value)) {
+                    $providerAlias = (string) $value;
+                }
                 break;
             }
         }
@@ -165,8 +168,14 @@ class SmartContentResolver implements ContentTypeResolverInterface
         $params = [];
         foreach ($options as $option) {
             $name = $option->getName();
-            if (null !== $name) {
-                $value = $option->getValue();
+            if (!\is_string($name)) {
+                continue;
+            }
+
+            $value = $option->getValue();
+            if (\is_int($value)) {
+                $params[$name] = new PropertyParameter($name, (string) $value);
+            } elseif (\is_array($value) || \is_bool($value) || \is_string($value)) {
                 $params[$name] = new PropertyParameter($name, $value);
             }
         }
@@ -192,7 +201,7 @@ class SmartContentResolver implements ContentTypeResolverInterface
                 $ids[] = (int) $tagIdentifier;
             } else {
                 $tag = $this->tagManager->findByName($tagIdentifier);
-                if ($tag) {
+                if (null !== $tag) {
                     $ids[] = $tag->getId();
                 }
             }

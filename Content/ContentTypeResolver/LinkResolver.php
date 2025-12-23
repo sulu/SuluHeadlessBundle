@@ -79,13 +79,14 @@ class LinkResolver implements ContentTypeResolverInterface
 
         $provider = $this->linkProviderPool->getProvider($value['provider']);
 
-        $linkItems = $provider->preload([$value['href']], $locale);
+        $linkItems = \iterator_to_array($provider->preload([$value['href']], $locale));
 
         if (0 === \count($linkItems)) {
             return null;
         }
 
-        $url = \reset($linkItems)->getUrl();
+        $firstItem = \reset($linkItems);
+        $url = $firstItem->getUrl();
         if (isset($value['anchor'])) {
             $url = \sprintf('%s#%s', $url, $value['anchor']);
         }

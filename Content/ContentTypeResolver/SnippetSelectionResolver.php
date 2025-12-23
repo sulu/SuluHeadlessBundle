@@ -38,7 +38,9 @@ class SnippetSelectionResolver implements ContentTypeResolverInterface
 
     public function resolve(mixed $data, FieldMetadata $fieldMetadata, string $locale, array $attributes = []): ContentView
     {
+        /** @var string|null $webspaceKey */
         $webspaceKey = $attributes['webspaceKey'] ?? null;
+        /** @var string|null $shadowLocale */
         $shadowLocale = ($attributes['isShadow'] ?? false) ? ($attributes['shadowLocale'] ?? null) : null;
 
         // Get parameters from field options
@@ -49,14 +51,16 @@ class SnippetSelectionResolver implements ContentTypeResolverInterface
                 $includeExtension = (bool) $option->getValue();
             }
             if ('default' === $option->getName()) {
-                $defaultArea = (string) $option->getValue();
+                $optionValue = $option->getValue();
+                $defaultArea = \is_string($optionValue) || \is_int($optionValue) ? (string) $optionValue : null;
             }
         }
 
+        /** @var array<string> $snippetIds */
         $snippetIds = \is_array($data) ? $data : [];
 
         // Load default snippet if no snippets selected and default area is configured
-        if (empty($snippetIds) && $defaultArea && $webspaceKey) {
+        if (empty($snippetIds) && null !== $defaultArea && null !== $webspaceKey) {
             $snippetArea = $this->snippetAreaRepository->findOneBy([
                 'webspaceKey' => $webspaceKey,
                 'areaKey' => $defaultArea,

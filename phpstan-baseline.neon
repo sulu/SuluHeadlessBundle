@@ -26,16 +26,6 @@ parameters:
 			path: Content/ContentTypeResolver/TextEditorResolver.php
 
 		-
-			message: "#^Parameter \\#1 \\$filters of method Sulu\\\\Component\\\\SmartContent\\\\DataProviderInterface\\:\\:resolveResourceItems\\(\\) expects array\\{dataSource\\?\\: int\\|string\\|null, sortMethod\\?\\: 'asc'\\|'desc', sortBy\\?\\: string, tags\\?\\: array\\<string\\>, tagOperator\\?\\: 'and'\\|'or', types\\?\\: array\\<string\\>, categories\\?\\: array\\<int\\>, categoryOperator\\?\\: 'and'\\|'or', \\.\\.\\.\\}, array given\\.$#"
-			count: 1
-			path: Content/DataProviderResolver/AccountDataProviderResolver.php
-
-		-
-			message: "#^Parameter \\#1 \\$filters of method Sulu\\\\Component\\\\SmartContent\\\\DataProviderInterface\\:\\:resolveResourceItems\\(\\) expects array\\{dataSource\\?\\: int\\|string\\|null, sortMethod\\?\\: 'asc'\\|'desc', sortBy\\?\\: string, tags\\?\\: array\\<string\\>, tagOperator\\?\\: 'and'\\|'or', types\\?\\: array\\<string\\>, categories\\?\\: array\\<int\\>, categoryOperator\\?\\: 'and'\\|'or', \\.\\.\\.\\}, array given\\.$#"
-			count: 1
-			path: Content/DataProviderResolver/ContactDataProviderResolver.php
-
-		-
 			message: "#^Method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Content\\\\DataProviderResolver\\\\DataProviderResult\\:\\:__construct\\(\\) has parameter \\$items with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Content/DataProviderResolver/DataProviderResult.php
@@ -51,101 +41,166 @@ parameters:
 			path: Content/DataProviderResolver/DataProviderResult.php
 
 		-
-			message: "#^Parameter \\#1 \\$filters of method Sulu\\\\Component\\\\Media\\\\SmartContent\\\\MediaDataProvider\\:\\:resolveResourceItems\\(\\) expects array\\{dataSource\\?\\: int\\|string\\|null, sortMethod\\?\\: 'asc'\\|'desc', sortBy\\?\\: string, tags\\?\\: array\\<string\\>, tagOperator\\?\\: 'and'\\|'or', types\\?\\: array\\<string\\>, categories\\?\\: array\\<int\\>, categoryOperator\\?\\: 'and'\\|'or', \\.\\.\\.\\}, array given\\.$#"
-			count: 1
-			path: Content/DataProviderResolver/MediaDataProviderResolver.php
-
-		-
 			message: "#^Parameter \\#2 \\$locale of method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Content\\\\Serializer\\\\MediaSerializerInterface\\:\\:serialize\\(\\) expects string, mixed given\\.$#"
 			count: 1
 			path: Content/DataProviderResolver/MediaDataProviderResolver.php
-
-		-
-			message: "#^PHPDoc tag @var above a method has no effect\\.$#"
-			count: 1
-			path: Content/DataProviderResolver/PageDataProviderResolver.php
-
-		-
-			message: "#^PHPDoc tag @var does not specify variable name\\.$#"
-			count: 1
-			path: Content/DataProviderResolver/PageDataProviderResolver.php
-
-		-
-			message: "#^Parameter \\#1 \\$filters of method Sulu\\\\Component\\\\Content\\\\SmartContent\\\\PageDataProvider\\:\\:resolveResourceItems\\(\\) expects array\\{dataSource\\?\\: int\\|string\\|null, sortMethod\\?\\: 'asc'\\|'desc', sortBy\\?\\: string, tags\\?\\: array\\<string\\>, tagOperator\\?\\: 'and'\\|'or', types\\?\\: array\\<string\\>, categories\\?\\: array\\<int\\>, categoryOperator\\?\\: 'and'\\|'or', \\.\\.\\.\\}, array given\\.$#"
-			count: 1
-			path: Content/DataProviderResolver/PageDataProviderResolver.php
 
 		-
 			message: "#^Parameter \\#3 \\$locale of method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Content\\\\StructureResolverInterface\\:\\:resolveProperties\\(\\) expects string, mixed given\\.$#"
 			count: 1
 			path: Content/DataProviderResolver/PageDataProviderResolver.php
 
+		# DataProviderResolver filters for SmartContentProviderInterface::findFlatBy()
 		-
-			message: "#^Parameter \\#3 \\$webspaceKey of method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Content\\\\DataProviderResolver\\\\PageDataProviderResolver\\:\\:loadPageStructures\\(\\) expects string, mixed given\\.$#"
+			message: "#^Parameter \\#1 \\$filters of method Sulu\\\\Bundle\\\\AdminBundle\\\\SmartContent\\\\SmartContentProviderInterface\\:\\:findFlatBy\\(\\) expects array\\{.*\\}, array<string, mixed> given\\.$#"
+			count: 1
+			path: Content/DataProviderResolver/AccountDataProviderResolver.php
+
+		-
+			message: "#^Parameter \\#2 \\$locale of method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Content\\\\Serializer\\\\AccountSerializerInterface\\:\\:serialize\\(\\) expects string, mixed given\\.$#"
+			count: 1
+			path: Content/DataProviderResolver/AccountDataProviderResolver.php
+
+		-
+			message: "#^Parameter \\#1 \\$filters of method Sulu\\\\Bundle\\\\AdminBundle\\\\SmartContent\\\\SmartContentProviderInterface\\:\\:findFlatBy\\(\\) expects array\\{.*\\}, array<string, mixed> given\\.$#"
+			count: 1
+			path: Content/DataProviderResolver/ContactDataProviderResolver.php
+
+		-
+			message: "#^Parameter \\#2 \\$locale of method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Content\\\\Serializer\\\\ContactSerializerInterface\\:\\:serialize\\(\\) expects string, mixed given\\.$#"
+			count: 1
+			path: Content/DataProviderResolver/ContactDataProviderResolver.php
+
+		-
+			message: "#^Parameter \\#1 \\$filters of method Sulu\\\\Bundle\\\\AdminBundle\\\\SmartContent\\\\SmartContentProviderInterface\\:\\:findFlatBy\\(\\) expects array\\{.*\\}, array<string, mixed> given\\.$#"
+			count: 1
+			path: Content/DataProviderResolver/MediaDataProviderResolver.php
+
+		-
+			message: "#^Parameter \\#1 \\$filters of method Sulu\\\\Bundle\\\\AdminBundle\\\\SmartContent\\\\SmartContentProviderInterface\\:\\:findFlatBy\\(\\) expects array\\{.*\\}, array<string, mixed> given\\.$#"
 			count: 1
 			path: Content/DataProviderResolver/PageDataProviderResolver.php
 
 		-
-			message: "#^Parameter \\#4 \\$locale of method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Content\\\\DataProviderResolver\\\\PageDataProviderResolver\\:\\:loadPageStructures\\(\\) expects string, mixed given\\.$#"
+			message: "#^Parameter \\#5 \\$locale of method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Content\\\\DataProviderResolver\\\\PageDataProviderResolver\\:\\:convertFilters\\(\\) expects string, mixed given\\.$#"
 			count: 1
 			path: Content/DataProviderResolver/PageDataProviderResolver.php
 
 		-
-			message: "#^PHPDoc tag @var above a method has no effect\\.$#"
+			message: "#^Parameter \\#1 \\$filters of method Sulu\\\\Bundle\\\\AdminBundle\\\\SmartContent\\\\SmartContentProviderInterface\\:\\:findFlatBy\\(\\) expects array\\{.*\\}, array<string, mixed> given\\.$#"
 			count: 1
 			path: Content/DataProviderResolver/SnippetDataProviderResolver.php
 
 		-
-			message: "#^PHPDoc tag @var does not specify variable name\\.$#"
+			message: "#^Parameter \\#3 \\$locale of method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Content\\\\StructureResolverInterface\\:\\:resolveProperties\\(\\) expects string, mixed given\\.$#"
 			count: 1
 			path: Content/DataProviderResolver/SnippetDataProviderResolver.php
 
 		-
-			message: "#^Parameter \\#1 \\$filters of method Sulu\\\\Component\\\\SmartContent\\\\DataProviderInterface\\:\\:resolveResourceItems\\(\\) expects array\\{dataSource\\?\\: int\\|string\\|null, sortMethod\\?\\: 'asc'\\|'desc', sortBy\\?\\: string, tags\\?\\: array\\<string\\>, tagOperator\\?\\: 'and'\\|'or', types\\?\\: array\\<string\\>, categories\\?\\: array\\<int\\>, categoryOperator\\?\\: 'and'\\|'or', \\.\\.\\.\\}, array given\\.$#"
+			message: "#^Parameter \\#5 \\$locale of method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Content\\\\DataProviderResolver\\\\SnippetDataProviderResolver\\:\\:convertFilters\\(\\) expects string, mixed given\\.$#"
+			count: 1
+			path: Content/DataProviderResolver/SnippetDataProviderResolver.php
+
+		# Repository findBy locale mixed type issues
+		-
+			message: "#^Parameter \\#1 \\$filters of method Sulu\\\\Page\\\\Domain\\\\Repository\\\\PageRepositoryInterface\\:\\:findBy\\(\\) expects array\\{.*\\}, array\\{.*locale\\: mixed.*\\} given\\.$#"
+			count: 1
+			path: Content/DataProviderResolver/PageDataProviderResolver.php
+
+		-
+			message: "#^Parameter \\#1 \\$filters of method Sulu\\\\Snippet\\\\Domain\\\\Repository\\\\SnippetRepositoryInterface\\:\\:findBy\\(\\) expects array\\{.*\\}, array\\{.*locale\\: mixed.*\\} given\\.$#"
+			count: 1
+			path: Content/DataProviderResolver/SnippetDataProviderResolver.php
+
+		# DataProviderAliasInterface class not found (removed in Sulu 3.0)
+		-
+			message: "#^Class Sulu\\\\Component\\\\SmartContent\\\\DataProviderAliasInterface not found\\.$#"
+			count: 1
+			path: Content/ContentTypeResolver/SmartContentResolver.php
+
+		-
+			message: "#^Call to method getAlias\\(\\) on an unknown class Sulu\\\\Component\\\\SmartContent\\\\DataProviderAliasInterface\\.$#"
+			count: 1
+			path: Content/ContentTypeResolver/SmartContentResolver.php
+
+		# Method parameter iterable type issues in DataProviderResolvers
+		-
+			message: "#^Method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Content\\\\DataProviderResolver\\\\AccountDataProviderResolver\\:\\:convertFilters\\(\\) has parameter \\$filters with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: Content/DataProviderResolver/AccountDataProviderResolver.php
+
+		-
+			message: "#^Method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Content\\\\DataProviderResolver\\\\AccountDataProviderResolver\\:\\:extractSortBys\\(\\) has parameter \\$filters with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: Content/DataProviderResolver/AccountDataProviderResolver.php
+
+		-
+			message: "#^Method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Content\\\\DataProviderResolver\\\\ContactDataProviderResolver\\:\\:convertFilters\\(\\) has parameter \\$filters with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: Content/DataProviderResolver/ContactDataProviderResolver.php
+
+		-
+			message: "#^Method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Content\\\\DataProviderResolver\\\\ContactDataProviderResolver\\:\\:extractSortBys\\(\\) has parameter \\$filters with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: Content/DataProviderResolver/ContactDataProviderResolver.php
+
+		-
+			message: "#^Method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Content\\\\DataProviderResolver\\\\MediaDataProviderResolver\\:\\:convertFilters\\(\\) has parameter \\$filters with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: Content/DataProviderResolver/MediaDataProviderResolver.php
+
+		-
+			message: "#^Method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Content\\\\DataProviderResolver\\\\MediaDataProviderResolver\\:\\:extractSortBys\\(\\) has parameter \\$filters with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: Content/DataProviderResolver/MediaDataProviderResolver.php
+
+		-
+			message: "#^Method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Content\\\\DataProviderResolver\\\\PageDataProviderResolver\\:\\:convertFilters\\(\\) has parameter \\$filters with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: Content/DataProviderResolver/PageDataProviderResolver.php
+
+		-
+			message: "#^Method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Content\\\\DataProviderResolver\\\\PageDataProviderResolver\\:\\:extractSortBys\\(\\) has parameter \\$filters with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: Content/DataProviderResolver/PageDataProviderResolver.php
+
+		-
+			message: "#^Method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Content\\\\DataProviderResolver\\\\SnippetDataProviderResolver\\:\\:convertFilters\\(\\) has parameter \\$filters with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Content/DataProviderResolver/SnippetDataProviderResolver.php
 
 		-
-			message: "#^Cannot access offset string on mixed\\.$#"
-			count: 2
+			message: "#^Method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Content\\\\DataProviderResolver\\\\SnippetDataProviderResolver\\:\\:extractSortBys\\(\\) has parameter \\$filters with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: Content/DataProviderResolver/SnippetDataProviderResolver.php
+
+		# Generic interface type issues (DimensionContentInterface and ContentRichEntityInterface have nested generics)
+		-
+			message: "#^Method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Content\\\\StructureResolver\\:\\:resolve\\(\\) has parameter \\$dimensionContent with generic interface Sulu\\\\Content\\\\Domain\\\\Model\\\\ContentRichEntityInterface but does not specify its types\\: T$#"
+			count: 1
 			path: Content/StructureResolver.php
 
 		-
-			message: "#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\\.$#"
-			count: 2
-			path: Controller/NavigationController.php
-
-		-
-			message: "#^Cannot access offset 'children' on mixed\\.$#"
-			count: 2
-			path: Controller/NavigationController.php
-
-		-
-			message: "#^Cannot access offset 'excerpt' on mixed\\.$#"
-			count: 3
-			path: Controller/NavigationController.php
-
-		-
-			message: "#^Cannot access offset 'icon' on mixed\\.$#"
-			count: 2
-			path: Controller/NavigationController.php
-
-		-
-			message: "#^Cannot access offset 'images' on mixed\\.$#"
-			count: 2
-			path: Controller/NavigationController.php
-
-		-
-			message: "#^Cannot access offset mixed on mixed\\.$#"
-			count: 2
-			path: Controller/NavigationController.php
-
-		-
-			message: "#^Cannot call method getEntity\\(\\) on mixed\\.$#"
-			count: 2
-			path: Controller/NavigationController.php
-
-		-
-			message: "#^Parameter \\#1 \\$navigation of method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Controller\\\\NavigationController\\:\\:serializeExcerptMedia\\(\\) expects array, mixed given\\.$#"
+			message: "#^Method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Content\\\\StructureResolver\\:\\:resolveProperties\\(\\) has parameter \\$dimensionContent with generic interface Sulu\\\\Content\\\\Domain\\\\Model\\\\ContentRichEntityInterface but does not specify its types\\: T$#"
 			count: 1
-			path: Controller/NavigationController.php
+			path: Content/StructureResolver.php
+
+		-
+			message: "#^Method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Content\\\\StructureResolver\\:\\:buildAttributes\\(\\) has parameter \\$dimensionContent with generic interface Sulu\\\\Content\\\\Domain\\\\Model\\\\ContentRichEntityInterface but does not specify its types\\: T$#"
+			count: 1
+			path: Content/StructureResolver.php
+
+		-
+			message: "#^Method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Content\\\\StructureResolver\\:\\:resolveExtensions\\(\\) has parameter \\$dimensionContent with generic interface Sulu\\\\Content\\\\Domain\\\\Model\\\\ContentRichEntityInterface but does not specify its types\\: T$#"
+			count: 1
+			path: Content/StructureResolver.php
+
+		-
+			message: "#^Method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Content\\\\StructureResolverInterface\\:\\:resolve\\(\\) has parameter \\$dimensionContent with generic interface Sulu\\\\Content\\\\Domain\\\\Model\\\\ContentRichEntityInterface but does not specify its types\\: T$#"
+			count: 1
+			path: Content/StructureResolverInterface.php
+
+		-
+			message: "#^Method Sulu\\\\Bundle\\\\HeadlessBundle\\\\Content\\\\StructureResolverInterface\\:\\:resolveProperties\\(\\) has parameter \\$dimensionContent with generic interface Sulu\\\\Content\\\\Domain\\\\Model\\\\ContentRichEntityInterface but does not specify its types\\: T$#"
+			count: 1
+			path: Content/StructureResolverInterface.php
