@@ -347,7 +347,9 @@ class BlockResolverTest extends TestCase
         $result = $resolver->resolve($data, $this->fieldMetadata, 'en', []);
 
         $this->assertInstanceOf(ContentView::class, $result);
-        $this->assertCount(1, $result->getContent());
+        $content = $result->getContent();
+        $this->assertIsArray($content);
+        $this->assertCount(1, $content);
     }
 
     /**

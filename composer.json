@@ -14,7 +14,7 @@
     },
     "require-dev": {
         "cmsig/seal-memory-adapter": "^0.12",
-        "coduo/php-matcher": "^6.0",
+        "coduo/php-matcher": "^6.0.14",
         "handcraftedinthealps/code-coverage-checker": "^0.2.1",
         "jangregor/phpstan-prophecy": "^1.0",
         "php-cs-fixer/shim": "^3.0",
@@ -78,8 +78,7 @@
             "Tests/Application/bin/websiteconsole lint:container --env prod"
         ],
         "lint-doctrine": [
-            "Tests/Application/bin/adminconsole doctrine:schema:validate --skip-sync",
-            "Tests/Application/bin/adminconsole doctrine:ensure-production-settings --env prod"
+            "Tests/Application/bin/adminconsole doctrine:schema:validate --skip-sync"
         ]
     },
     "config": {

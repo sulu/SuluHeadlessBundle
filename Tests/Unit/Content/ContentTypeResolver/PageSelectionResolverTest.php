@@ -24,8 +24,6 @@ use Sulu\Content\Application\ContentAggregator\ContentAggregatorInterface;
 use Sulu\Content\Domain\Model\DimensionContentInterface;
 use Sulu\Page\Domain\Model\Page;
 use Sulu\Page\Domain\Model\PageDimensionContent;
-use Sulu\Page\Domain\Model\PageDimensionContentInterface;
-use Sulu\Page\Domain\Model\PageInterface;
 use Sulu\Page\Domain\Repository\PageRepositoryInterface;
 
 class PageSelectionResolverTest extends TestCase
@@ -235,7 +233,9 @@ class PageSelectionResolverTest extends TestCase
         $result = $pageSelectionResolver->resolve(['page-id-1'], $this->fieldMetadata, $locale, []);
 
         $this->assertInstanceOf(ContentView::class, $result);
-        $this->assertCount(1, $result->getContent());
+        $content = $result->getContent();
+        $this->assertIsArray($content);
+        $this->assertCount(1, $content);
     }
 
     public function testResolveWithCustomProperties(): void
@@ -291,7 +291,9 @@ class PageSelectionResolverTest extends TestCase
         $result = $this->pageSelectionResolver->resolve(['page-id-1'], $fieldMetadata, $locale, []);
 
         $this->assertInstanceOf(ContentView::class, $result);
-        $this->assertCount(1, $result->getContent());
+        $content = $result->getContent();
+        $this->assertIsArray($content);
+        $this->assertCount(1, $content);
     }
 
     public function testResolveWithNonStringPropertyValue(): void
@@ -306,6 +308,7 @@ class PageSelectionResolverTest extends TestCase
 
         $entry = new \Sulu\Bundle\AdminBundle\Metadata\FormMetadata\OptionMetadata();
         $entry->setName('customProp');
+        /* @phpstan-ignore argument.type (intentionally testing non-string value) */
         $entry->setValue(['not-a-string']);
 
         $propertiesOption->setValue([$entry]);

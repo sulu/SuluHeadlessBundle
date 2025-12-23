@@ -45,6 +45,10 @@ class NavigationController
     public function getAction(Request $request, string $context): Response
     {
         $webspace = $this->requestAnalyzer->getWebspace();
+        if (null === $webspace) {
+            throw new \RuntimeException('No webspace found in request.');
+        }
+
         $locale = $request->getLocale();
         $uuid = $request->query->get('uuid');
         $depth = $request->query->getInt('depth', 1);
