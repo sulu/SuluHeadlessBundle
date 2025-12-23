@@ -1,0 +1,112 @@
+<?xml version="1.0" ?>
+<template xmlns="http://schemas.sulu.io/template/template"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://schemas.sulu.io/template/template http://schemas.sulu.io/template/template-1.0.xsd">
+
+    <key>smart-content-providers</key>
+
+    <view>headless</view>
+    <controller>Sulu\Bundle\HeadlessBundle\Controller\HeadlessWebsiteController::indexAction</controller>
+    <cacheLifetime>2400</cacheLifetime>
+
+    <meta>
+        <title lang="en">Smart Content Providers Test</title>
+        <title lang="de">Smart Content Provider Test</title>
+    </meta>
+
+    <properties>
+        <property name="title" type="text_line" mandatory="true">
+            <meta>
+                <title lang="en">Title</title>
+                <title lang="de">Titel</title>
+            </meta>
+            <tag name="sulu.rlp.part"/>
+        </property>
+
+        <property name="url" type="resource_locator" mandatory="true">
+            <meta>
+                <title lang="en">URL</title>
+                <title lang="de">URL</title>
+            </meta>
+            <tag name="sulu.rlp"/>
+        </property>
+
+        <property name="pages_content" type="smart_content">
+            <meta>
+                <title lang="en">Pages Content</title>
+                <title lang="de">Seiten Inhalt</title>
+            </meta>
+            <params>
+                <param name="provider" value="pages"/>
+                <param name="max_per_page" value="5"/>
+                <param name="properties" type="collection">
+                    <param name="title" value="title"/>
+                    <param name="url" value="url"/>
+                </param>
+            </params>
+        </property>
+
+        <property name="snippets_content" type="smart_content">
+            <meta>
+                <title lang="en">Snippets Content</title>
+                <title lang="de">Schnipsel Inhalt</title>
+            </meta>
+            <params>
+                <param name="provider" value="snippets"/>
+                <param name="max_per_page" value="5"/>
+            </params>
+        </property>
+
+        <property name="media_content" type="smart_content">
+            <meta>
+                <title lang="en">Media Content</title>
+                <title lang="de">Medien Inhalt</title>
+            </meta>
+            <params>
+                <param name="provider" value="media"/>
+                <param name="max_per_page" value="5"/>
+            </params>
+        </property>
+
+        <property name="contacts_content" type="smart_content">
+            <meta>
+                <title lang="en">Contacts Content</title>
+                <title lang="de">Kontakte Inhalt</title>
+            </meta>
+            <params>
+                <param name="provider" value="contacts"/>
+                <param name="max_per_page" value="5"/>
+            </params>
+        </property>
+
+        <property name="accounts_content" type="smart_content">
+            <meta>
+                <title lang="en">Accounts Content</title>
+                <title lang="de">Organisationen Inhalt</title>
+            </meta>
+            <params>
+                <param name="provider" value="accounts"/>
+                <param name="max_per_page" value="5"/>
+            </params>
+        </property>
+
+        <property name="pages_with_excerpt" type="smart_content">
+            <meta>
+                <title lang="en">Pages with Excerpt</title>
+                <title lang="de">Seiten mit Auszug</title>
+            </meta>
+            <params>
+                <param name="provider" value="pages"/>
+                <param name="max_per_page" value="5"/>
+                <param name="properties" type="collection">
+                    <param name="title" value="title"/>
+                    <param name="url" value="url"/>
+                    <param name="excerptTitle" value="excerpt.title"/>
+                    <param name="excerptDescription" value="excerpt.description"/>
+                    <param name="excerptTags" value="excerpt.tags"/>
+                    <param name="excerptImages" value="excerpt.images"/>
+                </param>
+            </params>
+        </property>
+    </properties>
+</template>

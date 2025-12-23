@@ -1,0 +1,160 @@
+{
+    "id": "@uuid@",
+    "nodeType": 1,
+    "type": "page",
+    "template": "resolver-test",
+    "content": {
+        "title": "Media Single",
+        "url": "/media-single",
+        "media_selection": [
+            {
+                "id": "@integer@",
+                "formatUri": "@string@",
+                "formatPreferredExtension": "png",
+                "mimeType": "image/png",
+                "name": "test-image.png",
+                "title": "Test Image 1",
+                "description": "@string@",
+                "url": "@string@",
+                "locale": "de",
+                "size": "@integer@",
+                "version": "@integer@",
+                "subVersion": "@integer@",
+                "isImage": true,
+                "isVideo": false,
+                "isAudio": false,
+                "isDocument": false,
+                "collection": "@integer@",
+                "type": {
+                    "id": "@integer@",
+                    "name": "image"
+                },
+                "categories": [],
+                "tags": [],
+                "targetGroups": [],
+                "properties": [],
+                "contentLanguages": [],
+                "publishLanguages": [],
+                "created": "@string@",
+                "changed": "@string@"
+            }
+        ],
+        "text_editor": "@string@",
+        "link": null,
+        "single_media_selection": null,
+        "image_map": [],
+        "collection_selection": [],
+        "single_collection_selection": null,
+        "category_selection": [],
+        "single_category_selection": null,
+        "contact_selection": [],
+        "single_contact_selection": null,
+        "account_selection": [],
+        "single_account_selection": null,
+        "contact_account_selection": [],
+        "page_selection": [],
+        "single_page_selection": null,
+        "snippet_selection": [],
+        "single_snippet_selection": null,
+        "teaser_selection": [],
+        "smart_content": [],
+        "blocks": []
+    },
+    "view": {
+        "title": [],
+        "url": [],
+        "media_selection": {
+            "ids": ["@integer@"]
+        },
+        "text_editor": [],
+        "link": [],
+        "single_media_selection": {
+            "id": null
+        },
+        "image_map": [],
+        "collection_selection": {
+            "ids": []
+        },
+        "single_collection_selection": {
+            "id": null
+        },
+        "category_selection": {
+            "ids": []
+        },
+        "single_category_selection": {
+            "id": null
+        },
+        "contact_selection": {
+            "ids": []
+        },
+        "single_contact_selection": {
+            "id": null
+        },
+        "account_selection": {
+            "ids": []
+        },
+        "single_account_selection": {
+            "id": null
+        },
+        "contact_account_selection": {
+            "ids": []
+        },
+        "page_selection": {
+            "ids": []
+        },
+        "single_page_selection": {
+            "id": ""
+        },
+        "snippet_selection": {
+            "ids": []
+        },
+        "single_snippet_selection": {
+            "id": null
+        },
+        "teaser_selection": {
+            "items": [],
+            "presentAs": null
+        },
+        "smart_content": {
+            "hasNextPage": false,
+            "page": 1,
+            "paginated": true,
+            "categories": [],
+            "tags": [],
+            "websiteCategories": [],
+            "websiteCategoriesOperator": "OR",
+            "websiteTags": [],
+            "websiteTagsOperator": "OR",
+            "excluded": ["@uuid@"]
+        },
+        "blocks": []
+    },
+    "author": null,
+    "authored": "@string@.isDateTime()",
+    "changer": null,
+    "changed": "@string@.isDateTime()",
+    "creator": null,
+    "created": "@string@.isDateTime()",
+    "extension": {
+        "excerpt": {
+            "title": "@string@",
+            "description": "@string@",
+            "more": "@string@",
+            "categories": [],
+            "tags": [],
+            "icon": [],
+            "images": [],
+            "audience_targeting_groups": [],
+            "segments": []
+        },
+        "seo": {
+            "title": "@string@",
+            "description": "@string@",
+            "keywords": "@string@",
+            "canonicalUrl": "@string@",
+            "noIndex": false,
+            "noFollow": false,
+            "hideInSitemap": false
+        }
+    }
+}

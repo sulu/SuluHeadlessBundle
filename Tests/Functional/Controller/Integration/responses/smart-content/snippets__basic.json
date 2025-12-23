@@ -1,0 +1,183 @@
+{
+    "id": "@uuid@",
+    "nodeType": 1,
+    "type": "page",
+    "template": "smart-content-providers",
+    "content": {
+        "title": "Smart Content Snippets",
+        "url": "/smart-content-snippets",
+        "pages_content": [],
+        "pages_with_excerpt": [],
+        "snippets_content": [
+            {
+                "id": "@uuid@",
+                "nodeType": 1,
+                "type": "snippet",
+                "template": "default",
+                "content": {
+                    "title": "Smart Snippet One"
+                },
+                "view": {
+                    "title": []
+                },
+                "author": null,
+                "authored": null,
+                "changer": null,
+                "changed": "@string@.isDateTime()",
+                "creator": null,
+                "created": "@string@.isDateTime()"
+            },
+            {
+                "id": "@uuid@",
+                "nodeType": 1,
+                "type": "snippet",
+                "template": "default",
+                "content": {
+                    "title": "Smart Snippet Two"
+                },
+                "view": {
+                    "title": []
+                },
+                "author": null,
+                "authored": null,
+                "changer": null,
+                "changed": "@string@.isDateTime()",
+                "creator": null,
+                "created": "@string@.isDateTime()"
+            }
+        ],
+        "media_content": [],
+        "contacts_content": [
+            {
+                "id": "@integer@",
+                "firstName": "Smart",
+                "lastName": "Contact One",
+                "fullName": "Smart Contact One"
+            },
+            {
+                "id": "@integer@",
+                "firstName": "Smart",
+                "lastName": "Contact Two",
+                "fullName": "Smart Contact Two"
+            }
+        ],
+        "accounts_content": [
+            {
+                "id": "@integer@",
+                "name": "Smart Account One",
+                "number": "@string@",
+                "depth": 0
+            },
+            {
+                "id": "@integer@",
+                "name": "Smart Account Two",
+                "number": "@string@",
+                "depth": 0
+            }
+        ]
+    },
+    "view": {
+        "title": [],
+        "url": [],
+        "pages_content": {
+            "hasNextPage": false,
+            "page": 1,
+            "paginated": true,
+            "categories": [],
+            "tags": [],
+            "websiteCategories": [],
+            "websiteCategoriesOperator": "OR",
+            "websiteTags": [],
+            "websiteTagsOperator": "OR",
+            "excluded": ["@uuid@"]
+        },
+        "pages_with_excerpt": {
+            "hasNextPage": false,
+            "page": 1,
+            "paginated": true,
+            "categories": [],
+            "tags": [],
+            "websiteCategories": [],
+            "websiteCategoriesOperator": "OR",
+            "websiteTags": [],
+            "websiteTagsOperator": "OR",
+            "excluded": ["@uuid@"]
+        },
+        "snippets_content": {
+            "hasNextPage": false,
+            "page": 1,
+            "paginated": true,
+            "categories": [],
+            "tags": [],
+            "websiteCategories": [],
+            "websiteCategoriesOperator": "OR",
+            "websiteTags": [],
+            "websiteTagsOperator": "OR",
+            "excluded": ["@uuid@"]
+        },
+        "media_content": {
+            "hasNextPage": false,
+            "page": 1,
+            "paginated": true,
+            "categories": [],
+            "tags": [],
+            "websiteCategories": [],
+            "websiteCategoriesOperator": "OR",
+            "websiteTags": [],
+            "websiteTagsOperator": "OR",
+            "excluded": ["@uuid@"]
+        },
+        "contacts_content": {
+            "hasNextPage": false,
+            "page": 1,
+            "paginated": true,
+            "categories": [],
+            "tags": [],
+            "websiteCategories": [],
+            "websiteCategoriesOperator": "OR",
+            "websiteTags": [],
+            "websiteTagsOperator": "OR",
+            "excluded": ["@uuid@"]
+        },
+        "accounts_content": {
+            "hasNextPage": false,
+            "page": 1,
+            "paginated": true,
+            "categories": [],
+            "tags": [],
+            "websiteCategories": [],
+            "websiteCategoriesOperator": "OR",
+            "websiteTags": [],
+            "websiteTagsOperator": "OR",
+            "excluded": ["@uuid@"]
+        }
+    },
+    "author": null,
+    "authored": "@string@.isDateTime()",
+    "changer": null,
+    "changed": "@string@.isDateTime()",
+    "creator": null,
+    "created": "@string@.isDateTime()",
+    "extension": {
+        "excerpt": {
+            "title": "",
+            "description": "",
+            "more": "",
+            "categories": [],
+            "tags": [],
+            "icon": [],
+            "images": [],
+            "audience_targeting_groups": [],
+            "segments": []
+        },
+        "seo": {
+            "title": "",
+            "description": "",
+            "keywords": "",
+            "canonicalUrl": "",
+            "noIndex": false,
+            "noFollow": false,
+            "hideInSitemap": false
+        }
+    }
+}

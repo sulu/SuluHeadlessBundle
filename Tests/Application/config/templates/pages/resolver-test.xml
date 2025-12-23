@@ -1,0 +1,293 @@
+<?xml version="1.0" ?>
+<template xmlns="http://schemas.sulu.io/template/template"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://schemas.sulu.io/template/template http://schemas.sulu.io/template/template-1.0.xsd">
+
+    <key>resolver-test</key>
+
+    <view>headless</view>
+    <controller>Sulu\Bundle\HeadlessBundle\Controller\HeadlessWebsiteController::indexAction</controller>
+    <cacheLifetime>2400</cacheLifetime>
+
+    <meta>
+        <title lang="en">Resolver Test</title>
+        <title lang="de">Resolver Test</title>
+    </meta>
+
+    <properties>
+        <property name="title" type="text_line" mandatory="true">
+            <meta>
+                <title lang="en">Title</title>
+                <title lang="de">Titel</title>
+            </meta>
+            <tag name="sulu.rlp.part"/>
+        </property>
+
+        <property name="url" type="resource_locator" mandatory="true">
+            <meta>
+                <title lang="en">URL</title>
+                <title lang="de">URL</title>
+            </meta>
+            <tag name="sulu.rlp"/>
+        </property>
+
+        <property name="text_editor" type="text_editor">
+            <meta>
+                <title lang="en">Text Editor</title>
+                <title lang="de">Texteditor</title>
+            </meta>
+        </property>
+
+        <property name="link" type="link">
+            <meta>
+                <title lang="en">Link</title>
+                <title lang="de">Link</title>
+            </meta>
+            <params>
+                <param name="enable_anchor" value="true"/>
+            </params>
+        </property>
+
+        <property name="media_selection" type="media_selection">
+            <meta>
+                <title lang="en">Media Selection</title>
+                <title lang="de">Medienauswahl</title>
+            </meta>
+        </property>
+
+        <property name="single_media_selection" type="single_media_selection">
+            <meta>
+                <title lang="en">Single Media Selection</title>
+                <title lang="de">Medium</title>
+            </meta>
+        </property>
+
+        <property name="image_map" type="image_map" default-type="basic">
+            <meta>
+                <title lang="en">Image Map</title>
+                <title lang="de">Image Map</title>
+            </meta>
+            <types>
+                <type name="basic">
+                    <meta>
+                        <title lang="en">Basic</title>
+                        <title lang="de">Grundlegend</title>
+                    </meta>
+                    <properties>
+                        <property name="title" type="text_line">
+                            <meta>
+                                <title lang="en">Title</title>
+                                <title lang="de">Titel</title>
+                            </meta>
+                        </property>
+                        <property name="description" type="text_area">
+                            <meta>
+                                <title lang="en">Description</title>
+                                <title lang="de">Beschreibung</title>
+                            </meta>
+                        </property>
+                    </properties>
+                </type>
+                <type name="link">
+                    <meta>
+                        <title lang="en">Link</title>
+                        <title lang="de">Link</title>
+                    </meta>
+                    <properties>
+                        <property name="link" type="link">
+                            <meta>
+                                <title lang="en">Link</title>
+                                <title lang="de">Link</title>
+                            </meta>
+                        </property>
+                    </properties>
+                </type>
+            </types>
+        </property>
+
+        <property name="collection_selection" type="collection_selection">
+            <meta>
+                <title lang="en">Collection Selection</title>
+                <title lang="de">Ordner</title>
+            </meta>
+        </property>
+
+        <property name="single_collection_selection" type="single_collection_selection">
+            <meta>
+                <title lang="en">Single Collection Selection</title>
+                <title lang="de">Ordner</title>
+            </meta>
+        </property>
+
+        <property name="category_selection" type="category_selection">
+            <meta>
+                <title lang="en">Category Selection</title>
+                <title lang="de">Kategorien</title>
+            </meta>
+        </property>
+
+        <property name="single_category_selection" type="single_category_selection">
+            <meta>
+                <title lang="en">Single Category Selection</title>
+                <title lang="de">Kategorie</title>
+            </meta>
+        </property>
+
+        <property name="contact_selection" type="contact_selection">
+            <meta>
+                <title lang="en">Contact Selection</title>
+                <title lang="de">Kontakte</title>
+            </meta>
+        </property>
+
+        <property name="single_contact_selection" type="single_contact_selection">
+            <meta>
+                <title lang="en">Single Contact Selection</title>
+                <title lang="de">Kontakt</title>
+            </meta>
+        </property>
+
+        <property name="account_selection" type="account_selection">
+            <meta>
+                <title lang="en">Account Selection</title>
+                <title lang="de">Organisationen</title>
+            </meta>
+        </property>
+
+        <property name="single_account_selection" type="single_account_selection">
+            <meta>
+                <title lang="en">Single Account Selection</title>
+                <title lang="de">Organisation</title>
+            </meta>
+        </property>
+
+        <property name="contact_account_selection" type="contact_account_selection">
+            <meta>
+                <title lang="en">Contact and Account Selection</title>
+                <title lang="de">Kontakte und Organisationen</title>
+            </meta>
+        </property>
+
+        <property name="page_selection" type="page_selection">
+            <meta>
+                <title lang="en">Page Selection</title>
+                <title lang="de">Seiten</title>
+            </meta>
+        </property>
+
+        <property name="single_page_selection" type="single_page_selection">
+            <meta>
+                <title lang="en">Single Page Selection</title>
+                <title lang="de">Seite</title>
+            </meta>
+        </property>
+
+        <property name="snippet_selection" type="snippet_selection">
+            <meta>
+                <title lang="en">Snippet Selection</title>
+                <title lang="de">Schnipsel</title>
+            </meta>
+        </property>
+
+        <property name="single_snippet_selection" type="single_snippet_selection">
+            <meta>
+                <title lang="en">Single Snippet Selection</title>
+                <title lang="de">Schnipsel</title>
+            </meta>
+        </property>
+
+        <property name="teaser_selection" type="teaser_selection">
+            <meta>
+                <title lang="en">Teaser Selection</title>
+                <title lang="de">Anreiser</title>
+            </meta>
+        </property>
+
+        <property name="smart_content" type="smart_content">
+            <meta>
+                <title lang="en">Smart Content</title>
+                <title lang="de">Smart Content</title>
+            </meta>
+        </property>
+
+        <block name="blocks" default-type="text" minOccurs="0">
+            <meta>
+                <title lang="en">Blocks</title>
+                <title lang="de">Blöcke</title>
+            </meta>
+
+            <types>
+                <type name="text">
+                    <meta>
+                        <title lang="en">Text</title>
+                        <title lang="de">Text</title>
+                    </meta>
+                    <properties>
+                        <property name="title" type="text_line">
+                            <meta>
+                                <title lang="en">Title</title>
+                                <title lang="de">Titel</title>
+                            </meta>
+                        </property>
+                        <property name="content" type="text_editor">
+                            <meta>
+                                <title lang="en">Content</title>
+                                <title lang="de">Inhalt</title>
+                            </meta>
+                        </property>
+                    </properties>
+                </type>
+                <type name="media">
+                    <meta>
+                        <title lang="en">Media</title>
+                        <title lang="de">Media</title>
+                    </meta>
+                    <properties>
+                        <property name="images" type="media_selection">
+                            <meta>
+                                <title lang="en">Images</title>
+                                <title lang="de">Bilder</title>
+                            </meta>
+                        </property>
+                        <property name="caption" type="text_line">
+                            <meta>
+                                <title lang="en">Caption</title>
+                                <title lang="de">Beschriftung</title>
+                            </meta>
+                        </property>
+                    </properties>
+                </type>
+                <type name="nested">
+                    <meta>
+                        <title lang="en">Nested</title>
+                        <title lang="de">Verschachtelt</title>
+                    </meta>
+                    <properties>
+                        <block name="inner_blocks" default-type="inner_text" minOccurs="0">
+                            <meta>
+                                <title lang="en">Inner Blocks</title>
+                                <title lang="de">Innere Blöcke</title>
+                            </meta>
+                            <types>
+                                <type name="inner_text">
+                                    <meta>
+                                        <title lang="en">Inner Text</title>
+                                        <title lang="de">Innerer Text</title>
+                                    </meta>
+                                    <properties>
+                                        <property name="text" type="text_editor">
+                                            <meta>
+                                                <title lang="en">Text</title>
+                                                <title lang="de">Text</title>
+                                            </meta>
+                                        </property>
+                                    </properties>
+                                </type>
+                            </types>
+                        </block>
+                    </properties>
+                </type>
+            </types>
+        </block>
+    </properties>
+</template>
