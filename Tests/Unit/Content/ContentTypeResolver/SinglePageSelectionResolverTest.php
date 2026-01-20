@@ -115,6 +115,6 @@ class SinglePageSelectionResolverTest extends TestCase
 
         $this->assertNull($result->getContent());
 
-        $this->assertSame(['id' => null], $result->getView());
+        $this->assertSame(['id' => ''], $result->getView());
     }
 }

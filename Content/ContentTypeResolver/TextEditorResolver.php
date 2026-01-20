@@ -31,8 +31,8 @@ class TextEditorResolver implements ContentTypeResolverInterface
 
     public function resolve(mixed $data, FieldMetadata $fieldMetadata, string $locale, array $attributes = []): ContentView
     {
-        if (null === $data) {
-            return new ContentView(null);
+        if (null === $data || '' === $data) {
+            return new ContentView('');
         }
 
         return new ContentView($this->markupParser->parse($data, $locale));

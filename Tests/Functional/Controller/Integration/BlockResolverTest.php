@@ -16,11 +16,9 @@ namespace Sulu\Bundle\HeadlessBundle\Tests\Functional\Controller\Integration;
 use Sulu\Bundle\HeadlessBundle\Tests\Functional\BaseTestCase;
 use Sulu\Bundle\HeadlessBundle\Tests\Traits\CreateMediaTrait;
 use Sulu\Bundle\HeadlessBundle\Tests\Traits\CreatePageTrait;
-use Sulu\Bundle\MediaBundle\DataFixtures\ORM\LoadCollectionTypes;
-use Sulu\Bundle\MediaBundle\DataFixtures\ORM\LoadMediaTypes;
 use Sulu\Bundle\MediaBundle\Entity\CollectionInterface;
 use Sulu\Bundle\MediaBundle\Entity\MediaInterface;
-use Sulu\Bundle\PageBundle\Document\PageDocument;
+use Sulu\Page\Domain\Model\Page;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -33,16 +31,12 @@ class BlockResolverTest extends BaseTestCase
 
     private static CollectionInterface $collection;
     private static MediaInterface $media;
-    private static PageDocument $targetPage;
+    private static Page $targetPage;
 
     public static function setUpBeforeClass(): void
     {
-        self::initPhpcr();
-
-        $collectionTypeFixture = new LoadCollectionTypes();
-        $collectionTypeFixture->load(self::getEntityManager());
-        $mediaTypeFixture = new LoadMediaTypes();
-        $mediaTypeFixture->load(self::getEntityManager());
+        static::purgeDatabase();
+        self::bootKernel();
 
         self::$collection = self::createCollection('Test Collection', 'de');
         self::$media = self::createMedia('Test Image 1', self::$collection, 'de');
@@ -194,6 +188,8 @@ class BlockResolverTest extends BaseTestCase
             'template' => 'resolver-test',
             'blocks' => [],
         ]);
+
+        self::getEntityManager()->clear();
 
         static::ensureKernelShutdown();
     }

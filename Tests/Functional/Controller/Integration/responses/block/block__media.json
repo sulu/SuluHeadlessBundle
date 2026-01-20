@@ -1,6 +1,6 @@
 {
     "id": "@uuid@",
-    "nodeType": 1,
+    "linkType": null,
     "type": "page",
     "template": "resolver-test",
     "content": {
@@ -31,19 +31,14 @@
                         "categories": [],
                         "tags": [],
                         "targetGroups": [],
-                        "contentLanguages": [],
-                        "publishLanguages": [],
                         "properties": [],
-                        "type": {
-                            "id": 2,
-                            "name": "image"
-                        },
+                        "type": "image",
                         "created": "@string@.isDateTime()",
                         "changed": "@string@.isDateTime()"
                     }
                 ],
                 "caption": "Image caption",
-                "settings": {}
+                "settings": []
             }
         ],
         "text_editor": "",
@@ -157,7 +152,7 @@
             "categories": [],
             "tags": [],
             "icon": [],
-            "images": [],
+            "image": [],
             "audience_targeting_groups": [],
             "segments": []
         },

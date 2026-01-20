@@ -1,6 +1,6 @@
 {
     "id": "@uuid@",
-    "nodeType": 1,
+    "linkType": null,
     "type": "page",
     "template": "resolver-test",
     "content": {
@@ -8,7 +8,7 @@
         "url": "/single-page-basic",
         "single_page_selection": {
             "id": "@uuid@",
-            "nodeType": "@integer@",
+    "linkType": null,
             "type": "page",
             "template": "default",
             "content": {
@@ -130,7 +130,7 @@
             "categories": [],
             "tags": [],
             "icon": [],
-            "images": [],
+            "image": [],
             "audience_targeting_groups": [],
             "segments": []
         },

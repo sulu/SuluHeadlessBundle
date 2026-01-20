@@ -1,6 +1,6 @@
 {
     "id": "@uuid@",
-    "nodeType": 1,
+    "linkType": null,
     "type": "page",
     "template": "smart-content-providers",
     "content": {
@@ -11,7 +11,6 @@
         "snippets_content": [
             {
                 "id": "@uuid@",
-                "nodeType": 1,
                 "type": "snippet",
                 "template": "default",
                 "content": {
@@ -20,8 +19,6 @@
                 "view": {
                     "title": []
                 },
-                "author": null,
-                "authored": null,
                 "changer": null,
                 "changed": "@string@.isDateTime()",
                 "creator": null,
@@ -29,7 +26,6 @@
             },
             {
                 "id": "@uuid@",
-                "nodeType": 1,
                 "type": "snippet",
                 "template": "default",
                 "content": {
@@ -38,78 +34,13 @@
                 "view": {
                     "title": []
                 },
-                "author": null,
-                "authored": null,
                 "changer": null,
                 "changed": "@string@.isDateTime()",
                 "creator": null,
                 "created": "@string@.isDateTime()"
             }
         ],
-        "media_content": [
-            {
-                "id": "@integer@",
-                "formatUri": "@string@",
-                "formatPreferredExtension": "png",
-                "mimeType": "image/png",
-                "name": "test-image.png",
-                "title": "Smart Media One",
-                "description": "@string@",
-                "url": "@string@",
-                "locale": "de",
-                "size": "@integer@",
-                "version": "@integer@",
-                "subVersion": "@integer@",
-                "isImage": true,
-                "isVideo": false,
-                "isAudio": false,
-                "isDocument": false,
-                "collection": "@integer@",
-                "type": {
-                    "id": "@integer@",
-                    "name": "image"
-                },
-                "categories": [],
-                "tags": [],
-                "targetGroups": [],
-                "properties": [],
-                "contentLanguages": [],
-                "publishLanguages": [],
-                "created": "@string@",
-                "changed": "@string@"
-            },
-            {
-                "id": "@integer@",
-                "formatUri": "@string@",
-                "formatPreferredExtension": "png",
-                "mimeType": "image/png",
-                "name": "test-image.png",
-                "title": "Smart Media Two",
-                "description": "@string@",
-                "url": "@string@",
-                "locale": "de",
-                "size": "@integer@",
-                "version": "@integer@",
-                "subVersion": "@integer@",
-                "isImage": true,
-                "isVideo": false,
-                "isAudio": false,
-                "isDocument": false,
-                "collection": "@integer@",
-                "type": {
-                    "id": "@integer@",
-                    "name": "image"
-                },
-                "categories": [],
-                "tags": [],
-                "targetGroups": [],
-                "properties": [],
-                "contentLanguages": [],
-                "publishLanguages": [],
-                "created": "@string@",
-                "changed": "@string@"
-            }
-        ],
+        "media_content": [],
         "contacts_content": [
             {
                 "id": "@integer@",
@@ -230,7 +161,7 @@
             "categories": [],
             "tags": [],
             "icon": [],
-            "images": [],
+            "image": [],
             "audience_targeting_groups": [],
             "segments": []
         },

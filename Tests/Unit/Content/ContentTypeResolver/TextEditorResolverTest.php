@@ -78,7 +78,7 @@ class TextEditorResolverTest extends TestCase
     {
         $result = $this->textEditorResolver->resolve(null, $this->fieldMetadata, 'en');
 
-        $this->assertNull($result->getContent());
+        $this->assertSame('', $result->getContent());
 
         $this->assertSame([], $result->getView());
     }

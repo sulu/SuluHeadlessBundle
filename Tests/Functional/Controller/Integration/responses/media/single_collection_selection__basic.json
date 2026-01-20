@@ -1,6 +1,7 @@
 {
     "id": "@uuid@",
-    "nodeType": 1,
+    "linkType": null,
+    "linkType": null,
     "type": "page",
     "template": "resolver-test",
     "content": {
@@ -116,7 +117,7 @@
             "categories": [],
             "tags": [],
             "icon": [],
-            "images": [],
+            "image": [],
             "audience_targeting_groups": [],
             "segments": []
         },

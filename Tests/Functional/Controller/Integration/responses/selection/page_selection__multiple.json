@@ -1,6 +1,6 @@
 {
     "id": "@uuid@",
-    "nodeType": 1,
+    "linkType": null,
     "type": "page",
     "template": "resolver-test",
     "content": {
@@ -9,7 +9,7 @@
         "page_selection": [
             {
                 "id": "@uuid@",
-                "nodeType": "@integer@",
+    "linkType": null,
                 "type": "page",
                 "template": "default",
                 "content": {
@@ -29,7 +29,7 @@
             },
             {
                 "id": "@uuid@",
-                "nodeType": "@integer@",
+    "linkType": null,
                 "type": "page",
                 "template": "default",
                 "content": {
@@ -152,7 +152,7 @@
             "categories": [],
             "tags": [],
             "icon": [],
-            "images": [],
+            "image": [],
             "audience_targeting_groups": [],
             "segments": []
         },

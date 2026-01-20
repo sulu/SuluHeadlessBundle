@@ -1,6 +1,6 @@
 {
     "id": "@uuid@",
-    "nodeType": 1,
+    "linkType": null,
     "type": "page",
     "template": "resolver-test",
     "content": {
@@ -13,10 +13,10 @@
                     {
                         "type": "inner_text",
                         "text": "<p>Inner block content</p>",
-                        "settings": {}
+                        "settings": []
                     }
                 ],
-                "settings": {}
+                "settings": []
             }
         ],
         "text_editor": "@string@",
@@ -131,7 +131,7 @@
             "categories": [],
             "tags": [],
             "icon": [],
-            "images": [],
+            "image": [],
             "audience_targeting_groups": [],
             "segments": []
         },

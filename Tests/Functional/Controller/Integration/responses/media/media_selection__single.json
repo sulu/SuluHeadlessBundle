@@ -1,6 +1,7 @@
 {
     "id": "@uuid@",
-    "nodeType": 1,
+    "linkType": null,
+    "linkType": null,
     "type": "page",
     "template": "resolver-test",
     "content": {
@@ -25,16 +26,11 @@
                 "isAudio": false,
                 "isDocument": false,
                 "collection": "@integer@",
-                "type": {
-                    "id": "@integer@",
-                    "name": "image"
-                },
+                "type": "image",
                 "categories": [],
                 "tags": [],
                 "targetGroups": [],
                 "properties": [],
-                "contentLanguages": [],
-                "publishLanguages": [],
                 "created": "@string@",
                 "changed": "@string@"
             }
@@ -143,7 +139,7 @@
             "categories": [],
             "tags": [],
             "icon": [],
-            "images": [],
+            "image": [],
             "audience_targeting_groups": [],
             "segments": []
         },

@@ -16,11 +16,13 @@ namespace Sulu\Bundle\HeadlessBundle\Content;
 use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FormMetadata;
 use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\TypedFormMetadata;
 use Sulu\Bundle\AdminBundle\Metadata\MetadataProviderInterface;
+use Sulu\Bundle\HeadlessBundle\Content\ExtensionResolver\ExtensionResolverProvider;
 use Sulu\Bundle\HttpCacheBundle\ReferenceStore\ReferenceStoreInterface;
 use Sulu\Component\Persistence\Model\AuditableInterface;
 use Sulu\Content\Domain\Model\AuthorInterface;
 use Sulu\Content\Domain\Model\DimensionContentInterface;
 use Sulu\Content\Domain\Model\ExcerptInterface;
+use Sulu\Content\Domain\Model\LinkInterface;
 use Sulu\Content\Domain\Model\SeoInterface;
 use Sulu\Content\Domain\Model\ShadowInterface;
 use Sulu\Content\Domain\Model\TaxonomyInterface;
@@ -33,6 +35,7 @@ class StructureResolver implements StructureResolverInterface
         private MetadataProviderInterface $formMetadataProvider,
         private ContentResolverInterface $contentResolver,
         private ReferenceStoreInterface $referenceStore,
+        private ExtensionResolverProvider $extensionResolverProvider,
     ) {
     }
 
@@ -50,8 +53,6 @@ class StructureResolver implements StructureResolverInterface
         $resourceId = $resource->getId();
         $resourceKey = $dimensionContent::getResourceKey();
 
-        // TODO internal / external link
-
         $this->referenceStore->add($resourceId, $resourceKey);
 
         $attributes = $this->buildAttributes($dimensionContent);
@@ -60,6 +61,11 @@ class StructureResolver implements StructureResolverInterface
             'id' => $resourceId,
             'type' => $dimensionContent instanceof TemplateInterface ? $dimensionContent::getTemplateType() : null,
         ];
+
+        if ($dimensionContent instanceof LinkInterface) {
+            $linkData = $dimensionContent->getLinkData();
+            $data['linkType'] = null !== $linkData ? ($linkData['provider'] ?? null) : null;
+        }
 
         if ($dimensionContent instanceof TemplateInterface) {
             $templateKey = $dimensionContent->getTemplateKey();
@@ -148,6 +154,18 @@ class StructureResolver implements StructureResolverInterface
             $filteredFieldMetadata = [];
             $filteredTemplateData = [];
             foreach ($properties as $targetKey => $sourceKey) {
+                $isExtensionProperty = false;
+                foreach ($this->extensionResolverProvider->getResolvers() as $resolver) {
+                    if (\str_starts_with($sourceKey, $resolver->getPrefix())) {
+                        $isExtensionProperty = true;
+                        break;
+                    }
+                }
+
+                if ($isExtensionProperty) {
+                    continue;
+                }
+
                 if (\array_key_exists($sourceKey, $fieldMetadataList)) {
                     $filteredFieldMetadata[$targetKey] = $fieldMetadataList[$sourceKey];
                 }
@@ -157,6 +175,10 @@ class StructureResolver implements StructureResolverInterface
             }
             $fieldMetadataList = $filteredFieldMetadata;
             $templateData = $filteredTemplateData;
+
+            if ($dimensionContent instanceof DimensionContentInterface) {
+                $this->resolveExtensionProperties($dimensionContent, $properties, $locale, $attributes, $content, $view);
+            }
         }
 
         foreach ($fieldMetadataList as $fieldName => $fieldMetadata) {
@@ -167,6 +189,31 @@ class StructureResolver implements StructureResolverInterface
         }
 
         return new ContentView($content, $view);
+    }
+
+    /**
+     * @param array<string, string> $properties
+     * @param array<string, mixed> $attributes
+     * @param array<string, mixed> $content
+     * @param array<string, mixed> $view
+     */
+    private function resolveExtensionProperties(
+        DimensionContentInterface $dimensionContent,
+        array $properties,
+        string $locale,
+        array $attributes,
+        array &$content,
+        array &$view,
+    ): void {
+        foreach ($this->extensionResolverProvider->getResolvers() as $resolver) {
+            if ($this->extensionResolverProvider->hasPropertiesWithPrefix($properties, $resolver->getPrefix())) {
+                $extensionView = $resolver->resolve($dimensionContent, $properties, $locale, $attributes);
+                $extensionContent = $extensionView->getContent();
+                \assert(\is_array($extensionContent));
+                $content = \array_merge($content, $extensionContent);
+                $view = \array_merge($view, $extensionView->getView());
+            }
+        }
     }
 
     /**
@@ -191,8 +238,6 @@ class StructureResolver implements StructureResolverInterface
             $attributes['isShadow'] = null !== $shadowLocale;
             $attributes['shadowLocale'] = $shadowLocale;
         }
-
-        // TODO internal / external link provider
 
         return $attributes;
     }

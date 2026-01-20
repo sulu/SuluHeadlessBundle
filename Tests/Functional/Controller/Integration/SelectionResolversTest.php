@@ -22,8 +22,8 @@ use Sulu\Bundle\HeadlessBundle\Tests\Traits\CreateCategoryTrait;
 use Sulu\Bundle\HeadlessBundle\Tests\Traits\CreateContactTrait;
 use Sulu\Bundle\HeadlessBundle\Tests\Traits\CreatePageTrait;
 use Sulu\Bundle\HeadlessBundle\Tests\Traits\CreateSnippetTrait;
-use Sulu\Bundle\PageBundle\Document\PageDocument;
-use Sulu\Bundle\SnippetBundle\Document\SnippetDocument;
+use Sulu\Page\Domain\Model\Page;
+use Sulu\Snippet\Domain\Model\Snippet;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -43,14 +43,15 @@ class SelectionResolversTest extends BaseTestCase
     private static ContactInterface $contact2;
     private static AccountInterface $account1;
     private static AccountInterface $account2;
-    private static PageDocument $targetPage1;
-    private static PageDocument $targetPage2;
-    private static SnippetDocument $snippet1;
-    private static SnippetDocument $snippet2;
+    private static Page $targetPage1;
+    private static Page $targetPage2;
+    private static Snippet $snippet1;
+    private static Snippet $snippet2;
 
     public static function setUpBeforeClass(): void
     {
-        self::initPhpcr();
+        static::purgeDatabase();
+        self::bootKernel();
 
         self::$category1 = self::createCategory(['name' => 'Category One']);
         self::$category2 = self::createCategory(['name' => 'Category Two']);
@@ -242,6 +243,8 @@ class SelectionResolversTest extends BaseTestCase
             'template' => 'resolver-test',
             'single_snippet_selection' => null,
         ]);
+
+        self::getEntityManager()->clear();
 
         static::ensureKernelShutdown();
     }

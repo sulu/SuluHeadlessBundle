@@ -19,8 +19,6 @@ use Sulu\Bundle\HeadlessBundle\Tests\Traits\CreateContactTrait;
 use Sulu\Bundle\HeadlessBundle\Tests\Traits\CreateMediaTrait;
 use Sulu\Bundle\HeadlessBundle\Tests\Traits\CreatePageTrait;
 use Sulu\Bundle\HeadlessBundle\Tests\Traits\CreateSnippetTrait;
-use Sulu\Bundle\MediaBundle\DataFixtures\ORM\LoadCollectionTypes;
-use Sulu\Bundle\MediaBundle\DataFixtures\ORM\LoadMediaTypes;
 use Sulu\Bundle\MediaBundle\Entity\CollectionInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\HttpFoundation\Response;
@@ -39,14 +37,8 @@ class SmartContentResolverTest extends BaseTestCase
 
     public static function setUpBeforeClass(): void
     {
-        self::initPhpcr();
-
-        self::purgeDatabase();
-
-        $collectionTypeFixture = new LoadCollectionTypes();
-        $collectionTypeFixture->load(self::getEntityManager());
-        $mediaTypeFixture = new LoadMediaTypes();
-        $mediaTypeFixture->load(self::getEntityManager());
+        static::purgeDatabase();
+        self::bootKernel();
 
         self::createSnippet([
             'title' => 'Smart Snippet One',
@@ -81,14 +73,14 @@ class SmartContentResolverTest extends BaseTestCase
             'title' => 'Content Page One',
             'url' => '/pages-parent/content-page-one',
             'template' => 'default',
-            'parent_path' => '/cmf/sulu_io/contents' . $pagesParent->getResourceSegment(),
+            'parentId' => $pagesParent->getUuid(),
         ]);
 
         self::createPage([
             'title' => 'Content Page Two',
             'url' => '/pages-parent/content-page-two',
             'template' => 'default',
-            'parent_path' => '/cmf/sulu_io/contents' . $pagesParent->getResourceSegment(),
+            'parentId' => $pagesParent->getUuid(),
         ]);
 
         $excerptParent = self::createPage([
@@ -101,7 +93,7 @@ class SmartContentResolverTest extends BaseTestCase
             'title' => 'Page With Excerpt One',
             'url' => '/excerpt-parent/page-one',
             'template' => 'default',
-            'parent_path' => '/cmf/sulu_io/contents' . $excerptParent->getResourceSegment(),
+            'parentId' => $excerptParent->getUuid(),
             'excerpt' => [
                 'title' => 'Excerpt Title One',
                 'description' => 'First page excerpt description',
@@ -112,7 +104,7 @@ class SmartContentResolverTest extends BaseTestCase
             'title' => 'Page With Excerpt Two',
             'url' => '/excerpt-parent/page-two',
             'template' => 'default',
-            'parent_path' => '/cmf/sulu_io/contents' . $excerptParent->getResourceSegment(),
+            'parentId' => $excerptParent->getUuid(),
             'excerpt' => [
                 'title' => 'Excerpt Title Two',
                 'description' => 'Second page excerpt description',
@@ -169,6 +161,8 @@ class SmartContentResolverTest extends BaseTestCase
             'url' => '/smart-content-accounts',
             'template' => 'smart-content-providers',
         ]);
+
+        self::getEntityManager()->clear();
 
         static::ensureKernelShutdown();
     }

@@ -1,5 +1,6 @@
 {
     "id": "@uuid@",
+    "linkType": null,
     "type": "page",
     "template": "default",
     "content": {

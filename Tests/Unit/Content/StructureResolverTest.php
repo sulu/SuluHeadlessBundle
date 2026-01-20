@@ -23,6 +23,9 @@ use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\TypedFormMetadata;
 use Sulu\Bundle\AdminBundle\Metadata\MetadataProviderInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentResolverInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
+use Sulu\Bundle\HeadlessBundle\Content\ExtensionResolver\ExcerptResolver;
+use Sulu\Bundle\HeadlessBundle\Content\ExtensionResolver\ExtensionResolverProvider;
+use Sulu\Bundle\HeadlessBundle\Content\ExtensionResolver\SeoResolver;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolver;
 use Sulu\Bundle\HttpCacheBundle\ReferenceStore\ReferenceStoreInterface;
 use Sulu\Page\Domain\Model\Page;
@@ -55,10 +58,24 @@ class StructureResolverTest extends TestCase
         $this->contentResolver = $this->prophesize(ContentResolverInterface::class);
         $this->referenceStore = $this->prophesize(ReferenceStoreInterface::class);
 
+        // Create real extension resolvers
+        $excerptResolver = new ExcerptResolver(
+            $this->formMetadataProvider->reveal(),
+            $this->contentResolver->reveal(),
+        );
+        $seoResolver = new SeoResolver(
+            $this->formMetadataProvider->reveal(),
+            $this->contentResolver->reveal(),
+        );
+
+        // Create provider with resolvers
+        $extensionResolverProvider = new ExtensionResolverProvider([$excerptResolver, $seoResolver]);
+
         $this->structureResolver = new StructureResolver(
             $this->formMetadataProvider->reveal(),
             $this->contentResolver->reveal(),
             $this->referenceStore->reveal(),
+            $extensionResolverProvider,
         );
     }
 

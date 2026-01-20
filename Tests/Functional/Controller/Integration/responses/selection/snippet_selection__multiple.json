@@ -1,6 +1,6 @@
 {
     "id": "@uuid@",
-    "nodeType": 1,
+    "linkType": null,
     "type": "page",
     "template": "resolver-test",
     "content": {
@@ -9,7 +9,6 @@
         "snippet_selection": [
             {
                 "id": "@uuid@",
-                "nodeType": "@integer@",
                 "type": "snippet",
                 "template": "default",
                 "content": {
@@ -20,8 +19,6 @@
                     "title": [],
                     "description": []
                 },
-                "author": "@null@",
-                "authored": "@null@",
                 "changer": "@null@",
                 "changed": "@string@",
                 "creator": "@null@",
@@ -29,7 +26,6 @@
             },
             {
                 "id": "@uuid@",
-                "nodeType": "@integer@",
                 "type": "snippet",
                 "template": "default",
                 "content": {
@@ -40,8 +36,6 @@
                     "title": [],
                     "description": []
                 },
-                "author": "@null@",
-                "authored": "@null@",
                 "changer": "@null@",
                 "changed": "@string@",
                 "creator": "@null@",
@@ -152,7 +146,7 @@
             "categories": [],
             "tags": [],
             "icon": [],
-            "images": [],
+            "image": [],
             "audience_targeting_groups": [],
             "segments": []
         },

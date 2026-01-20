@@ -1,6 +1,6 @@
 {
     "id": "@uuid@",
-    "nodeType": 1,
+    "linkType": null,
     "type": "page",
     "template": "resolver-test",
     "content": {
@@ -11,7 +11,7 @@
                 "type": "text",
                 "title": "Block Title",
                 "content": "<p>Block content here</p>",
-                "settings": {}
+                "settings": []
             }
         ],
         "text_editor": "@string@",
@@ -123,7 +123,7 @@
             "categories": [],
             "tags": [],
             "icon": [],
-            "images": [],
+            "image": [],
             "audience_targeting_groups": [],
             "segments": []
         },

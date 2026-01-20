@@ -1,12 +1,12 @@
 {
     "id": "@uuid@",
-    "nodeType": 1,
+    "linkType": null,
     "type": "page",
     "template": "resolver-test",
     "content": {
         "title": "Link Anchor",
         "url": "/link-anchor",
-        "link": "https://example.com",
+        "link": "https://example.com#section1",
         "text_editor": "@string@",
         "media_selection": [],
         "single_media_selection": null,
@@ -116,7 +116,7 @@
             "categories": [],
             "tags": [],
             "icon": [],
-            "images": [],
+            "image": [],
             "audience_targeting_groups": [],
             "segments": []
         },

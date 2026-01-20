@@ -159,7 +159,7 @@ class SnippetAreaControllerTest extends BaseTestCase
             Response::HTTP_OK,
             null,
             null,
-            1800,
+            86400,
         ];
     }
 
