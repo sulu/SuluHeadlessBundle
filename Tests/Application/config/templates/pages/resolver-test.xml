@@ -196,6 +196,20 @@
             </meta>
         </property>
 
+        <property name="article_selection" type="article_selection">
+            <meta>
+                <title lang="en">Article Selection</title>
+                <title lang="de">Artikel-Auswahl</title>
+            </meta>
+        </property>
+
+        <property name="single_article_selection" type="single_article_selection">
+            <meta>
+                <title lang="en">Single Article Selection</title>
+                <title lang="de">Artikel</title>
+            </meta>
+        </property>
+
         <property name="teaser_selection" type="teaser_selection">
             <meta>
                 <title lang="en">Teaser Selection</title>

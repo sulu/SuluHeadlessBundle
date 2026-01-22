@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Tests\Application;
 
+use Sulu\Article\Infrastructure\Symfony\HttpKernel\SuluArticleBundle;
 use Sulu\Bundle\HeadlessBundle\SuluHeadlessBundle;
 use Sulu\Bundle\TestBundle\Kernel\SuluTestKernel;
 use Sulu\Snippet\Infrastructure\Symfony\HttpKernel\SuluSnippetBundle;
@@ -29,6 +30,7 @@ class Kernel extends SuluTestKernel
     {
         /** @var BundleInterface[] $bundles */
         $bundles = parent::registerBundles();
+        $bundles[] = new SuluArticleBundle();
         $bundles[] = new SuluSnippetBundle();
         $bundles[] = new SuluHeadlessBundle();
 

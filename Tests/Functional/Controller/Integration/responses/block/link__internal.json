@@ -26,7 +26,9 @@
         "single_snippet_selection": null,
         "teaser_selection": [],
         "smart_content": [],
-        "blocks": []
+        "blocks": [],
+        "article_selection": [],
+        "single_article_selection": "@null@"
     },
     "view": {
         "title": [],
@@ -98,9 +100,17 @@
             "websiteCategoriesOperator": "OR",
             "websiteTags": [],
             "websiteTagsOperator": "OR",
-            "excluded": ["@uuid@"]
+            "excluded": [
+                "@uuid@"
+            ]
         },
-        "blocks": []
+        "blocks": [],
+        "article_selection": {
+            "ids": []
+        },
+        "single_article_selection": {
+            "id": ""
+        }
     },
     "author": null,
     "authored": "@string@.isDateTime()",

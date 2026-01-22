@@ -33,7 +33,9 @@
         "snippet_selection": [],
         "single_snippet_selection": null,
         "teaser_selection": [],
-        "smart_content": []
+        "smart_content": [],
+        "article_selection": [],
+        "single_article_selection": "@null@"
     },
     "view": {
         "title": [],
@@ -106,7 +108,15 @@
             "websiteCategoriesOperator": "OR",
             "websiteTags": [],
             "websiteTagsOperator": "OR",
-            "excluded": ["@uuid@"]
+            "excluded": [
+                "@uuid@"
+            ]
+        },
+        "article_selection": {
+            "ids": []
+        },
+        "single_article_selection": {
+            "id": ""
         }
     },
     "author": null,

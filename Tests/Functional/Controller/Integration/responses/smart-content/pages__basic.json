@@ -109,7 +109,8 @@
                 "number": "@string@",
                 "depth": 0
             }
-        ]
+        ],
+        "articles_content": []
     },
     "view": {
         "title": [],
@@ -125,7 +126,9 @@
             "websiteCategoriesOperator": "OR",
             "websiteTags": [],
             "websiteTagsOperator": "OR",
-            "excluded": ["@uuid@"]
+            "excluded": [
+                "@uuid@"
+            ]
         },
         "pages_with_excerpt": {
             "hasNextPage": false,
@@ -137,7 +140,9 @@
             "websiteCategoriesOperator": "OR",
             "websiteTags": [],
             "websiteTagsOperator": "OR",
-            "excluded": ["@uuid@"]
+            "excluded": [
+                "@uuid@"
+            ]
         },
         "snippets_content": {
             "hasNextPage": false,
@@ -149,7 +154,9 @@
             "websiteCategoriesOperator": "OR",
             "websiteTags": [],
             "websiteTagsOperator": "OR",
-            "excluded": ["@uuid@"]
+            "excluded": [
+                "@uuid@"
+            ]
         },
         "media_content": {
             "hasNextPage": false,
@@ -161,7 +168,9 @@
             "websiteCategoriesOperator": "OR",
             "websiteTags": [],
             "websiteTagsOperator": "OR",
-            "excluded": ["@uuid@"]
+            "excluded": [
+                "@uuid@"
+            ]
         },
         "contacts_content": {
             "hasNextPage": false,
@@ -173,7 +182,9 @@
             "websiteCategoriesOperator": "OR",
             "websiteTags": [],
             "websiteTagsOperator": "OR",
-            "excluded": ["@uuid@"]
+            "excluded": [
+                "@uuid@"
+            ]
         },
         "accounts_content": {
             "hasNextPage": false,
@@ -185,7 +196,23 @@
             "websiteCategoriesOperator": "OR",
             "websiteTags": [],
             "websiteTagsOperator": "OR",
-            "excluded": ["@uuid@"]
+            "excluded": [
+                "@uuid@"
+            ]
+        },
+        "articles_content": {
+            "hasNextPage": false,
+            "page": 1,
+            "paginated": true,
+            "categories": [],
+            "tags": [],
+            "websiteCategories": [],
+            "websiteCategoriesOperator": "OR",
+            "websiteTags": [],
+            "websiteTagsOperator": "OR",
+            "excluded": [
+                "@uuid@"
+            ]
         }
     },
     "author": null,

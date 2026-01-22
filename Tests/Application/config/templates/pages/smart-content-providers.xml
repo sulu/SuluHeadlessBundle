@@ -108,5 +108,20 @@
                 </param>
             </params>
         </property>
+
+        <property name="articles_content" type="smart_content">
+            <meta>
+                <title lang="en">Articles Content</title>
+                <title lang="de">Artikel Inhalt</title>
+            </meta>
+            <params>
+                <param name="provider" value="articles"/>
+                <param name="max_per_page" value="5"/>
+                <param name="properties" type="collection">
+                    <param name="title" value="title"/>
+                    <param name="url" value="url"/>
+                </param>
+            </params>
+        </property>
     </properties>
 </template>

@@ -1,7 +1,6 @@
 {
     "id": "@uuid@",
     "linkType": null,
-    "linkType": null,
     "type": "page",
     "template": "resolver-test",
     "content": {
@@ -34,13 +33,17 @@
         "single_snippet_selection": null,
         "teaser_selection": [],
         "smart_content": [],
-        "blocks": []
+        "blocks": [],
+        "article_selection": [],
+        "single_article_selection": "@null@"
     },
     "view": {
         "title": [],
         "url": [],
         "collection_selection": {
-            "ids": ["@integer@"]
+            "ids": [
+                "@integer@"
+            ]
         },
         "text_editor": [],
         "link": [],
@@ -101,9 +104,17 @@
             "websiteCategoriesOperator": "OR",
             "websiteTags": [],
             "websiteTagsOperator": "OR",
-            "excluded": ["@uuid@"]
+            "excluded": [
+                "@uuid@"
+            ]
         },
-        "blocks": []
+        "blocks": [],
+        "article_selection": {
+            "ids": []
+        },
+        "single_article_selection": {
+            "id": ""
+        }
     },
     "author": null,
     "authored": "@string@.isDateTime()",
