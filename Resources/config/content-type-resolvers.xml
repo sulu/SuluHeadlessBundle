@@ -138,7 +138,6 @@
         <service
             id="sulu_headless.content_resolver.smart_content"
             class="Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\SmartContentResolver"
-            lazy="true"
         >
             <argument type="tagged" tag="sulu_headless.data_provider_resolver" default-index-method="getDataProvider" index-by="provider"/>
             <argument type="service" id="sulu_tag.tag_manager"/>

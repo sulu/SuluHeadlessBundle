@@ -29,13 +29,6 @@ jobs:
                       env:
                           SYMFONY_DEPRECATIONS_HELPER: weak
 
-                    - php-version: '8.2'
-                      coverage: true
-                      dependency-versions: 'highest'
-                      tools: 'composer:v2'
-                      env:
-                          SYMFONY_DEPRECATIONS_HELPER: weak
-
                     - php-version: '8.3'
                       coverage: false
                       dependency-versions: 'highest'
@@ -52,7 +45,7 @@ jobs:
                           SYMFONY_DEPRECATIONS_HELPER: weak
 
                     - php-version: '8.5'
-                      coverage: false
+                      coverage: true
                       dependency-versions: 'highest'
                       tools: 'composer:v2'
                       composer-stability: 'dev'
