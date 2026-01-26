@@ -59,7 +59,11 @@ class MediaDataProviderResolver implements DataProviderResolverInterface
         }
         $locale = $options['locale'];
 
-        $smartFilters = $this->convertFilters($filters, $limit, $page, $pageSize);
+        if (!isset($filters['dataSource'])) {
+            return new DataProviderResult([], false);
+        }
+
+        $smartFilters = $this->convertFilters($filters, $locale, $limit, $page, $pageSize);
         $sortBys = $this->extractSortBys($filters);
 
         $flatResults = $this->mediaSmartContentProvider->findFlatBy($smartFilters, $sortBys, $options);
@@ -91,7 +95,7 @@ class MediaDataProviderResolver implements DataProviderResolverInterface
      *
      * @return array<string, mixed>
      */
-    private function convertFilters(array $filters, ?int $limit, int $page, ?int $pageSize): array
+    private function convertFilters(array $filters, string $locale, ?int $limit, int $page, ?int $pageSize): array
     {
         $offset = 0;
         if (null !== $pageSize && $page > 1) {
@@ -109,7 +113,7 @@ class MediaDataProviderResolver implements DataProviderResolverInterface
             'websiteTagOperator' => $filters['websiteTagsOperator'] ?? 'OR',
             'types' => $filters['types'] ?? [],
             'typesOperator' => 'OR',
-            'locale' => $filters['locale'] ?? 'en',
+            'locale' => $locale,
             'dataSource' => $filters['dataSource'] ?? null,
             'limit' => $pageSize ?? $limit,
             'offset' => $offset,

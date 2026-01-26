@@ -109,7 +109,7 @@ class MediaDataProviderResolverTest extends TestCase
             'formatUri' => '/media/2/{format}/media-2.jpg?v=1-0',
         ]);
 
-        $result = $this->mediaResolver->resolve([], [], ['locale' => 'en'], 10, 1, 5);
+        $result = $this->mediaResolver->resolve(['dataSource' => '1'], [], ['locale' => 'en'], 10, 1, 5);
 
         // hasNextPage is false because count(2) < pageSize(5)
         $this->assertFalse($result->getHasNextPage());
@@ -128,7 +128,16 @@ class MediaDataProviderResolverTest extends TestCase
         );
     }
 
-    public function testResolveEmptyResult(): void
+    public function testResolveWithoutDataSourceReturnsEmpty(): void
+    {
+        // When no dataSource is provided, the resolver should return empty without calling the provider
+        $result = $this->mediaResolver->resolve([], [], ['locale' => 'en'], 10, 1, 5);
+
+        $this->assertFalse($result->getHasNextPage());
+        $this->assertSame([], $result->getItems());
+    }
+
+    public function testResolveEmptyResultFromProvider(): void
     {
         $this->mediaSmartContentProvider->findFlatBy(
             Argument::type('array'),
@@ -136,7 +145,7 @@ class MediaDataProviderResolverTest extends TestCase
             ['locale' => 'en']
         )->willReturn([]);
 
-        $result = $this->mediaResolver->resolve([], [], ['locale' => 'en'], 10, 1, 5);
+        $result = $this->mediaResolver->resolve(['dataSource' => '1'], [], ['locale' => 'en'], 10, 1, 5);
 
         $this->assertFalse($result->getHasNextPage());
         $this->assertSame([], $result->getItems());

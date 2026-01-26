@@ -60,7 +60,7 @@ class ContactDataProviderResolver implements DataProviderResolverInterface
         }
         $locale = $options['locale'];
 
-        $smartFilters = $this->convertFilters($filters, $limit, $page, $pageSize);
+        $smartFilters = $this->convertFilters($filters, $locale, $limit, $page, $pageSize);
         $sortBys = $this->extractSortBys($filters);
 
         $flatResults = $this->contactSmartContentProvider->findFlatBy($smartFilters, $sortBys, $options);
@@ -93,7 +93,7 @@ class ContactDataProviderResolver implements DataProviderResolverInterface
      *
      * @return array<string, mixed>
      */
-    private function convertFilters(array $filters, ?int $limit, int $page, ?int $pageSize): array
+    private function convertFilters(array $filters, string $locale, ?int $limit, int $page, ?int $pageSize): array
     {
         $offset = 0;
         if (null !== $pageSize && $page > 1) {
@@ -111,7 +111,7 @@ class ContactDataProviderResolver implements DataProviderResolverInterface
             'websiteTagOperator' => $filters['websiteTagsOperator'] ?? 'OR',
             'types' => [],
             'typesOperator' => 'OR',
-            'locale' => $filters['locale'] ?? 'en',
+            'locale' => $locale,
             'dataSource' => $filters['dataSource'] ?? null,
             'limit' => $pageSize ?? $limit,
             'offset' => $offset,
