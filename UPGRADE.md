@@ -13,6 +13,7 @@ Symfony 5.4 support was dropped. Minimum required version is now 6.4.
 ### Response format changes
 
 - `nodeType` removed, replaced with `linkType` (contains link provider name or `null` for regular pages)
+- `linkType` added to navigation items (contains link provider name or `null` for regular pages)
 - `path` removed from navigation responses
 - `excerpt.images` renamed to `excerpt.image` (returns single object or `null` instead of array)
 - `excerpt.icon` now returns single object or `null` instead of array

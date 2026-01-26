@@ -4,6 +4,7 @@
             {
                 "id": "@uuid@",
                 "uuid": "@uuid@",
+                "linkType": null,
                 "publishedState": true,
                 "published": "@string@.isDateTime()",
                 "title": "Test 3",

@@ -163,6 +163,7 @@ class NavigationController
         $transformed = [];
         $transformed['id'] = $item['id'] ?? $item['uuid'] ?? null;
         $transformed['uuid'] = $item['uuid'] ?? $item['id'] ?? null;
+        $transformed['linkType'] = $item['linkType'] ?? null;
         $transformed['title'] = $item['title'] ?? '';
         $transformed['url'] = $item['url'] ?? '';
         $transformed['template'] = $item['template'] ?? 'default';
@@ -200,7 +201,7 @@ class NavigationController
     protected function transformExcerpt(array $excerptData, string $locale): array
     {
         $icon = $excerptData['icon'] ?? null;
-        $images = $excerptData['images'] ?? null;
+        $image = $excerptData['image'] ?? null;
         $categories = $excerptData['categories'] ?? [];
 
         return [
@@ -210,8 +211,8 @@ class NavigationController
             'icon' => \is_object($icon) && \method_exists($icon, 'getEntity')
                 ? $this->mediaSerializer->serialize($icon->getEntity(), $locale)
                 : null,
-            'images' => \is_object($images) && \method_exists($images, 'getEntity')
-                ? $this->mediaSerializer->serialize($images->getEntity(), $locale)
+            'image' => \is_object($image) && \method_exists($image, 'getEntity')
+                ? $this->mediaSerializer->serialize($image->getEntity(), $locale)
                 : null,
             'categories' => \is_array($categories) ? \array_map(
                 fn ($category) => $this->categorySerializer->serialize($category->getEntity(), $locale),
@@ -231,6 +232,7 @@ class NavigationController
             'uuid' => 'object.resource.uuid',
             'title' => 'title',
             'url' => 'url',
+            'linkType' => 'object.linkData.provider',
             'publishedState' => 'object.workflowPublished',
             'published' => 'object.workflowPublished',
             'author' => 'object.author.id',
@@ -254,7 +256,7 @@ class NavigationController
                 'excerpt.description' => 'excerpt.description',
                 'excerpt.more' => 'excerpt.more',
                 'excerpt.icon' => 'excerpt.icon',
-                'excerpt.images' => 'excerpt.image',
+                'excerpt.image' => 'excerpt.image',
                 'excerpt.categories' => 'excerpt.categories',
                 'excerpt.tags' => 'excerpt.tags',
             ]);

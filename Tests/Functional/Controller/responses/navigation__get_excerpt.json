@@ -4,6 +4,7 @@
             {
                 "id": "@uuid@",
                 "uuid": "@uuid@",
+                "linkType": null,
                 "changed": "@string@.isDateTime()",
                 "changer": null,
                 "created": "@string@.isDateTime()",
@@ -30,13 +31,14 @@
                     "categories": [],
                     "tags": [],
                     "icon": null,
-                    "images": null
+                    "image": null
                 },
                 "children": []
             },
             {
                 "id": "@uuid@",
                 "uuid": "@uuid@",
+                "linkType": null,
                 "changed": "@string@.isDateTime()",
                 "changer": null,
                 "created": "@string@.isDateTime()",
@@ -88,7 +90,7 @@
                         "formatUri": "@string@.matchRegex('/^\\/uploads\\/media\\/{format}\\/\\d{2}\\/\\d+-test-image\\.{extension}\\?v=1-0$/')",
                         "formatPreferredExtension": "png"
                     },
-                    "images": null
+                    "image": null
                 },
                 "children": []
             }
