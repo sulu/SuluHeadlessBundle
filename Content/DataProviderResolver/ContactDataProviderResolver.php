@@ -65,7 +65,7 @@ class ContactDataProviderResolver implements DataProviderResolverInterface
 
         $flatResults = $this->contactSmartContentProvider->findFlatBy($smartFilters, $sortBys, $options);
 
-        $ids = \array_map(fn (array $item) => (int) $item['id'], $flatResults);
+        $ids = \array_map(static fn (array $item) => (int) $item['id'], $flatResults);
 
         if (empty($ids)) {
             return new DataProviderResult([], false);

@@ -64,7 +64,7 @@ class SeoResolver implements ExtensionResolverInterface
         if ($formMetadata instanceof FormMetadata) {
             $fieldMetadataList = \array_filter(
                 $formMetadata->getFlatFieldMetadata(),
-                fn ($item) => !\in_array($item->getType(), ['search_result'], true)
+                static fn ($item) => !\in_array($item->getType(), ['search_result'], true)
             );
         }
 

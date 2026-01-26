@@ -372,7 +372,7 @@ class SmartContentResolverTest extends TestCase
         $providerResult->getHasNextPage()->willReturn(false);
         $providerResult->getItems()->willReturn([['id' => 'targeted-item']]);
         $this->mediaProviderResolver->resolve(
-            Argument::that(function ($filters) {
+            Argument::that(static function ($filters) {
                 return isset($filters['targetGroupId']) && 42 === $filters['targetGroupId'];
             }),
             Argument::any(),

@@ -126,7 +126,7 @@ class ArticlePageTreeDataProviderResolverTest extends TestCase
         $mergedContent1 = $this->prophesize(DimensionContentInterface::class);
         $mergedContent2 = $this->prophesize(DimensionContentInterface::class);
 
-        $this->contentMerger->merge(Argument::that(function ($collection) {
+        $this->contentMerger->merge(Argument::that(static function ($collection) {
             return true;
         }))->willReturn($mergedContent1->reveal(), $mergedContent2->reveal());
 

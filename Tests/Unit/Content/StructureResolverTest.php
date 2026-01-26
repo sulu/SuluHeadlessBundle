@@ -369,7 +369,7 @@ class StructureResolverTest extends TestCase
 
         $this->formMetadataProvider->getMetadata('page', 'en', [])->willReturn($typedFormMetadata->reveal());
 
-        $this->contentResolver->resolve('Test', $titleField, 'en', Argument::that(function ($attributes) {
+        $this->contentResolver->resolve('Test', $titleField, 'en', Argument::that(static function ($attributes) {
             return isset($attributes['isShadow']) && true === $attributes['isShadow']
                 && isset($attributes['shadowLocale']) && 'de' === $attributes['shadowLocale'];
         }))->willReturn(new ContentView('Test', []));

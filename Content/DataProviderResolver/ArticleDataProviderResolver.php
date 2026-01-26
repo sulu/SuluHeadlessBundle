@@ -69,7 +69,7 @@ class ArticleDataProviderResolver implements DataProviderResolverInterface
 
         $flatResults = $this->articleSmartContentProvider->findFlatBy($smartFilters, $sortBys, $options);
 
-        $ids = \array_map(fn (array $item) => $item['id'], $flatResults);
+        $ids = \array_map(static fn (array $item) => $item['id'], $flatResults);
 
         if (empty($ids)) {
             return new DataProviderResult([], false);
