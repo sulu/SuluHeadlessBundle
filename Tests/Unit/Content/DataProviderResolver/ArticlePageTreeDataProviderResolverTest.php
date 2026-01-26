@@ -13,12 +13,10 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\DataProviderResolver;
 
-use Doctrine\Common\Collections\ArrayCollection;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
-use Sulu\Article\Domain\Model\ArticleDimensionContent;
 use Sulu\Article\Domain\Model\ArticleInterface;
 use Sulu\Article\Domain\Repository\ArticleRepositoryInterface;
 use Sulu\Bundle\AdminBundle\SmartContent\Configuration\ProviderConfigurationInterface;
@@ -26,7 +24,7 @@ use Sulu\Bundle\AdminBundle\SmartContent\SmartContentProviderInterface;
 use Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver\ArticlePageTreeDataProviderResolver;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
 use Sulu\Component\Content\Compat\PropertyParameter;
-use Sulu\Content\Application\ContentMerger\ContentMergerInterface;
+use Sulu\Content\Application\ContentAggregator\ContentAggregatorInterface;
 use Sulu\Content\Domain\Model\DimensionContentInterface;
 
 class ArticlePageTreeDataProviderResolverTest extends TestCase
@@ -49,9 +47,9 @@ class ArticlePageTreeDataProviderResolverTest extends TestCase
     private ObjectProphecy $articleRepository;
 
     /**
-     * @var ObjectProphecy<ContentMergerInterface>
+     * @var ObjectProphecy<ContentAggregatorInterface>
      */
-    private ObjectProphecy $contentMerger;
+    private ObjectProphecy $contentAggregator;
 
     private ArticlePageTreeDataProviderResolver $articlePageTreeDataProviderResolver;
 
@@ -60,13 +58,13 @@ class ArticlePageTreeDataProviderResolverTest extends TestCase
         $this->articlePageTreeSmartContentProvider = $this->prophesize(SmartContentProviderInterface::class);
         $this->structureResolver = $this->prophesize(StructureResolverInterface::class);
         $this->articleRepository = $this->prophesize(ArticleRepositoryInterface::class);
-        $this->contentMerger = $this->prophesize(ContentMergerInterface::class);
+        $this->contentAggregator = $this->prophesize(ContentAggregatorInterface::class);
 
         $this->articlePageTreeDataProviderResolver = new ArticlePageTreeDataProviderResolver(
             $this->articlePageTreeSmartContentProvider->reveal(),
             $this->structureResolver->reveal(),
             $this->articleRepository->reveal(),
-            $this->contentMerger->reveal(),
+            $this->contentAggregator->reveal(),
             true,
         );
     }
@@ -109,13 +107,9 @@ class ArticlePageTreeDataProviderResolverTest extends TestCase
 
         $article1 = $this->prophesize(ArticleInterface::class);
         $article1->getUuid()->willReturn('article-id-1');
-        $dimensionContent1 = $this->prophesize(ArticleDimensionContent::class);
-        $article1->getDimensionContents()->willReturn(new ArrayCollection([$dimensionContent1->reveal()]));
 
         $article2 = $this->prophesize(ArticleInterface::class);
         $article2->getUuid()->willReturn('article-id-2');
-        $dimensionContent2 = $this->prophesize(ArticleDimensionContent::class);
-        $article2->getDimensionContents()->willReturn(new ArrayCollection([$dimensionContent2->reveal()]));
 
         $this->articleRepository->findBy(
             Argument::type('array'),
@@ -126,9 +120,15 @@ class ArticlePageTreeDataProviderResolverTest extends TestCase
         $mergedContent1 = $this->prophesize(DimensionContentInterface::class);
         $mergedContent2 = $this->prophesize(DimensionContentInterface::class);
 
-        $this->contentMerger->merge(Argument::that(static function ($collection) {
-            return true;
-        }))->willReturn($mergedContent1->reveal(), $mergedContent2->reveal());
+        $this->contentAggregator->aggregate(
+            $article1,
+            ['locale' => 'en', 'stage' => 'draft']
+        )->willReturn($mergedContent1->reveal());
+
+        $this->contentAggregator->aggregate(
+            $article2,
+            ['locale' => 'en', 'stage' => 'draft']
+        )->willReturn($mergedContent2->reveal());
 
         $this->structureResolver->resolveProperties(
             $mergedContent1,

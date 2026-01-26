@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\DataProviderResolver;
 
-use Doctrine\Common\Collections\ArrayCollection;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
@@ -23,9 +22,8 @@ use Sulu\Bundle\AdminBundle\SmartContent\SmartContentProviderInterface;
 use Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver\SnippetDataProviderResolver;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
 use Sulu\Component\Content\Compat\PropertyParameter;
-use Sulu\Content\Application\ContentMerger\ContentMergerInterface;
+use Sulu\Content\Application\ContentAggregator\ContentAggregatorInterface;
 use Sulu\Content\Domain\Model\DimensionContentInterface;
-use Sulu\Snippet\Domain\Model\SnippetDimensionContent;
 use Sulu\Snippet\Domain\Model\SnippetInterface;
 use Sulu\Snippet\Domain\Repository\SnippetRepositoryInterface;
 
@@ -49,9 +47,9 @@ class SnippetDataProviderResolverTest extends TestCase
     private ObjectProphecy $snippetRepository;
 
     /**
-     * @var ObjectProphecy<ContentMergerInterface>
+     * @var ObjectProphecy<ContentAggregatorInterface>
      */
-    private ObjectProphecy $contentMerger;
+    private ObjectProphecy $contentAggregator;
 
     private SnippetDataProviderResolver $snippetDataProviderResolver;
 
@@ -60,13 +58,13 @@ class SnippetDataProviderResolverTest extends TestCase
         $this->snippetSmartContentProvider = $this->prophesize(SmartContentProviderInterface::class);
         $this->structureResolver = $this->prophesize(StructureResolverInterface::class);
         $this->snippetRepository = $this->prophesize(SnippetRepositoryInterface::class);
-        $this->contentMerger = $this->prophesize(ContentMergerInterface::class);
+        $this->contentAggregator = $this->prophesize(ContentAggregatorInterface::class);
 
         $this->snippetDataProviderResolver = new SnippetDataProviderResolver(
             $this->snippetSmartContentProvider->reveal(),
             $this->structureResolver->reveal(),
             $this->snippetRepository->reveal(),
-            $this->contentMerger->reveal(),
+            $this->contentAggregator->reveal(),
         );
     }
 
@@ -107,16 +105,12 @@ class SnippetDataProviderResolverTest extends TestCase
             ['id' => 'snippet-id-2', 'title' => 'Snippet 2'],
         ]);
 
-        // Create mock snippets with dimension contents
+        // Create mock snippets
         $snippet1 = $this->prophesize(SnippetInterface::class);
         $snippet1->getUuid()->willReturn('snippet-id-1');
-        $dimensionContent1 = $this->prophesize(SnippetDimensionContent::class);
-        $snippet1->getDimensionContents()->willReturn(new ArrayCollection([$dimensionContent1->reveal()]));
 
         $snippet2 = $this->prophesize(SnippetInterface::class);
         $snippet2->getUuid()->willReturn('snippet-id-2');
-        $dimensionContent2 = $this->prophesize(SnippetDimensionContent::class);
-        $snippet2->getDimensionContents()->willReturn(new ArrayCollection([$dimensionContent2->reveal()]));
 
         $this->snippetRepository->findBy(
             Argument::type('array'),
@@ -124,13 +118,19 @@ class SnippetDataProviderResolverTest extends TestCase
             [SnippetRepositoryInterface::GROUP_SELECT_SNIPPET_WEBSITE => true]
         )->willReturn([$snippet1->reveal(), $snippet2->reveal()]);
 
-        // Content merger returns merged dimension content
+        // Content aggregator returns merged dimension content
         $mergedContent1 = $this->prophesize(DimensionContentInterface::class);
         $mergedContent2 = $this->prophesize(DimensionContentInterface::class);
 
-        $this->contentMerger->merge(Argument::that(static function ($collection) {
-            return true; // Accept any DimensionContentCollection
-        }))->willReturn($mergedContent1->reveal(), $mergedContent2->reveal());
+        $this->contentAggregator->aggregate(
+            $snippet1,
+            ['locale' => 'en', 'stage' => 'live']
+        )->willReturn($mergedContent1->reveal());
+
+        $this->contentAggregator->aggregate(
+            $snippet2,
+            ['locale' => 'en', 'stage' => 'live']
+        )->willReturn($mergedContent2->reveal());
 
         $this->structureResolver->resolveProperties(
             $mergedContent1,

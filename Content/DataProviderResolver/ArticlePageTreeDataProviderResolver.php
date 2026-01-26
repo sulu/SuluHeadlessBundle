@@ -13,14 +13,12 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver;
 
-use Sulu\Article\Domain\Model\ArticleDimensionContent;
 use Sulu\Article\Domain\Repository\ArticleRepositoryInterface;
 use Sulu\Bundle\AdminBundle\SmartContent\Configuration\ProviderConfigurationInterface;
 use Sulu\Bundle\AdminBundle\SmartContent\SmartContentProviderInterface;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
 use Sulu\Component\Content\Compat\PropertyParameter;
-use Sulu\Content\Application\ContentMerger\ContentMergerInterface;
-use Sulu\Content\Domain\Model\DimensionContentCollection;
+use Sulu\Content\Application\ContentAggregator\ContentAggregatorInterface;
 
 class ArticlePageTreeDataProviderResolver implements DataProviderResolverInterface
 {
@@ -33,7 +31,7 @@ class ArticlePageTreeDataProviderResolver implements DataProviderResolverInterfa
         private SmartContentProviderInterface $articlePageTreeSmartContentProvider,
         private StructureResolverInterface $structureResolver,
         private ArticleRepositoryInterface $articleRepository,
-        private ContentMergerInterface $contentMerger,
+        private ContentAggregatorInterface $contentAggregator,
         private bool $showDrafts,
     ) {
     }
@@ -104,13 +102,10 @@ class ArticlePageTreeDataProviderResolver implements DataProviderResolverInterfa
         $resolvedArticles = \array_fill_keys($ids, null);
 
         foreach ($articles as $articleEntity) {
-            $dimensionContentCollection = new DimensionContentCollection(
-                $articleEntity->getDimensionContents(),
+            $dimensionContent = $this->contentAggregator->aggregate(
+                $articleEntity,
                 ['locale' => $locale, 'stage' => $stage],
-                ArticleDimensionContent::class,
             );
-
-            $dimensionContent = $this->contentMerger->merge($dimensionContentCollection);
             $resolvedArticles[$articleEntity->getUuid()] = $this->structureResolver->resolveProperties(
                 $dimensionContent,
                 $propertyMap,

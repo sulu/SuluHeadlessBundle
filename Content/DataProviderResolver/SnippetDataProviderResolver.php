@@ -17,9 +17,7 @@ use Sulu\Bundle\AdminBundle\SmartContent\Configuration\ProviderConfigurationInte
 use Sulu\Bundle\AdminBundle\SmartContent\SmartContentProviderInterface;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
 use Sulu\Component\Content\Compat\PropertyParameter;
-use Sulu\Content\Application\ContentMerger\ContentMergerInterface;
-use Sulu\Content\Domain\Model\DimensionContentCollection;
-use Sulu\Snippet\Domain\Model\SnippetDimensionContent;
+use Sulu\Content\Application\ContentAggregator\ContentAggregatorInterface;
 use Sulu\Snippet\Domain\Repository\SnippetRepositoryInterface;
 
 class SnippetDataProviderResolver implements DataProviderResolverInterface
@@ -33,7 +31,7 @@ class SnippetDataProviderResolver implements DataProviderResolverInterface
         private SmartContentProviderInterface $snippetSmartContentProvider,
         private StructureResolverInterface $structureResolver,
         private SnippetRepositoryInterface $snippetRepository,
-        private ContentMergerInterface $contentMerger,
+        private ContentAggregatorInterface $contentAggregator,
     ) {
     }
 
@@ -101,13 +99,10 @@ class SnippetDataProviderResolver implements DataProviderResolverInterface
         $resolvedSnippets = \array_fill_keys($ids, null);
 
         foreach ($snippets as $snippetEntity) {
-            $dimensionContentCollection = new DimensionContentCollection(
-                $snippetEntity->getDimensionContents(),
+            $dimensionContent = $this->contentAggregator->aggregate(
+                $snippetEntity,
                 ['locale' => $locale, 'stage' => 'live'],
-                SnippetDimensionContent::class,
             );
-
-            $dimensionContent = $this->contentMerger->merge($dimensionContentCollection);
             $resolvedSnippets[$snippetEntity->getUuid()] = $this->structureResolver->resolveProperties(
                 $dimensionContent,
                 $propertyMap,

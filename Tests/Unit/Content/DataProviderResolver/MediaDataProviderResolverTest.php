@@ -79,7 +79,9 @@ class MediaDataProviderResolverTest extends TestCase
     public function testResolve(): void
     {
         $media1 = $this->prophesize(MediaInterface::class);
+        $media1->getId()->willReturn(1);
         $media2 = $this->prophesize(MediaInterface::class);
+        $media2->getId()->willReturn(2);
 
         // SmartContentProvider returns flat results with id/title
         $this->mediaSmartContentProvider->findFlatBy(
@@ -91,9 +93,11 @@ class MediaDataProviderResolverTest extends TestCase
             ['id' => '2', 'title' => 'Media 2'],
         ]);
 
-        // Repository fetches actual entities
-        $this->mediaRepository->findMediaById(1)->willReturn($media1->reveal());
-        $this->mediaRepository->findMediaById(2)->willReturn($media2->reveal());
+        // Repository fetches actual entities in batch
+        $this->mediaRepository->findMedia(['ids' => [1, 2]])->willReturn([
+            $media1->reveal(),
+            $media2->reveal(),
+        ]);
 
         $this->mediaSerializer->serialize($media1, 'en')->willReturn([
             'id' => 1,

@@ -71,17 +71,17 @@ class AccountDataProviderResolver implements DataProviderResolverInterface
             return new DataProviderResult([], false);
         }
 
-        $items = [];
-        foreach ($ids as $id) {
-            $account = $this->accountRepository->find($id);
-            if (null !== $account) {
-                $items[] = $this->accountSerializer->serialize(
-                    $account,
-                    $locale,
-                    SerializationContext::create()->setGroups(['partialAccount']),
-                );
-            }
+        $accounts = $this->accountRepository->findByIds($ids);
+
+        $items = \array_fill_keys($ids, null);
+        foreach ($accounts as $account) {
+            $items[$account->getId()] = $this->accountSerializer->serialize(
+                $account,
+                $locale,
+                SerializationContext::create()->setGroups(['partialAccount']),
+            );
         }
+        $items = \array_values(\array_filter($items));
 
         $hasNextPage = null !== $pageSize && \count($flatResults) >= $pageSize;
 

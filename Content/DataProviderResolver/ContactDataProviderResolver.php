@@ -71,17 +71,17 @@ class ContactDataProviderResolver implements DataProviderResolverInterface
             return new DataProviderResult([], false);
         }
 
-        $items = [];
-        foreach ($ids as $id) {
-            $contact = $this->contactRepository->find($id);
-            if (null !== $contact) {
-                $items[] = $this->contactSerializer->serialize(
-                    $contact,
-                    $locale,
-                    SerializationContext::create()->setGroups(['partialContact']),
-                );
-            }
+        $contacts = $this->contactRepository->findByIds($ids);
+
+        $items = \array_fill_keys($ids, null);
+        foreach ($contacts as $contact) {
+            $items[$contact->getId()] = $this->contactSerializer->serialize(
+                $contact,
+                $locale,
+                SerializationContext::create()->setGroups(['partialContact']),
+            );
         }
+        $items = \array_values(\array_filter($items));
 
         $hasNextPage = null !== $pageSize && \count($flatResults) >= $pageSize;
 

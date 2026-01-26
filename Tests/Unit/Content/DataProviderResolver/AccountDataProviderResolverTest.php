@@ -79,7 +79,9 @@ class AccountDataProviderResolverTest extends TestCase
     public function testResolve(): void
     {
         $account1 = $this->prophesize(AccountInterface::class);
+        $account1->getId()->willReturn(1);
         $account2 = $this->prophesize(AccountInterface::class);
+        $account2->getId()->willReturn(2);
 
         // SmartContentProvider returns flat results with id/title
         $this->accountSmartContentProvider->findFlatBy(
@@ -91,9 +93,11 @@ class AccountDataProviderResolverTest extends TestCase
             ['id' => '2', 'title' => 'Account 2'],
         ]);
 
-        // Repository fetches actual entities
-        $this->accountRepository->find(1)->willReturn($account1->reveal());
-        $this->accountRepository->find(2)->willReturn($account2->reveal());
+        // Repository fetches actual entities in batch
+        $this->accountRepository->findByIds([1, 2])->willReturn([
+            $account1->reveal(),
+            $account2->reveal(),
+        ]);
 
         $this->accountSerializer->serialize($account1, 'en', Argument::cetera())->willReturn([
             'id' => 1,

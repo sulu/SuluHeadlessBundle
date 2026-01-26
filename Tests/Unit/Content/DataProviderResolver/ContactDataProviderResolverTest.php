@@ -79,7 +79,9 @@ class ContactDataProviderResolverTest extends TestCase
     public function testResolve(): void
     {
         $contact1 = $this->prophesize(ContactInterface::class);
+        $contact1->getId()->willReturn(1);
         $contact2 = $this->prophesize(ContactInterface::class);
+        $contact2->getId()->willReturn(2);
 
         // SmartContentProvider returns flat results with id/title
         $this->contactSmartContentProvider->findFlatBy(
@@ -91,9 +93,11 @@ class ContactDataProviderResolverTest extends TestCase
             ['id' => '2', 'title' => 'Contact 2'],
         ]);
 
-        // Repository fetches actual entities
-        $this->contactRepository->find(1)->willReturn($contact1->reveal());
-        $this->contactRepository->find(2)->willReturn($contact2->reveal());
+        // Repository fetches actual entities in batch
+        $this->contactRepository->findByIds([1, 2])->willReturn([
+            $contact1->reveal(),
+            $contact2->reveal(),
+        ]);
 
         $this->contactSerializer->serialize($contact1, 'en', Argument::cetera())->willReturn([
             'id' => 1,

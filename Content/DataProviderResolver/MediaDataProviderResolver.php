@@ -16,7 +16,6 @@ namespace Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver;
 use Sulu\Bundle\AdminBundle\SmartContent\Configuration\ProviderConfigurationInterface;
 use Sulu\Bundle\AdminBundle\SmartContent\SmartContentProviderInterface;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializerInterface;
-use Sulu\Bundle\MediaBundle\Entity\MediaInterface;
 use Sulu\Bundle\MediaBundle\Entity\MediaRepositoryInterface;
 use Sulu\Component\Content\Compat\PropertyParameter;
 
@@ -71,14 +70,13 @@ class MediaDataProviderResolver implements DataProviderResolverInterface
             return new DataProviderResult([], false);
         }
 
-        $items = [];
-        foreach ($ids as $id) {
-            /** @var MediaInterface|null $media */
-            $media = $this->mediaRepository->findMediaById($id);
-            if (null !== $media) {
-                $items[] = $this->mediaSerializer->serialize($media, $locale);
-            }
+        $medias = $this->mediaRepository->findMedia(['ids' => $ids]);
+
+        $items = \array_fill_keys($ids, null);
+        foreach ($medias as $media) {
+            $items[$media->getId()] = $this->mediaSerializer->serialize($media, $locale);
         }
+        $items = \array_values(\array_filter($items));
 
         $hasNextPage = false;
         if (null !== $pageSize && \count($flatResults) >= $pageSize) {

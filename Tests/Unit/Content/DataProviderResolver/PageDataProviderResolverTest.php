@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\DataProviderResolver;
 
-use Doctrine\Common\Collections\ArrayCollection;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
@@ -23,9 +22,8 @@ use Sulu\Bundle\AdminBundle\SmartContent\SmartContentProviderInterface;
 use Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver\PageDataProviderResolver;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
 use Sulu\Component\Content\Compat\PropertyParameter;
-use Sulu\Content\Application\ContentMerger\ContentMergerInterface;
+use Sulu\Content\Application\ContentAggregator\ContentAggregatorInterface;
 use Sulu\Content\Domain\Model\DimensionContentInterface;
-use Sulu\Page\Domain\Model\PageDimensionContent;
 use Sulu\Page\Domain\Model\PageInterface;
 use Sulu\Page\Domain\Repository\PageRepositoryInterface;
 
@@ -49,9 +47,9 @@ class PageDataProviderResolverTest extends TestCase
     private ObjectProphecy $pageRepository;
 
     /**
-     * @var ObjectProphecy<ContentMergerInterface>
+     * @var ObjectProphecy<ContentAggregatorInterface>
      */
-    private ObjectProphecy $contentMerger;
+    private ObjectProphecy $contentAggregator;
 
     private PageDataProviderResolver $pageDataProviderResolver;
 
@@ -60,13 +58,13 @@ class PageDataProviderResolverTest extends TestCase
         $this->pageSmartContentProvider = $this->prophesize(SmartContentProviderInterface::class);
         $this->structureResolver = $this->prophesize(StructureResolverInterface::class);
         $this->pageRepository = $this->prophesize(PageRepositoryInterface::class);
-        $this->contentMerger = $this->prophesize(ContentMergerInterface::class);
+        $this->contentAggregator = $this->prophesize(ContentAggregatorInterface::class);
 
         $this->pageDataProviderResolver = new PageDataProviderResolver(
             $this->pageSmartContentProvider->reveal(),
             $this->structureResolver->reveal(),
             $this->pageRepository->reveal(),
-            $this->contentMerger->reveal(),
+            $this->contentAggregator->reveal(),
             true, // showDrafts
         );
     }
@@ -108,16 +106,12 @@ class PageDataProviderResolverTest extends TestCase
             ['id' => 'page-id-2', 'title' => 'Page 2'],
         ]);
 
-        // Create mock pages with dimension contents
+        // Create mock pages
         $page1 = $this->prophesize(PageInterface::class);
         $page1->getUuid()->willReturn('page-id-1');
-        $dimensionContent1 = $this->prophesize(PageDimensionContent::class);
-        $page1->getDimensionContents()->willReturn(new ArrayCollection([$dimensionContent1->reveal()]));
 
         $page2 = $this->prophesize(PageInterface::class);
         $page2->getUuid()->willReturn('page-id-2');
-        $dimensionContent2 = $this->prophesize(PageDimensionContent::class);
-        $page2->getDimensionContents()->willReturn(new ArrayCollection([$dimensionContent2->reveal()]));
 
         $this->pageRepository->findBy(
             Argument::type('array'),
@@ -125,13 +119,19 @@ class PageDataProviderResolverTest extends TestCase
             [PageRepositoryInterface::GROUP_SELECT_PAGE_WEBSITE => true]
         )->willReturn([$page1->reveal(), $page2->reveal()]);
 
-        // Content merger returns merged dimension content
+        // Content aggregator returns merged dimension content
         $mergedContent1 = $this->prophesize(DimensionContentInterface::class);
         $mergedContent2 = $this->prophesize(DimensionContentInterface::class);
 
-        $this->contentMerger->merge(Argument::that(static function ($collection) {
-            return true; // Accept any DimensionContentCollection
-        }))->willReturn($mergedContent1->reveal(), $mergedContent2->reveal());
+        $this->contentAggregator->aggregate(
+            $page1,
+            ['locale' => 'en', 'stage' => 'draft']
+        )->willReturn($mergedContent1->reveal());
+
+        $this->contentAggregator->aggregate(
+            $page2,
+            ['locale' => 'en', 'stage' => 'draft']
+        )->willReturn($mergedContent2->reveal());
 
         $this->structureResolver->resolveProperties(
             $mergedContent1,

@@ -17,9 +17,7 @@ use Sulu\Bundle\AdminBundle\SmartContent\Configuration\ProviderConfigurationInte
 use Sulu\Bundle\AdminBundle\SmartContent\SmartContentProviderInterface;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
 use Sulu\Component\Content\Compat\PropertyParameter;
-use Sulu\Content\Application\ContentMerger\ContentMergerInterface;
-use Sulu\Content\Domain\Model\DimensionContentCollection;
-use Sulu\Page\Domain\Model\PageDimensionContent;
+use Sulu\Content\Application\ContentAggregator\ContentAggregatorInterface;
 use Sulu\Page\Domain\Repository\PageRepositoryInterface;
 
 class PageDataProviderResolver implements DataProviderResolverInterface
@@ -33,7 +31,7 @@ class PageDataProviderResolver implements DataProviderResolverInterface
         private SmartContentProviderInterface $pageSmartContentProvider,
         private StructureResolverInterface $structureResolver,
         private PageRepositoryInterface $pageRepository,
-        private ContentMergerInterface $contentMerger,
+        private ContentAggregatorInterface $contentAggregator,
         private bool $showDrafts,
     ) {
     }
@@ -105,13 +103,10 @@ class PageDataProviderResolver implements DataProviderResolverInterface
         $resolvedPages = \array_fill_keys($ids, null);
 
         foreach ($pages as $pageEntity) {
-            $dimensionContentCollection = new DimensionContentCollection(
-                $pageEntity->getDimensionContents(),
+            $dimensionContent = $this->contentAggregator->aggregate(
+                $pageEntity,
                 ['locale' => $locale, 'stage' => $stage],
-                PageDimensionContent::class,
             );
-
-            $dimensionContent = $this->contentMerger->merge($dimensionContentCollection);
             $resolvedPages[$pageEntity->getUuid()] = $this->structureResolver->resolveProperties(
                 $dimensionContent,
                 $propertyMap,
