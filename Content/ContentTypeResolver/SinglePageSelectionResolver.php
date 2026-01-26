@@ -35,7 +35,8 @@ class SinglePageSelectionResolver implements ContentTypeResolverInterface
         }
 
         $content = $this->pageSelectionResolver->resolve([$data], $fieldMetadata, $locale, $attributes);
+        $resolvedContent = $content->getContent();
 
-        return new ContentView($content->getContent()[0] ?? null, ['id' => $data]);
+        return new ContentView(\is_array($resolvedContent) ? ($resolvedContent[0] ?? null) : null, ['id' => $data]);
     }
 }

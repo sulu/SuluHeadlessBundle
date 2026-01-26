@@ -40,10 +40,11 @@ class SingleSnippetSelectionResolver implements ContentTypeResolverInterface
         );
         $content = $contentView->getContent();
         $view = $contentView->getView();
+        $viewIds = $view['ids'] ?? [];
 
         return new ContentView(
-            $content[0] ?? null,
-            ['id' => $view['ids'][0] ?? null],
+            \is_array($content) ? ($content[0] ?? null) : null,
+            ['id' => \is_array($viewIds) ? ($viewIds[0] ?? null) : null],
         );
     }
 }

@@ -59,7 +59,10 @@ class ArticlePageTreeDataProviderResolver implements DataProviderResolverInterfa
         int $page = 1,
         ?int $pageSize = null,
     ): DataProviderResult {
-        $locale = $options['locale'] ?? 'en';
+        if (!\is_string($options['locale'] ?? null)) {
+            throw new \InvalidArgumentException('The "locale" option must be a string.');
+        }
+        $locale = $options['locale'];
 
         $smartFilters = $this->convertFilters($filters, $limit, $page, $pageSize, $locale);
         $sortBys = $this->extractSortBys($filters);
@@ -121,6 +124,8 @@ class ArticlePageTreeDataProviderResolver implements DataProviderResolverInterfa
     }
 
     /**
+     * @param array<string, mixed> $filters
+     *
      * @return array<string, mixed>
      */
     private function convertFilters(array $filters, ?int $limit, int $page, ?int $pageSize, string $locale): array
@@ -151,14 +156,19 @@ class ArticlePageTreeDataProviderResolver implements DataProviderResolverInterfa
     }
 
     /**
+     * @param array<string, mixed> $filters
+     *
      * @return array<string, string>
      */
     private function extractSortBys(array $filters): array
     {
-        if (!isset($filters['sortBy']) || empty($filters['sortBy'])) {
+        $sortBy = $filters['sortBy'] ?? null;
+        if (!\is_string($sortBy) || '' === $sortBy) {
             return [];
         }
 
-        return [$filters['sortBy'] => $filters['sortMethod'] ?? 'asc'];
+        $sortMethod = $filters['sortMethod'] ?? 'asc';
+
+        return [$sortBy => \is_string($sortMethod) ? $sortMethod : 'asc'];
     }
 }

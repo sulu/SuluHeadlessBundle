@@ -345,4 +345,230 @@ class SmartContentResolverTest extends TestCase
         $this->assertInstanceOf(ContentView::class, $result);
         $this->assertSame(1, $result->getView()['page']);
     }
+
+    public function testResolveWithAudienceTargeting(): void
+    {
+        $configuration = $this->prophesize(ProviderConfigurationInterface::class);
+        $configuration->getSorting()->willReturn(null);
+        $configuration->hasDatasource()->willReturn(false);
+        $configuration->hasTags()->willReturn(false);
+        $configuration->hasCategories()->willReturn(false);
+        $configuration->hasSorting()->willReturn(false);
+        $configuration->hasLimit()->willReturn(true);
+        $configuration->hasPagination()->willReturn(false);
+        $configuration->hasPresentAs()->willReturn(false);
+        $configuration->hasAudienceTargeting()->willReturn(true);
+        $configuration->getDatasourceResourceKey()->willReturn(null);
+        $configuration->getDatasourceAdapter()->willReturn(null);
+        $this->mediaProviderResolver->getProviderConfiguration()->willReturn($configuration->reveal());
+        $this->mediaProviderResolver->getProviderDefaultParams()->willReturn([]);
+
+        $this->tagRequestHandler->getTags('tags')->willReturn([]);
+        $this->categoryRequestHandler->getCategories('categories')->willReturn([]);
+
+        $this->targetGroupStore->getTargetGroupId()->willReturn(42);
+
+        $providerResult = $this->prophesize(DataProviderResult::class);
+        $providerResult->getHasNextPage()->willReturn(false);
+        $providerResult->getItems()->willReturn([['id' => 'targeted-item']]);
+        $this->mediaProviderResolver->resolve(
+            Argument::that(function ($filters) {
+                return isset($filters['targetGroupId']) && 42 === $filters['targetGroupId'];
+            }),
+            Argument::any(),
+            Argument::any(),
+            Argument::any()
+        )->willReturn($providerResult->reveal());
+
+        $data = [
+            'audienceTargeting' => true,
+            'limitResult' => 5,
+        ];
+
+        $result = $this->smartContentResolver->resolve($data, $this->fieldMetadata, 'en', []);
+
+        $this->assertInstanceOf(ContentView::class, $result);
+        $this->assertSame([['id' => 'targeted-item']], $result->getContent());
+    }
+
+    public function testResolveWithNonStringOptionName(): void
+    {
+        $configuration = $this->prophesize(ProviderConfigurationInterface::class);
+        $configuration->getSorting()->willReturn(null);
+        $configuration->hasDatasource()->willReturn(false);
+        $configuration->hasTags()->willReturn(false);
+        $configuration->hasCategories()->willReturn(false);
+        $configuration->hasSorting()->willReturn(false);
+        $configuration->hasLimit()->willReturn(true);
+        $configuration->hasPagination()->willReturn(false);
+        $configuration->hasPresentAs()->willReturn(false);
+        $configuration->hasAudienceTargeting()->willReturn(false);
+        $configuration->getDatasourceResourceKey()->willReturn(null);
+        $configuration->getDatasourceAdapter()->willReturn(null);
+        $this->mediaProviderResolver->getProviderConfiguration()->willReturn($configuration->reveal());
+        $this->mediaProviderResolver->getProviderDefaultParams()->willReturn([]);
+
+        $this->tagRequestHandler->getTags('tags')->willReturn([]);
+        $this->categoryRequestHandler->getCategories('categories')->willReturn([]);
+
+        $providerResult = $this->prophesize(DataProviderResult::class);
+        $providerResult->getHasNextPage()->willReturn(false);
+        $providerResult->getItems()->willReturn([]);
+        $this->mediaProviderResolver->resolve(
+            Argument::any(),
+            Argument::any(),
+            Argument::any(),
+            Argument::any()
+        )->willReturn($providerResult->reveal());
+
+        // Create field with an option that has non-string name (will be skipped)
+        $fieldMetadata = new FieldMetadata('smart_content');
+
+        $providerOption = new OptionMetadata();
+        $providerOption->setName('provider');
+        $providerOption->setValue('media');
+        $fieldMetadata->addOption($providerOption);
+
+        // Option with numeric name (should be skipped in convertOptionsToParams)
+        $numericOption = new OptionMetadata();
+        $numericOption->setName(123);
+        $numericOption->setValue('some_value');
+        $fieldMetadata->addOption($numericOption);
+
+        $result = $this->smartContentResolver->resolve([], $fieldMetadata, 'en', []);
+
+        $this->assertInstanceOf(ContentView::class, $result);
+    }
+
+    public function testResolvePaginatedWithZeroPage(): void
+    {
+        $configuration = $this->prophesize(ProviderConfigurationInterface::class);
+        $configuration->getSorting()->willReturn(null);
+        $configuration->hasDatasource()->willReturn(false);
+        $configuration->hasTags()->willReturn(false);
+        $configuration->hasCategories()->willReturn(false);
+        $configuration->hasSorting()->willReturn(false);
+        $configuration->hasLimit()->willReturn(true);
+        $configuration->hasPagination()->willReturn(true);
+        $configuration->hasPresentAs()->willReturn(false);
+        $configuration->hasAudienceTargeting()->willReturn(false);
+        $configuration->getDatasourceResourceKey()->willReturn(null);
+        $configuration->getDatasourceAdapter()->willReturn(null);
+        $this->mediaProviderResolver->getProviderConfiguration()->willReturn($configuration->reveal());
+        $this->mediaProviderResolver->getProviderDefaultParams()->willReturn([]);
+
+        $this->tagRequestHandler->getTags('tags')->willReturn([]);
+        $this->categoryRequestHandler->getCategories('categories')->willReturn([]);
+
+        $request = $this->prophesize(Request::class);
+        $request->get('p', 1)->willReturn(0);
+        $this->requestStack->getCurrentRequest()->willReturn($request->reveal());
+
+        $providerResult = $this->prophesize(DataProviderResult::class);
+        $providerResult->getHasNextPage()->willReturn(false);
+        $providerResult->getItems()->willReturn([]);
+        $this->mediaProviderResolver->resolve(
+            Argument::any(),
+            Argument::any(),
+            Argument::any(),
+            Argument::any(),
+            1,
+            5
+        )->willReturn($providerResult->reveal());
+
+        $result = $this->smartContentResolver->resolve([], $this->fieldMetadata, 'en', []);
+
+        $this->assertInstanceOf(ContentView::class, $result);
+        $this->assertSame(1, $result->getView()['page']);
+    }
+
+    public function testResolvePaginatedWithNegativePage(): void
+    {
+        $configuration = $this->prophesize(ProviderConfigurationInterface::class);
+        $configuration->getSorting()->willReturn(null);
+        $configuration->hasDatasource()->willReturn(false);
+        $configuration->hasTags()->willReturn(false);
+        $configuration->hasCategories()->willReturn(false);
+        $configuration->hasSorting()->willReturn(false);
+        $configuration->hasLimit()->willReturn(true);
+        $configuration->hasPagination()->willReturn(true);
+        $configuration->hasPresentAs()->willReturn(false);
+        $configuration->hasAudienceTargeting()->willReturn(false);
+        $configuration->getDatasourceResourceKey()->willReturn(null);
+        $configuration->getDatasourceAdapter()->willReturn(null);
+        $this->mediaProviderResolver->getProviderConfiguration()->willReturn($configuration->reveal());
+        $this->mediaProviderResolver->getProviderDefaultParams()->willReturn([]);
+
+        $this->tagRequestHandler->getTags('tags')->willReturn([]);
+        $this->categoryRequestHandler->getCategories('categories')->willReturn([]);
+
+        $request = $this->prophesize(Request::class);
+        $request->get('p', 1)->willReturn(-5);
+        $this->requestStack->getCurrentRequest()->willReturn($request->reveal());
+
+        $providerResult = $this->prophesize(DataProviderResult::class);
+        $providerResult->getHasNextPage()->willReturn(false);
+        $providerResult->getItems()->willReturn([]);
+        $this->mediaProviderResolver->resolve(
+            Argument::any(),
+            Argument::any(),
+            Argument::any(),
+            Argument::any(),
+            1,
+            5
+        )->willReturn($providerResult->reveal());
+
+        $result = $this->smartContentResolver->resolve([], $this->fieldMetadata, 'en', []);
+
+        $this->assertInstanceOf(ContentView::class, $result);
+        $this->assertSame(1, $result->getView()['page']);
+    }
+
+    public function testResolveWithIntegerOptionValue(): void
+    {
+        $configuration = $this->prophesize(ProviderConfigurationInterface::class);
+        $configuration->getSorting()->willReturn(null);
+        $configuration->hasDatasource()->willReturn(false);
+        $configuration->hasTags()->willReturn(false);
+        $configuration->hasCategories()->willReturn(false);
+        $configuration->hasSorting()->willReturn(false);
+        $configuration->hasLimit()->willReturn(true);
+        $configuration->hasPagination()->willReturn(false);
+        $configuration->hasPresentAs()->willReturn(false);
+        $configuration->hasAudienceTargeting()->willReturn(false);
+        $configuration->getDatasourceResourceKey()->willReturn(null);
+        $configuration->getDatasourceAdapter()->willReturn(null);
+        $this->mediaProviderResolver->getProviderConfiguration()->willReturn($configuration->reveal());
+        $this->mediaProviderResolver->getProviderDefaultParams()->willReturn([]);
+
+        $this->tagRequestHandler->getTags('tags')->willReturn([]);
+        $this->categoryRequestHandler->getCategories('categories')->willReturn([]);
+
+        $providerResult = $this->prophesize(DataProviderResult::class);
+        $providerResult->getHasNextPage()->willReturn(false);
+        $providerResult->getItems()->willReturn([]);
+        $this->mediaProviderResolver->resolve(
+            Argument::any(),
+            Argument::any(),
+            Argument::any(),
+            Argument::any()
+        )->willReturn($providerResult->reveal());
+
+        // Create field with an integer option value
+        $fieldMetadata = new FieldMetadata('smart_content');
+
+        $providerOption = new OptionMetadata();
+        $providerOption->setName('provider');
+        $providerOption->setValue('media');
+        $fieldMetadata->addOption($providerOption);
+
+        $intOption = new OptionMetadata();
+        $intOption->setName('limit');
+        $intOption->setValue(10);
+        $fieldMetadata->addOption($intOption);
+
+        $result = $this->smartContentResolver->resolve([], $fieldMetadata, 'en', []);
+
+        $this->assertInstanceOf(ContentView::class, $result);
+    }
 }

@@ -16,7 +16,7 @@ namespace Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver;
 class DataProviderResult
 {
     /**
-     * @param array[] $items
+     * @param array<int, array<string, mixed>> $items
      */
     public function __construct(
         private array $items,
@@ -30,7 +30,7 @@ class DataProviderResult
     }
 
     /**
-     * @return array[]
+     * @return array<int, array<string, mixed>>
      */
     public function getItems(): array
     {

@@ -21,7 +21,6 @@ use Sulu\Bundle\HeadlessBundle\Content\DataProviderResolver\DataProviderResolver
 use Sulu\Bundle\TagBundle\Tag\TagManagerInterface;
 use Sulu\Component\Category\Request\CategoryRequestHandlerInterface;
 use Sulu\Component\Content\Compat\PropertyParameter;
-use Sulu\Component\SmartContent\DataProviderAliasInterface;
 use Sulu\Component\Tag\Request\TagRequestHandlerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -33,22 +32,33 @@ class SmartContentResolver implements ContentTypeResolverInterface
     }
 
     /**
-     * @var DataProviderResolverInterface[]
+     * @var DataProviderResolverInterface[]|null
      */
-    private array $resolvers;
+    private ?array $resolversArray = null;
 
     /**
      * @param \Traversable<DataProviderResolverInterface> $resolvers
      */
     public function __construct(
-        \Traversable $resolvers,
+        private \Traversable $resolvers,
         private TagManagerInterface $tagManager,
         private RequestStack $requestStack,
         private TagRequestHandlerInterface $tagRequestHandler,
         private CategoryRequestHandlerInterface $categoryRequestHandler,
         private ?TargetGroupStoreInterface $targetGroupStore = null,
     ) {
-        $this->resolvers = \iterator_to_array($resolvers);
+    }
+
+    /**
+     * @return DataProviderResolverInterface[]
+     */
+    private function getResolvers(): array
+    {
+        if (null === $this->resolversArray) {
+            $this->resolversArray = \iterator_to_array($this->resolvers);
+        }
+
+        return $this->resolversArray;
     }
 
     public function resolve(mixed $data, FieldMetadata $fieldMetadata, string $locale, array $attributes = []): ContentView
@@ -155,7 +165,7 @@ class SmartContentResolver implements ContentTypeResolverInterface
             }
         }
 
-        return $this->resolvers[$providerAlias] ?? null;
+        return $this->getResolvers()[$providerAlias] ?? null;
     }
 
     /**
@@ -270,10 +280,6 @@ class SmartContentResolver implements ContentTypeResolverInterface
             'datasourceAdapter' => $providerConfiguration->getDatasourceAdapter(),
             'exclude_duplicates' => new PropertyParameter('exclude_duplicates', false),
         ];
-
-        if ($provider instanceof DataProviderAliasInterface) {
-            $defaults['alias'] = $provider->getAlias();
-        }
 
         return \array_merge(
             $defaults,

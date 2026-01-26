@@ -267,4 +267,145 @@ class StructureResolverTest extends TestCase
         $this->assertSame([], $result['content']);
         $this->assertSame([], $result['view']);
     }
+
+    public function testResolveTemplateNotInForms(): void
+    {
+        $page = new Page('123-123-123');
+        $page->setWebspaceKey('sulu_io');
+        $page->setCreated(new \DateTimeImmutable('2024-01-01 10:00:00'));
+        $page->setChanged(new \DateTimeImmutable('2024-01-02 15:00:00'));
+
+        $dimensionContent = new PageDimensionContent($page);
+        $dimensionContent->setTemplateKey('nonexistent');
+        $dimensionContent->setTemplateData(['title' => 'Test']);
+
+        $typedFormMetadata = $this->prophesize(TypedFormMetadata::class);
+        $typedFormMetadata->getForms()->willReturn([]);
+
+        $this->formMetadataProvider->getMetadata('page', 'en', [])->willReturn($typedFormMetadata->reveal());
+        $this->referenceStore->add('123-123-123', 'pages')->shouldBeCalled();
+
+        $result = $this->structureResolver->resolve($dimensionContent, 'en', false);
+
+        $this->assertSame('123-123-123', $result['id']);
+        $this->assertSame('nonexistent', $result['template']);
+        $this->assertSame([], $result['content']);
+        $this->assertSame([], $result['view']);
+    }
+
+    public function testResolvePropertiesWithExtensionProperties(): void
+    {
+        $page = new Page('123-123-123');
+        $page->setWebspaceKey('sulu_io');
+        $page->setCreated(new \DateTimeImmutable('2024-01-01 10:00:00'));
+        $page->setChanged(new \DateTimeImmutable('2024-01-02 15:00:00'));
+
+        $dimensionContent = new PageDimensionContent($page);
+        $dimensionContent->setTemplateKey('default');
+        $dimensionContent->setTemplateData(['title' => 'Test Title']);
+        $dimensionContent->setExcerptData(['title' => 'Excerpt Title']);
+
+        $titleField = new FieldMetadata('title');
+        $titleField->setType('text_line');
+
+        $formMetadata = $this->prophesize(FormMetadata::class);
+        $formMetadata->getFlatFieldMetadata()->willReturn(['title' => $titleField]);
+
+        $typedFormMetadata = $this->prophesize(TypedFormMetadata::class);
+        $typedFormMetadata->getForms()->willReturn(['default' => $formMetadata->reveal()]);
+
+        $this->formMetadataProvider->getMetadata('page', 'en', [])->willReturn($typedFormMetadata->reveal());
+
+        $excerptTitleField = new FieldMetadata('excerpt/title');
+        $excerptTitleField->setType('text_line');
+
+        $excerptFormMetadata = $this->prophesize(FormMetadata::class);
+        $excerptFormMetadata->getFlatFieldMetadata()->willReturn(['excerpt/title' => $excerptTitleField]);
+
+        $this->formMetadataProvider->getMetadata('content_excerpt', 'en', Argument::type('array'))
+            ->willReturn($excerptFormMetadata->reveal());
+
+        $this->contentResolver->resolve('Test Title', $titleField, 'en', Argument::type('array'))
+            ->willReturn(new ContentView('Test Title', []));
+        $this->contentResolver->resolve('Excerpt Title', $excerptTitleField, 'en', Argument::type('array'))
+            ->willReturn(new ContentView('Excerpt Title', []));
+
+        $this->referenceStore->add('123-123-123', 'pages')->shouldBeCalled();
+
+        /** @var array{content: array<string, mixed>} $result */
+        $result = $this->structureResolver->resolveProperties(
+            $dimensionContent,
+            [
+                'myTitle' => 'title',
+                'myExcerptTitle' => 'excerpt.title',
+            ],
+            'en',
+        );
+
+        $this->assertSame('Test Title', $result['content']['myTitle']);
+        $this->assertSame('Excerpt Title', $result['content']['myExcerptTitle']);
+    }
+
+    public function testResolveWithShadowLocale(): void
+    {
+        $page = new Page('123-123-123');
+        $page->setWebspaceKey('sulu_io');
+        $page->setCreated(new \DateTimeImmutable('2024-01-01 10:00:00'));
+        $page->setChanged(new \DateTimeImmutable('2024-01-02 15:00:00'));
+
+        $dimensionContent = new PageDimensionContent($page);
+        $dimensionContent->setTemplateKey('default');
+        $dimensionContent->setTemplateData(['title' => 'Test']);
+        $dimensionContent->setShadowLocale('de');
+
+        $titleField = new FieldMetadata('title');
+        $titleField->setType('text_line');
+
+        $formMetadata = $this->prophesize(FormMetadata::class);
+        $formMetadata->getFlatFieldMetadata()->willReturn(['title' => $titleField]);
+
+        $typedFormMetadata = $this->prophesize(TypedFormMetadata::class);
+        $typedFormMetadata->getForms()->willReturn(['default' => $formMetadata->reveal()]);
+
+        $this->formMetadataProvider->getMetadata('page', 'en', [])->willReturn($typedFormMetadata->reveal());
+
+        $this->contentResolver->resolve('Test', $titleField, 'en', Argument::that(function ($attributes) {
+            return isset($attributes['isShadow']) && true === $attributes['isShadow']
+                && isset($attributes['shadowLocale']) && 'de' === $attributes['shadowLocale'];
+        }))->willReturn(new ContentView('Test', []));
+
+        $this->referenceStore->add('123-123-123', 'pages')->shouldBeCalled();
+
+        /** @var array{content: array<string, mixed>} $result */
+        $result = $this->structureResolver->resolve($dimensionContent, 'en', false);
+
+        $this->assertSame('Test', $result['content']['title']);
+    }
+
+    public function testResolveWithAuthorData(): void
+    {
+        $page = new Page('123-123-123');
+        $page->setWebspaceKey('sulu_io');
+        $page->setCreated(new \DateTimeImmutable('2024-01-01 10:00:00'));
+        $page->setChanged(new \DateTimeImmutable('2024-01-02 15:00:00'));
+
+        $dimensionContent = new PageDimensionContent($page);
+        $dimensionContent->setTemplateKey('default');
+        $dimensionContent->setTemplateData([]);
+        $dimensionContent->setAuthored(new \DateTimeImmutable('2024-01-15 12:00:00'));
+
+        $formMetadata = $this->prophesize(FormMetadata::class);
+        $formMetadata->getFlatFieldMetadata()->willReturn([]);
+
+        $typedFormMetadata = $this->prophesize(TypedFormMetadata::class);
+        $typedFormMetadata->getForms()->willReturn(['default' => $formMetadata->reveal()]);
+
+        $this->formMetadataProvider->getMetadata('page', 'en', [])->willReturn($typedFormMetadata->reveal());
+        $this->referenceStore->add('123-123-123', 'pages')->shouldBeCalled();
+
+        $result = $this->structureResolver->resolve($dimensionContent, 'en', false);
+
+        $this->assertNull($result['author']);
+        $this->assertSame('2024-01-15T12:00:00+00:00', $result['authored']);
+    }
 }

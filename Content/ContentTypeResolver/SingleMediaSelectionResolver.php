@@ -36,7 +36,8 @@ class SingleMediaSelectionResolver implements ContentTypeResolverInterface
 
         $ids = \array_key_exists('id', $data) && \is_numeric($data['id']) ? [(int) $data['id']] : [];
         $content = $this->mediaSelectionResolver->resolve(['ids' => $ids], $fieldMetadata, $locale, $attributes);
+        $resolvedContent = $content->getContent();
 
-        return new ContentView($content->getContent()[0] ?? null, \array_merge(['id' => null], $data));
+        return new ContentView(\is_array($resolvedContent) ? ($resolvedContent[0] ?? null) : null, \array_merge(['id' => null], $data));
     }
 }
