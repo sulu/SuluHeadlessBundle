@@ -1,0 +1,89 @@
+{
+    "_embedded": {
+        "hits": [
+            {
+                "document": {
+                    "id": "@uuid@",
+                    "title": "PHP CMS Tutorial",
+                    "description": "",
+                    "url": "/php-cms-tutorial",
+                    "imageUrl": "",
+                    "locale": "de",
+                    "index": "page_sulu_io_published",
+                    "created": null,
+                    "creatorName": null,
+                    "creatorId": null,
+                    "changed": null,
+                    "changerName": null,
+                    "changerId": null,
+                    "properties": {
+                        "excerptTitle": "Complete Tutorial",
+                        "excerptMore": "",
+                        "excerptDescription": "Learn to build a CMS",
+                        "excerptCategories": "|1|",
+                        "excerptCategories#0#key": "technology",
+                        "excerptCategories#0#translation": "Technology",
+                        "excerptCategories#0#keywords": "[]",
+                        "excerptCategories#0#created": "@string@.isDateTime()",
+                        "excerptCategories#0#changed": "@string@.isDateTime()",
+                        "excerptCategories#0#creator": "",
+                        "excerptCategories#0#creator_id": "",
+                        "excerptCategories#0#changer": "",
+                        "excerptCategories#0#changer_id": "",
+                        "excerptTags": "|1|",
+                        "excerptTags#0#id": "1",
+                        "excerptTags#0#name": "cms",
+                        "excerptIcon": "{\"ids\":[]}",
+                        "excerptImages": "{\"ids\":[]}",
+                        "title": "PHP CMS Tutorial",
+                        "webspace_key": "sulu_io",
+                        "state": "published",
+                        "published": "@string@.isDateTime()",
+                        "authored": "@string@.isDateTime()",
+                        "_structure_type": "default"
+                    }
+                },
+                "score": "@double@",
+                "id": "@uuid@"
+            },
+            {
+                "document": {
+                    "id": "@uuid@",
+                    "title": "Web Development Guide",
+                    "description": "",
+                    "url": "/web-development",
+                    "imageUrl": "",
+                    "locale": "de",
+                    "index": "page_sulu_io_published",
+                    "created": null,
+                    "creatorName": null,
+                    "creatorId": null,
+                    "changed": null,
+                    "changerName": null,
+                    "changerId": null,
+                    "properties": {
+                        "excerptTitle": "Development Resources",
+                        "excerptMore": "",
+                        "excerptDescription": "Resources for developers",
+                        "excerptCategories": "||",
+                        "excerptTags": "|1|2|",
+                        "excerptTags#0#id": "1",
+                        "excerptTags#0#name": "cms",
+                        "excerptTags#1#id": "2",
+                        "excerptTags#1#name": "php",
+                        "excerptIcon": "{\"ids\":[]}",
+                        "excerptImages": "{\"ids\":[]}",
+                        "title": "Web Development Guide",
+                        "webspace_key": "sulu_io",
+                        "state": "published",
+                        "published": "@string@.isDateTime()",
+                        "authored": "@string@.isDateTime()",
+                        "_structure_type": "default"
+                    }
+                },
+                "score": "@double@",
+                "id": "@uuid@"
+            }
+        ]
+    }
+}

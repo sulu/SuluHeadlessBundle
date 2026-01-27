@@ -96,7 +96,7 @@ class MediaSerializerTest extends TestCase
         $apiMedia->getVersion()->willReturn(1)->shouldBeCalled();
         $apiMedia->getSubVersion()->willReturn(0)->shouldBeCalled();
 
-        $apiMediaArgument = Argument::that(function (Media $apiMedia) use ($media, $locale) {
+        $apiMediaArgument = Argument::that(static function (Media $apiMedia) use ($media, $locale) {
             return $apiMedia->getEntity() === $media->reveal() && $locale === $apiMedia->getLocale();
         });
 
@@ -143,7 +143,7 @@ class MediaSerializerTest extends TestCase
         $apiMedia->getName()->willReturn('media-1.pdf')->shouldBeCalled();
         $apiMedia->getMimeType()->willReturn('application/pdf')->shouldBeCalled();
 
-        $apiMediaArgument = Argument::that(function (Media $apiMedia) use ($media, $locale) {
+        $apiMediaArgument = Argument::that(static function (Media $apiMedia) use ($media, $locale) {
             return $apiMedia->getEntity() === $media->reveal() && $locale === $apiMedia->getLocale();
         });
 
@@ -202,7 +202,7 @@ class MediaSerializerTest extends TestCase
         $previewMedia->getId()->willReturn(1)->shouldBeCalled();
         $media->getPreviewImage()->willReturn($previewMedia->reveal())->shouldBeCalled();
 
-        $apiMediaArgument = Argument::that(function (Media $apiMedia) use ($media, $locale) {
+        $apiMediaArgument = Argument::that(static function (Media $apiMedia) use ($media, $locale) {
             return $apiMedia->getEntity() === $media->reveal() && $locale === $apiMedia->getLocale();
         });
 
@@ -251,7 +251,7 @@ class MediaSerializerTest extends TestCase
         $apiMedia->getVersion()->willReturn(1)->shouldBeCalled();
         $apiMedia->getSubVersion()->willReturn(0)->shouldBeCalled();
 
-        $apiMediaArgument = Argument::that(function (Media $apiMedia) use ($media, $locale) {
+        $apiMediaArgument = Argument::that(static function (Media $apiMedia) use ($media, $locale) {
             return $apiMedia->getEntity() === $media->reveal() && $locale === $apiMedia->getLocale();
         });
 

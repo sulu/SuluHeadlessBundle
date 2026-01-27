@@ -100,7 +100,7 @@ class StructureResolverTest extends TestCase
         $excerpt->getProperty('title')->willReturn($titleProperty->reveal());
 
         $this->contentResolver->resolve(Argument::any(), $titleProperty->reveal(), Argument::cetera())->will(
-            function ($arguments) {
+            static function ($arguments) {
                 return new ContentView($arguments[0]);
             }
         );
