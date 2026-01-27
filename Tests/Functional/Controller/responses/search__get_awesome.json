@@ -1,34 +1,67 @@
 {
-    "hits": [
-        {
-            "_formatted": "@array@",
-            "authoredAt": "@string@.isDateTime()",
-            "content": "@array@",
-            "id": "@string@",
-            "locale": "de",
-            "mediaId": "@string@",
-            "resourceId": "@uuid@",
-            "resourceKey": "pages",
-            "title": "Sulu is awesome",
-            "url": "/awesome-sulu",
-            "webspaces": [
-                "sulu_io"
-            ]
-        },
-        {
-            "_formatted": "@array@",
-            "authoredAt": "@string@.isDateTime()",
-            "content": "@array@",
-            "id": "@string@",
-            "locale": "de",
-            "mediaId": "@string@",
-            "resourceId": "@uuid@",
-            "resourceKey": "pages",
-            "title": "SEAL is awesome",
-            "url": "/awesome-seal",
-            "webspaces": [
-                "sulu_io"
-            ]
-        }
-    ]
+    "_embedded": {
+        "hits": [
+            {
+                "_formatted": {
+                    "content": null,
+                    "title": "Sulu is <mark>awesome</mark>"
+                },
+                "authoredAt": "@string@.isDateTime()",
+                "content": [],
+                "id": "@string@",
+                "locale": "de",
+                "media": {
+                    "categories": [],
+                    "changed": "@string@.isDateTime()",
+                    "collection": "@integer@",
+                    "created": "@string@.isDateTime()",
+                    "description": "",
+                    "formatPreferredExtension": "png",
+                    "formatUri": "@string@",
+                    "id": "@integer@",
+                    "isAudio": false,
+                    "isDocument": false,
+                    "isImage": true,
+                    "isVideo": false,
+                    "locale": "de",
+                    "mimeType": "image/png",
+                    "name": "test-image.png",
+                    "properties": [],
+                    "size": "@integer@",
+                    "subVersion": 0,
+                    "tags": [],
+                    "targetGroups": [],
+                    "title": "Test Image",
+                    "type": "image",
+                    "url": "@string@",
+                    "version": 1
+                },
+                "resourceId": "@uuid@",
+                "resourceKey": "pages",
+                "title": "Sulu is awesome",
+                "url": "/awesome-sulu",
+                "webspaces": [
+                    "sulu_io"
+                ]
+            },
+            {
+                "_formatted": {
+                    "content": null,
+                    "title": "SEAL is <mark>awesome</mark>"
+                },
+                "authoredAt": "@string@.isDateTime()",
+                "content": [],
+                "id": "@string@",
+                "locale": "de",
+                "media": null,
+                "resourceId": "@uuid@",
+                "resourceKey": "pages",
+                "title": "SEAL is awesome",
+                "url": "/awesome-seal",
+                "webspaces": [
+                    "sulu_io"
+                ]
+            }
+        ]
+    }
 }

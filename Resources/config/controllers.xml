@@ -45,6 +45,8 @@
             public="true"
         >
             <argument type="service" id="CmsIg\Seal\EngineInterface"/>
+            <argument type="service" id="sulu.repository.media"/>
+            <argument type="service" id="sulu_headless.serializer.media"/>
         </service>
         <service id="Sulu\Bundle\HeadlessBundle\Controller\SearchController"
                  alias="sulu_headless.controller.search" public="true"/>

@@ -17,7 +17,13 @@ Symfony 5.4 support was dropped. Minimum required version is now 6.4.
 - `path` removed from navigation responses
 - `excerpt.images` renamed to `excerpt.image` (returns single object or `null` instead of array)
 - `excerpt.icon` now returns single object or `null` instead of array
-- Search response changed from `_embedded.hits[].document` to flat `hits[]` with SEAL format
+- Search endpoint now uses SEAL search engine instead of Massive SearchBundle
+- Search `indices` query parameter replaced with `index` (single index, defaults to `website`)
+- Search response structure changed from nested `_embedded.hits[].document` to flat `_embedded.hits[]`
+- Search hit `imageUrl` field replaced with `media` (contains full serialized media object or `null`)
+- Search hit `score` field removed
+- Search hit `document.properties` (excerpt, state, etc.) removed — no longer included in response
+- Search hit fields changed: `id`, `title`, `url`, `locale` remain; new fields: `resourceKey`, `resourceId`, `content`, `authoredAt`, `webspaces`, `_formatted`, `media`
 
 ### StructureResolverInterface signature changed
 

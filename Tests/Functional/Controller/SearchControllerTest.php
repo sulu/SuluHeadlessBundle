@@ -16,6 +16,7 @@ namespace Sulu\Bundle\HeadlessBundle\Tests\Functional\Controller;
 use CmsIg\Seal\EngineInterface;
 use Sulu\Bundle\HeadlessBundle\Tests\Functional\BaseTestCase;
 use Sulu\Bundle\HeadlessBundle\Tests\Traits\CreateCategoryTrait;
+use Sulu\Bundle\HeadlessBundle\Tests\Traits\CreateMediaTrait;
 use Sulu\Bundle\HeadlessBundle\Tests\Traits\CreatePageTrait;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,6 +24,7 @@ use Symfony\Component\HttpFoundation\Response;
 class SearchControllerTest extends BaseTestCase
 {
     use CreateCategoryTrait;
+    use CreateMediaTrait;
     use CreatePageTrait;
 
     private KernelBrowser $websiteClient;
@@ -34,6 +36,10 @@ class SearchControllerTest extends BaseTestCase
     {
         static::purgeDatabase();
         self::bootKernel();
+
+        $collection = self::createCollection('Test Collection', 'de');
+        $media = self::createMedia('Test Image', $collection, 'de');
+        self::getEntityManager()->flush();
 
         /** @var EngineInterface $engine */
         $engine = self::getContainer()->get(EngineInterface::class);
@@ -70,6 +76,11 @@ class SearchControllerTest extends BaseTestCase
             [
                 'title' => 'Sulu is awesome',
                 'url' => '/awesome-sulu',
+                'excerpt' => [
+                    'image' => [
+                        'id' => $media->getId(),
+                    ],
+                ],
             ]
         );
 

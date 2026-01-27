@@ -48,6 +48,5 @@
         >
             <argument type="tagged" tag="sulu_headless.content_type_resolver" default-index-method="getContentType" index-by="type"/>
         </service>
-        <service id="Sulu\Bundle\HeadlessBundle\Content\ContentResolverInterface" alias="sulu_headless.content_resolver"/>
-    </services>
+        <service id="Sulu\Bundle\HeadlessBundle\Content\ContentResolverInterface" alias="sulu_headless.content_resolver"/>    </services>
 </container>
