@@ -11,6 +11,7 @@
                 "id": "@string@",
                 "locale": "de",
                 "media": null,
+                "properties": [],
                 "resourceId": "@uuid@",
                 "resourceKey": "pages",
                 "title": "SEAL is awesome",

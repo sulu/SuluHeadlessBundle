@@ -151,20 +151,20 @@ class SearchControllerTest extends BaseTestCase
         ];
 
         yield 'page with categories' => [
-            'Content Management',
-            ['page_sulu_io_published'],
+            'CMS Guide',
+            'website',
             'search__get_content_management.json',
         ];
 
         yield 'page with tags' => [
-            'Web Development',
-            ['page_sulu_io_published'],
+            'Development Resources',
+            'website',
             'search__get_web_development.json',
         ];
 
         yield 'page with categories and tags' => [
-            'PHP CMS',
-            ['page_sulu_io_published'],
+            'Complete Tutorial',
+            'website',
             'search__get_php_cms.json',
         ];
     }

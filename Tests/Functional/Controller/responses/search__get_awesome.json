@@ -36,6 +36,11 @@
                     "url": "@string@",
                     "version": 1
                 },
+                "properties": {
+                    "excerpt": {
+                        "imageId": "@integer@"
+                    }
+                },
                 "resourceId": "@uuid@",
                 "resourceKey": "pages",
                 "title": "Sulu is awesome",
@@ -54,6 +59,7 @@
                 "id": "@string@",
                 "locale": "de",
                 "media": null,
+                "properties": [],
                 "resourceId": "@uuid@",
                 "resourceKey": "pages",
                 "title": "SEAL is awesome",

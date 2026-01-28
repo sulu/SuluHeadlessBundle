@@ -2,56 +2,28 @@
     "_embedded": {
         "hits": [
             {
-                "document": {
-                    "id": "@uuid@",
-                    "title": "Content Management Systems",
-                    "description": "",
-                    "url": "/content-management",
-                    "imageUrl": "",
-                    "locale": "de",
-                    "index": "page_sulu_io_published",
-                    "created": null,
-                    "creatorName": null,
-                    "creatorId": null,
-                    "changed": null,
-                    "changerName": null,
-                    "changerId": null,
-                    "properties": {
-                        "excerptTitle": "CMS Guide",
-                        "excerptMore": "",
-                        "excerptDescription": "Guide about content management",
-                        "excerptCategories": "|1|2|",
-                        "excerptCategories#0#key": "technology",
-                        "excerptCategories#0#translation": "Technology",
-                        "excerptCategories#0#keywords": "[]",
-                        "excerptCategories#0#created": "@string@.isDateTime()",
-                        "excerptCategories#0#changed": "@string@.isDateTime()",
-                        "excerptCategories#0#creator": "",
-                        "excerptCategories#0#creator_id": "",
-                        "excerptCategories#0#changer": "",
-                        "excerptCategories#0#changer_id": "",
-                        "excerptCategories#1#key": "development",
-                        "excerptCategories#1#translation": "Development",
-                        "excerptCategories#1#keywords": "[]",
-                        "excerptCategories#1#created": "@string@.isDateTime()",
-                        "excerptCategories#1#changed": "@string@.isDateTime()",
-                        "excerptCategories#1#creator": "",
-                        "excerptCategories#1#creator_id": "",
-                        "excerptCategories#1#changer": "",
-                        "excerptCategories#1#changer_id": "",
-                        "excerptTags": "||",
-                        "excerptIcon": "{\"ids\":[]}",
-                        "excerptImages": "{\"ids\":[]}",
-                        "title": "Content Management Systems",
-                        "webspace_key": "sulu_io",
-                        "state": "published",
-                        "published": "@string@.isDateTime()",
-                        "authored": "@string@.isDateTime()",
-                        "_structure_type": "default"
+                "_formatted": {
+                    "content": null,
+                    "title": "<mark>CMS Guide</mark>"
+                },
+                "authoredAt": "@string@.isDateTime()",
+                "content": [],
+                "id": "@string@",
+                "locale": "de",
+                "media": null,
+                "properties": {
+                    "excerpt": {
+                        "description": "Guide about content management",
+                        "title": "CMS Guide"
                     }
                 },
-                "score": "@double@",
-                "id": "@uuid@"
+                "resourceId": "@uuid@",
+                "resourceKey": "pages",
+                "title": "CMS Guide",
+                "url": "/content-management",
+                "webspaces": [
+                    "sulu_io"
+                ]
             }
         ]
     }

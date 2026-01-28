@@ -2,42 +2,28 @@
     "_embedded": {
         "hits": [
             {
-                "document": {
-                    "id": "@uuid@",
-                    "title": "Web Development Guide",
-                    "description": "",
-                    "url": "/web-development",
-                    "imageUrl": "",
-                    "locale": "de",
-                    "index": "page_sulu_io_published",
-                    "created": null,
-                    "creatorName": null,
-                    "creatorId": null,
-                    "changed": null,
-                    "changerName": null,
-                    "changerId": null,
-                    "properties": {
-                        "excerptTitle": "Development Resources",
-                        "excerptMore": "",
-                        "excerptDescription": "Resources for developers",
-                        "excerptCategories": "||",
-                        "excerptTags": "|1|2|",
-                        "excerptTags#0#id": "1",
-                        "excerptTags#0#name": "cms",
-                        "excerptTags#1#id": "2",
-                        "excerptTags#1#name": "php",
-                        "excerptIcon": "{\"ids\":[]}",
-                        "excerptImages": "{\"ids\":[]}",
-                        "title": "Web Development Guide",
-                        "webspace_key": "sulu_io",
-                        "state": "published",
-                        "published": "@string@.isDateTime()",
-                        "authored": "@string@.isDateTime()",
-                        "_structure_type": "default"
+                "_formatted": {
+                    "content": null,
+                    "title": "<mark>Development Resources</mark>"
+                },
+                "authoredAt": "@string@.isDateTime()",
+                "content": [],
+                "id": "@string@",
+                "locale": "de",
+                "media": null,
+                "properties": {
+                    "excerpt": {
+                        "description": "Resources for developers",
+                        "title": "Development Resources"
                     }
                 },
-                "score": "@double@",
-                "id": "@uuid@"
+                "resourceId": "@uuid@",
+                "resourceKey": "pages",
+                "title": "Development Resources",
+                "url": "/web-development",
+                "webspaces": [
+                    "sulu_io"
+                ]
             }
         ]
     }
