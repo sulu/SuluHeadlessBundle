@@ -4,23 +4,35 @@
             {
                 "_formatted": {
                     "content": null,
-                    "title": "<mark>CMS Guide</mark>"
+                    "title": "Web Development <mark>Guide</mark>"
                 },
                 "authoredAt": "@string@.isDateTime()",
                 "content": [],
                 "id": "@string@",
                 "locale": "de",
                 "media": null,
-                "properties": {
-                    "excerpt": {
-                        "description": "Guide about content management",
-                        "title": "CMS Guide"
-                    }
-                },
                 "resourceId": "@uuid@",
                 "resourceKey": "pages",
-                "title": "CMS Guide",
-                "url": "/content-management",
+                "title": "Web Development Guide",
+                "url": "/web-development",
+                "webspaces": [
+                    "sulu_io"
+                ]
+            },
+            {
+                "_formatted": {
+                    "content": null,
+                    "title": "PHP <mark>CMS</mark> Tutorial"
+                },
+                "authoredAt": "@string@.isDateTime()",
+                "content": [],
+                "id": "@string@",
+                "locale": "de",
+                "media": null,
+                "resourceId": "@uuid@",
+                "resourceKey": "pages",
+                "title": "PHP CMS Tutorial",
+                "url": "/php-cms-tutorial",
                 "webspaces": [
                     "sulu_io"
                 ]

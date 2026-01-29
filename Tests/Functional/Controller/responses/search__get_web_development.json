@@ -4,22 +4,16 @@
             {
                 "_formatted": {
                     "content": null,
-                    "title": "<mark>Development Resources</mark>"
+                    "title": "Web <mark>Development</mark> Guide"
                 },
                 "authoredAt": "@string@.isDateTime()",
                 "content": [],
                 "id": "@string@",
                 "locale": "de",
                 "media": null,
-                "properties": {
-                    "excerpt": {
-                        "description": "Resources for developers",
-                        "title": "Development Resources"
-                    }
-                },
                 "resourceId": "@uuid@",
                 "resourceKey": "pages",
-                "title": "Development Resources",
+                "title": "Web Development Guide",
                 "url": "/web-development",
                 "webspaces": [
                     "sulu_io"

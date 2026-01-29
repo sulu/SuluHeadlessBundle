@@ -4,22 +4,16 @@
             {
                 "_formatted": {
                     "content": null,
-                    "title": "<mark>Complete Tutorial</mark>"
+                    "title": "PHP CMS <mark>Tutorial</mark>"
                 },
                 "authoredAt": "@string@.isDateTime()",
                 "content": [],
                 "id": "@string@",
                 "locale": "de",
                 "media": null,
-                "properties": {
-                    "excerpt": {
-                        "description": "Learn to build a CMS",
-                        "title": "Complete Tutorial"
-                    }
-                },
                 "resourceId": "@uuid@",
                 "resourceKey": "pages",
-                "title": "Complete Tutorial",
+                "title": "PHP CMS Tutorial",
                 "url": "/php-cms-tutorial",
                 "webspaces": [
                     "sulu_io"
