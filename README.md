@@ -214,6 +214,10 @@ Example: `/api/search?q=CMS`
 
 Example: `/api/snippet-areas/settings?includeExtension=true`
 
+#### Analytics
+
+`/api/analytics.json`
+
 ### Reference single page application implementation
 
 The SuluHeadlessBundle is completely **frontend independent** and does not require the use of a specific technology or 

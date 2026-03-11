@@ -61,10 +61,10 @@ class AnalyticsController
     public function __construct(
         SerializerInterface $serializer,
         AnalyticsRepositoryInterface $analyticsRepository,
-        $environment,
+        string $environment,
         int $maxAge,
         int $sharedMaxAge,
-        int $cacheLifetime
+        int $cacheLifetime,
     ) {
         $this->serializer = $serializer;
         $this->analyticsRepository = $analyticsRepository;
@@ -88,6 +88,7 @@ class AnalyticsController
             return new JsonResponse([]);
         }
 
+        /** @var Analytics[] $analyticsArray */
         $analyticsArray = $this->analyticsRepository->findByUrl(
             $portalUrl,
             $webspace->getKey(),
@@ -112,11 +113,15 @@ class AnalyticsController
         return $response;
     }
 
+    /**
+     * @param Analytics[] $analyticsArray
+     *
+     * @return mixed[]
+     */
     private function serializeData(array $analyticsArray): array
     {
         $serialized = [];
 
-        /** @var Analytics $analytics */
         foreach ($analyticsArray as $key => $analytics) {
             $serialized[$key] = [
                 'id' => $analytics->getId(),
