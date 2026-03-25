@@ -24,6 +24,44 @@ Symfony 5.4 support was dropped. Minimum required version is now 6.4.
 - Search hit `score` field removed
 - Search hit `document.properties` (excerpt, state, etc.) removed — no longer included in response
 - Search hit fields changed: `id`, `title`, `url`, `locale` remain; new fields: `resourceKey`, `resourceId`, `content`, `authoredAt`, `webspaces`, `_formatted`, `media`
+- Media `type` field changed from an object `{"name": "image", "id": 2}` to a plain string (e.g. `"image"`)
+
+### HeadlessWebsiteController refactored
+
+The `HeadlessWebsiteController` now extends `ContentController` (from `Sulu\Content\UserInterface\Controller\Website`) instead of `WebsiteController`.
+
+The `indexAction` signature changed to match the new base controller:
+
+```php
+// Before
+public function indexAction(
+    Request $request,
+    StructureInterface $structure,
+    bool $preview = false,
+    bool $partial = false
+): Response;
+
+// After
+public function indexAction(
+    Request $request,
+    DimensionContentInterface $object,
+    string $view,
+    bool $preview = false,
+    bool $partial = false,
+): Response;
+```
+
+The `resolveStructure(StructureInterface $structure)` method was renamed to `resolveHeadlessData(DimensionContentInterface $object, string $locale)`:
+
+```php
+// Before
+protected function resolveStructure(StructureInterface $structure): array;
+
+// After
+protected function resolveHeadlessData(DimensionContentInterface $object, string $locale): array;
+```
+
+The `serializeData()` helper method was removed. For non-JSON requests, override `resolveSuluParameters()` instead of `renderStructure()` — the `headless` key is now added there.
 
 ### StructureResolverInterface signature changed
 
