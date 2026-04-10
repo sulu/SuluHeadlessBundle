@@ -129,13 +129,13 @@ class SnippetDataProviderResolver implements DataProviderResolverInterface
 
         return [
             'categories' => $filters['categories'] ?? [],
-            'categoryOperator' => $filters['categoryOperator'] ?? 'OR',
+            'categoryOperator' => \strtoupper(\is_string($filters['categoryOperator'] ?? null) ? $filters['categoryOperator'] : 'OR'),
             'websiteCategories' => $filters['websiteCategories'] ?? [],
-            'websiteCategoryOperator' => $filters['websiteCategoriesOperator'] ?? 'OR',
+            'websiteCategoryOperator' => \strtoupper(\is_string($filters['websiteCategoriesOperator'] ?? null) ? $filters['websiteCategoriesOperator'] : 'OR'),
             'tags' => $filters['tags'] ?? [],
-            'tagOperator' => $filters['tagOperator'] ?? 'OR',
+            'tagOperator' => \strtoupper(\is_string($filters['tagOperator'] ?? null) ? $filters['tagOperator'] : 'OR'),
             'websiteTags' => $filters['websiteTags'] ?? [],
-            'websiteTagOperator' => $filters['websiteTagsOperator'] ?? 'OR',
+            'websiteTagOperator' => \strtoupper(\is_string($filters['websiteTagsOperator'] ?? null) ? $filters['websiteTagsOperator'] : 'OR'),
             'types' => $filters['types'] ?? [],
             'typesOperator' => 'OR',
             'locale' => $locale,
