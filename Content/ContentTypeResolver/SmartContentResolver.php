@@ -117,6 +117,10 @@ class SmartContentResolver implements ContentTypeResolverInterface
             'locale' => $locale,
         ];
 
+        if (isset($params['groups']) && $params['groups']->getValue()) {
+            $options['groups'] = $params['groups']->getValue();
+        }
+
         if (isset($params['max_per_page']) && $configuration->hasPagination()) {
             /** @var string $pageParameter */
             $pageParameter = $params['page_parameter']->getValue();
