@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Sulu\Bundle\HeadlessBundle\Tests\Traits;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Sulu\Bundle\TagBundle\Tag\TagManagerInterface;
 use Sulu\Content\Domain\Model\WorkflowInterface;
 use Sulu\Messenger\Infrastructure\Symfony\Messenger\FlushMiddleware\EnableFlushStamp;
 use Sulu\Snippet\Application\Message\ApplyWorkflowTransitionSnippetMessage;
@@ -60,7 +61,13 @@ trait CreateSnippetTrait
         if (isset($data['excerpt']) && \is_array($data['excerpt'])) {
             $excerptData = $data['excerpt'];
             if (isset($excerptData['tags']) && \is_array($excerptData['tags'])) {
-                $snippetData['excerptTags'] = $excerptData['tags'];
+                $tagManager = static::getContainer()->get(TagManagerInterface::class);
+                $tagIds = [];
+                foreach ($excerptData['tags'] as $tagName) {
+                    $tag = $tagManager->findOrCreateByName($tagName);
+                    $tagIds[] = $tag->getId();
+                }
+                $snippetData['excerptTags'] = $tagIds;
             }
             if (isset($excerptData['categories']) && \is_array($excerptData['categories'])) {
                 $snippetData['excerptCategories'] = $excerptData['categories'];

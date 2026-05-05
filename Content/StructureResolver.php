@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Content;
 
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FormMetadata;
 use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\TypedFormMetadata;
 use Sulu\Bundle\AdminBundle\Metadata\MetadataProviderInterface;
@@ -23,6 +24,7 @@ use Sulu\Content\Domain\Model\AuthorInterface;
 use Sulu\Content\Domain\Model\DimensionContentInterface;
 use Sulu\Content\Domain\Model\ExcerptInterface;
 use Sulu\Content\Domain\Model\LinkInterface;
+use Sulu\Content\Domain\Model\RoutableInterface;
 use Sulu\Content\Domain\Model\SeoInterface;
 use Sulu\Content\Domain\Model\ShadowInterface;
 use Sulu\Content\Domain\Model\TaxonomyInterface;
@@ -149,6 +151,7 @@ class StructureResolver implements StructureResolverInterface
 
         $fieldMetadataList = $formMetadata->getFlatFieldMetadata();
         $templateData = $dimensionContent->getTemplateData();
+        $templateData = $this->fillRouteFieldsFromRoute($dimensionContent, $templateData, $fieldMetadataList);
 
         if (null !== $properties) {
             $filteredFieldMetadata = [];
@@ -214,6 +217,56 @@ class StructureResolver implements StructureResolverInterface
                 $view = \array_merge($view, $extensionView->getView());
             }
         }
+    }
+
+    /**
+     * Fills route and page_tree_route field values from the Route entity into templateData.
+     * Since Sulu 3.0.6 these fields are not persisted in templateData anymore.
+     *
+     * @param array<string, mixed> $templateData
+     * @param array<string, FieldMetadata> $fieldMetadataList
+     *
+     * @return array<string, mixed>
+     */
+    private function fillRouteFieldsFromRoute(
+        TemplateInterface $dimensionContent,
+        array $templateData,
+        array $fieldMetadataList,
+    ): array {
+        if (!$dimensionContent instanceof RoutableInterface) {
+            return $templateData;
+        }
+
+        $route = $dimensionContent->getRoute();
+        if (null === $route) {
+            return $templateData;
+        }
+
+        foreach ($fieldMetadataList as $name => $field) {
+            $type = $field->getType();
+            if ('route' === $type) {
+                $templateData[$name] = $route->getSlug();
+            } elseif ('page_tree_route' === $type) {
+                $parentRoute = $route->getParentRoute();
+                if (null === $parentRoute) {
+                    continue;
+                }
+                $parentSlug = $parentRoute->getSlug();
+                $slug = $route->getSlug();
+                $suffix = \str_starts_with($slug, $parentSlug)
+                    ? \substr($slug, \strlen($parentSlug))
+                    : '';
+                $templateData[$name] = [
+                    'page' => [
+                        'uuid' => $parentRoute->getResourceId(),
+                        'path' => $parentSlug,
+                    ],
+                    'suffix' => $suffix,
+                ];
+            }
+        }
+
+        return $templateData;
     }
 
     /**
