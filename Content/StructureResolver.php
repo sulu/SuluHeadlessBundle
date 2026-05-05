@@ -15,6 +15,7 @@ namespace Sulu\Bundle\HeadlessBundle\Content;
 
 use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FormMetadata;
+use Sulu\Content\Application\ContentDataMapper\DataMapper\TemplateDataMapper;
 use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\TypedFormMetadata;
 use Sulu\Bundle\AdminBundle\Metadata\MetadataProviderInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ExtensionResolver\ExtensionResolverProvider;
@@ -220,9 +221,6 @@ class StructureResolver implements StructureResolverInterface
     }
 
     /**
-     * Fills route and page_tree_route field values from the Route entity into templateData.
-     * Since Sulu 3.0.6 these fields are not persisted in templateData anymore.
-     *
      * @param array<string, mixed> $templateData
      * @param array<string, FieldMetadata> $fieldMetadataList
      *
@@ -243,6 +241,10 @@ class StructureResolver implements StructureResolverInterface
         }
 
         foreach ($fieldMetadataList as $name => $field) {
+            if (!$field->hasTag(TemplateDataMapper::SKIP_TAG)) {
+                continue;
+            }
+
             $type = $field->getType();
             if ('route' === $type) {
                 $templateData[$name] = $route->getSlug();
