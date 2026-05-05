@@ -19,6 +19,7 @@ use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FormMetadata;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\TagMetadata;
 use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\TypedFormMetadata;
 use Sulu\Bundle\AdminBundle\Metadata\MetadataProviderInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentResolverInterface;
@@ -28,8 +29,10 @@ use Sulu\Bundle\HeadlessBundle\Content\ExtensionResolver\ExtensionResolverProvid
 use Sulu\Bundle\HeadlessBundle\Content\ExtensionResolver\SeoResolver;
 use Sulu\Bundle\HeadlessBundle\Content\StructureResolver;
 use Sulu\Bundle\HttpCacheBundle\ReferenceStore\ReferenceStoreInterface;
+use Sulu\Content\Application\ContentDataMapper\DataMapper\TemplateDataMapper;
 use Sulu\Page\Domain\Model\Page;
 use Sulu\Page\Domain\Model\PageDimensionContent;
+use Sulu\Route\Domain\Model\Route;
 
 class StructureResolverTest extends TestCase
 {
@@ -407,5 +410,213 @@ class StructureResolverTest extends TestCase
 
         $this->assertNull($result['author']);
         $this->assertSame('2024-01-15T12:00:00+00:00', $result['authored']);
+    }
+
+    public function testResolveRouteFieldFromRoute(): void
+    {
+        $route = new Route('pages', 'page-uuid', 'en', '/my-slug');
+
+        $page = new Page('123-123-123');
+        $page->setWebspaceKey('sulu_io');
+        $page->setCreated(new \DateTimeImmutable('2024-01-01 10:00:00'));
+        $page->setChanged(new \DateTimeImmutable('2024-01-02 15:00:00'));
+
+        $dimensionContent = new PageDimensionContent($page);
+        $dimensionContent->setTemplateKey('default');
+        $dimensionContent->setTemplateData([]);
+        $dimensionContent->setRoute($route);
+
+        $tag = new TagMetadata();
+        $tag->setName(TemplateDataMapper::SKIP_TAG);
+
+        $urlField = new FieldMetadata('url');
+        $urlField->setType('route');
+        $urlField->addTag($tag);
+
+        $formMetadata = $this->prophesize(FormMetadata::class);
+        $formMetadata->getFlatFieldMetadata()->willReturn(['url' => $urlField]);
+
+        $typedFormMetadata = $this->prophesize(TypedFormMetadata::class);
+        $typedFormMetadata->getForms()->willReturn(['default' => $formMetadata->reveal()]);
+
+        $this->formMetadataProvider->getMetadata('page', 'en', [])->willReturn($typedFormMetadata->reveal());
+
+        $this->contentResolver->resolve('/my-slug', $urlField, 'en', Argument::type('array'))
+            ->willReturn(new ContentView('/my-slug', []));
+
+        $this->referenceStore->add('123-123-123', 'pages')->shouldBeCalled();
+
+        /** @var array{content: array<string, mixed>} $result */
+        $result = $this->structureResolver->resolve($dimensionContent, 'en', false);
+
+        $this->assertSame('/my-slug', $result['content']['url']);
+    }
+
+    public function testResolvePageTreeRouteFieldFromRoute(): void
+    {
+        $parentRoute = new Route('pages', 'parent-uuid', 'en', '/parent');
+        $route = new Route('pages', 'page-uuid', 'en', '/parent/child', null, $parentRoute);
+
+        $page = new Page('123-123-123');
+        $page->setWebspaceKey('sulu_io');
+        $page->setCreated(new \DateTimeImmutable('2024-01-01 10:00:00'));
+        $page->setChanged(new \DateTimeImmutable('2024-01-02 15:00:00'));
+
+        $dimensionContent = new PageDimensionContent($page);
+        $dimensionContent->setTemplateKey('default');
+        $dimensionContent->setTemplateData([]);
+        $dimensionContent->setRoute($route);
+
+        $tag = new TagMetadata();
+        $tag->setName(TemplateDataMapper::SKIP_TAG);
+
+        $routeField = new FieldMetadata('url');
+        $routeField->setType('page_tree_route');
+        $routeField->addTag($tag);
+
+        $formMetadata = $this->prophesize(FormMetadata::class);
+        $formMetadata->getFlatFieldMetadata()->willReturn(['url' => $routeField]);
+
+        $typedFormMetadata = $this->prophesize(TypedFormMetadata::class);
+        $typedFormMetadata->getForms()->willReturn(['default' => $formMetadata->reveal()]);
+
+        $this->formMetadataProvider->getMetadata('page', 'en', [])->willReturn($typedFormMetadata->reveal());
+
+        $expectedValue = [
+            'page' => ['uuid' => 'parent-uuid', 'path' => '/parent'],
+            'suffix' => '/child',
+        ];
+        $this->contentResolver->resolve($expectedValue, $routeField, 'en', Argument::type('array'))
+            ->willReturn(new ContentView($expectedValue, []));
+
+        $this->referenceStore->add('123-123-123', 'pages')->shouldBeCalled();
+
+        /** @var array{content: array<string, array{page: array{path: string, uuid: string}, suffix: string}>} $result */
+        $result = $this->structureResolver->resolve($dimensionContent, 'en', false);
+
+        $this->assertSame('/parent', $result['content']['url']['page']['path']);
+        $this->assertSame('parent-uuid', $result['content']['url']['page']['uuid']);
+        $this->assertSame('/child', $result['content']['url']['suffix']);
+    }
+
+    public function testResolvePageTreeRouteFieldNoParentRoute(): void
+    {
+        $route = new Route('pages', 'page-uuid', 'en', '/my-slug');
+
+        $page = new Page('123-123-123');
+        $page->setWebspaceKey('sulu_io');
+        $page->setCreated(new \DateTimeImmutable('2024-01-01 10:00:00'));
+        $page->setChanged(new \DateTimeImmutable('2024-01-02 15:00:00'));
+
+        $dimensionContent = new PageDimensionContent($page);
+        $dimensionContent->setTemplateKey('default');
+        $dimensionContent->setTemplateData([]);
+        $dimensionContent->setRoute($route);
+
+        $tag = new TagMetadata();
+        $tag->setName(TemplateDataMapper::SKIP_TAG);
+
+        $routeField = new FieldMetadata('url');
+        $routeField->setType('page_tree_route');
+        $routeField->addTag($tag);
+
+        $formMetadata = $this->prophesize(FormMetadata::class);
+        $formMetadata->getFlatFieldMetadata()->willReturn(['url' => $routeField]);
+
+        $typedFormMetadata = $this->prophesize(TypedFormMetadata::class);
+        $typedFormMetadata->getForms()->willReturn(['default' => $formMetadata->reveal()]);
+
+        $this->formMetadataProvider->getMetadata('page', 'en', [])->willReturn($typedFormMetadata->reveal());
+
+        $this->contentResolver->resolve(null, $routeField, 'en', Argument::type('array'))
+            ->willReturn(new ContentView(null, []));
+
+        $this->referenceStore->add('123-123-123', 'pages')->shouldBeCalled();
+
+        /** @var array{content: array<string, mixed>} $result */
+        $result = $this->structureResolver->resolve($dimensionContent, 'en', false);
+
+        $this->assertNull($result['content']['url']);
+    }
+
+    public function testResolvePageTreeRouteFieldSlugWithoutParentPrefix(): void
+    {
+        $parentRoute = new Route('pages', 'parent-uuid', 'en', '/parent');
+        $route = new Route('pages', 'page-uuid', 'en', '/completely-different', null, $parentRoute);
+
+        $page = new Page('123-123-123');
+        $page->setWebspaceKey('sulu_io');
+        $page->setCreated(new \DateTimeImmutable('2024-01-01 10:00:00'));
+        $page->setChanged(new \DateTimeImmutable('2024-01-02 15:00:00'));
+
+        $dimensionContent = new PageDimensionContent($page);
+        $dimensionContent->setTemplateKey('default');
+        $dimensionContent->setTemplateData([]);
+        $dimensionContent->setRoute($route);
+
+        $tag = new TagMetadata();
+        $tag->setName(TemplateDataMapper::SKIP_TAG);
+
+        $routeField = new FieldMetadata('url');
+        $routeField->setType('page_tree_route');
+        $routeField->addTag($tag);
+
+        $formMetadata = $this->prophesize(FormMetadata::class);
+        $formMetadata->getFlatFieldMetadata()->willReturn(['url' => $routeField]);
+
+        $typedFormMetadata = $this->prophesize(TypedFormMetadata::class);
+        $typedFormMetadata->getForms()->willReturn(['default' => $formMetadata->reveal()]);
+
+        $this->formMetadataProvider->getMetadata('page', 'en', [])->willReturn($typedFormMetadata->reveal());
+
+        $expectedValue = [
+            'page' => ['uuid' => 'parent-uuid', 'path' => '/parent'],
+            'suffix' => '',
+        ];
+        $this->contentResolver->resolve($expectedValue, $routeField, 'en', Argument::type('array'))
+            ->willReturn(new ContentView($expectedValue, []));
+
+        $this->referenceStore->add('123-123-123', 'pages')->shouldBeCalled();
+
+        /** @var array{content: array<string, array{page: array{path: string, uuid: string}, suffix: string}>} $result */
+        $result = $this->structureResolver->resolve($dimensionContent, 'en', false);
+
+        $this->assertSame('', $result['content']['url']['suffix']);
+    }
+
+    public function testResolveSkipsRouteFieldWithoutSkipTag(): void
+    {
+        $route = new Route('pages', 'page-uuid', 'en', '/my-slug');
+
+        $page = new Page('123-123-123');
+        $page->setWebspaceKey('sulu_io');
+        $page->setCreated(new \DateTimeImmutable('2024-01-01 10:00:00'));
+        $page->setChanged(new \DateTimeImmutable('2024-01-02 15:00:00'));
+
+        $dimensionContent = new PageDimensionContent($page);
+        $dimensionContent->setTemplateKey('default');
+        $dimensionContent->setTemplateData(['url' => '/existing-value']);
+        $dimensionContent->setRoute($route);
+
+        $urlField = new FieldMetadata('url');
+        $urlField->setType('route');
+
+        $formMetadata = $this->prophesize(FormMetadata::class);
+        $formMetadata->getFlatFieldMetadata()->willReturn(['url' => $urlField]);
+
+        $typedFormMetadata = $this->prophesize(TypedFormMetadata::class);
+        $typedFormMetadata->getForms()->willReturn(['default' => $formMetadata->reveal()]);
+
+        $this->formMetadataProvider->getMetadata('page', 'en', [])->willReturn($typedFormMetadata->reveal());
+
+        $this->contentResolver->resolve('/existing-value', $urlField, 'en', Argument::type('array'))
+            ->willReturn(new ContentView('/existing-value', []));
+
+        $this->referenceStore->add('123-123-123', 'pages')->shouldBeCalled();
+
+        /** @var array{content: array<string, mixed>} $result */
+        $result = $this->structureResolver->resolve($dimensionContent, 'en', false);
+
+        $this->assertSame('/existing-value', $result['content']['url']);
     }
 }

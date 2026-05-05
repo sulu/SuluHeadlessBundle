@@ -6,37 +6,37 @@ parameters:
 			path: Content/ContentTypeResolver/SmartContentResolver.php
 
 		-
-			message: "#^Parameter \\#1 \\$filters of method Sulu\\\\Bundle\\\\AdminBundle\\\\SmartContent\\\\SmartContentProviderInterface\\:\\:findFlatBy\\(\\) expects array\\{categories\\: array\\<int\\>, categoryOperator\\: 'AND'\\|'OR', websiteCategories\\: array\\<string\\>, websiteCategoryOperator\\: 'AND'\\|'OR', tags\\: array\\<string\\>, tagOperator\\: 'AND'\\|'OR', websiteTags\\: array\\<string\\>, websiteTagOperator\\: 'AND'\\|'OR', \\.\\.\\.\\}, array\\<string, mixed\\> given\\.$#"
+			message: "#^Parameter \\#1 \\$filters of method Sulu\\\\Bundle\\\\AdminBundle\\\\SmartContent\\\\SmartContentProviderInterface\\:\\:findFlatBy\\(\\) expects array\\{categories\\: array\\<int\\>, categoryOperator\\: 'AND'\\|'OR', websiteCategories\\: array\\<string\\>, websiteCategoryOperator\\: 'AND'\\|'OR', tags\\: array\\<int\\>, tagOperator\\: 'AND'\\|'OR', websiteTags\\: array\\<string\\>, websiteTagOperator\\: 'AND'\\|'OR', \\.\\.\\.\\}, array\\<string, mixed\\> given\\.$#"
 			count: 1
 			path: Content/DataProviderResolver/AccountDataProviderResolver.php
 
 		-
-			message: "#^Parameter \\#1 \\$filters of method Sulu\\\\Bundle\\\\AdminBundle\\\\SmartContent\\\\SmartContentProviderInterface\\:\\:findFlatBy\\(\\) expects array\\{categories\\: array\\<int\\>, categoryOperator\\: 'AND'\\|'OR', websiteCategories\\: array\\<string\\>, websiteCategoryOperator\\: 'AND'\\|'OR', tags\\: array\\<string\\>, tagOperator\\: 'AND'\\|'OR', websiteTags\\: array\\<string\\>, websiteTagOperator\\: 'AND'\\|'OR', \\.\\.\\.\\}, array\\<string, mixed\\> given\\.$#"
+			message: "#^Parameter \\#1 \\$filters of method Sulu\\\\Bundle\\\\AdminBundle\\\\SmartContent\\\\SmartContentProviderInterface\\:\\:findFlatBy\\(\\) expects array\\{categories\\: array\\<int\\>, categoryOperator\\: 'AND'\\|'OR', websiteCategories\\: array\\<string\\>, websiteCategoryOperator\\: 'AND'\\|'OR', tags\\: array\\<int\\>, tagOperator\\: 'AND'\\|'OR', websiteTags\\: array\\<string\\>, websiteTagOperator\\: 'AND'\\|'OR', \\.\\.\\.\\}, array\\<string, mixed\\> given\\.$#"
 			count: 1
 			path: Content/DataProviderResolver/ArticleDataProviderResolver.php
 
 		-
-			message: "#^Parameter \\#1 \\$filters of method Sulu\\\\Bundle\\\\AdminBundle\\\\SmartContent\\\\SmartContentProviderInterface\\:\\:findFlatBy\\(\\) expects array\\{categories\\: array\\<int\\>, categoryOperator\\: 'AND'\\|'OR', websiteCategories\\: array\\<string\\>, websiteCategoryOperator\\: 'AND'\\|'OR', tags\\: array\\<string\\>, tagOperator\\: 'AND'\\|'OR', websiteTags\\: array\\<string\\>, websiteTagOperator\\: 'AND'\\|'OR', \\.\\.\\.\\}, array\\<string, mixed\\> given\\.$#"
+			message: "#^Parameter \\#1 \\$filters of method Sulu\\\\Bundle\\\\AdminBundle\\\\SmartContent\\\\SmartContentProviderInterface\\:\\:findFlatBy\\(\\) expects array\\{categories\\: array\\<int\\>, categoryOperator\\: 'AND'\\|'OR', websiteCategories\\: array\\<string\\>, websiteCategoryOperator\\: 'AND'\\|'OR', tags\\: array\\<int\\>, tagOperator\\: 'AND'\\|'OR', websiteTags\\: array\\<string\\>, websiteTagOperator\\: 'AND'\\|'OR', \\.\\.\\.\\}, array\\<string, mixed\\> given\\.$#"
 			count: 1
 			path: Content/DataProviderResolver/ArticlePageTreeDataProviderResolver.php
 
 		-
-			message: "#^Parameter \\#1 \\$filters of method Sulu\\\\Bundle\\\\AdminBundle\\\\SmartContent\\\\SmartContentProviderInterface\\:\\:findFlatBy\\(\\) expects array\\{categories\\: array\\<int\\>, categoryOperator\\: 'AND'\\|'OR', websiteCategories\\: array\\<string\\>, websiteCategoryOperator\\: 'AND'\\|'OR', tags\\: array\\<string\\>, tagOperator\\: 'AND'\\|'OR', websiteTags\\: array\\<string\\>, websiteTagOperator\\: 'AND'\\|'OR', \\.\\.\\.\\}, array\\<string, mixed\\> given\\.$#"
+			message: "#^Parameter \\#1 \\$filters of method Sulu\\\\Bundle\\\\AdminBundle\\\\SmartContent\\\\SmartContentProviderInterface\\:\\:findFlatBy\\(\\) expects array\\{categories\\: array\\<int\\>, categoryOperator\\: 'AND'\\|'OR', websiteCategories\\: array\\<string\\>, websiteCategoryOperator\\: 'AND'\\|'OR', tags\\: array\\<int\\>, tagOperator\\: 'AND'\\|'OR', websiteTags\\: array\\<string\\>, websiteTagOperator\\: 'AND'\\|'OR', \\.\\.\\.\\}, array\\<string, mixed\\> given\\.$#"
 			count: 1
 			path: Content/DataProviderResolver/ContactDataProviderResolver.php
 
 		-
-			message: "#^Parameter \\#1 \\$filters of method Sulu\\\\Bundle\\\\AdminBundle\\\\SmartContent\\\\SmartContentProviderInterface\\:\\:findFlatBy\\(\\) expects array\\{categories\\: array\\<int\\>, categoryOperator\\: 'AND'\\|'OR', websiteCategories\\: array\\<string\\>, websiteCategoryOperator\\: 'AND'\\|'OR', tags\\: array\\<string\\>, tagOperator\\: 'AND'\\|'OR', websiteTags\\: array\\<string\\>, websiteTagOperator\\: 'AND'\\|'OR', \\.\\.\\.\\}, array\\<string, mixed\\> given\\.$#"
+			message: "#^Parameter \\#1 \\$filters of method Sulu\\\\Bundle\\\\AdminBundle\\\\SmartContent\\\\SmartContentProviderInterface\\:\\:findFlatBy\\(\\) expects array\\{categories\\: array\\<int\\>, categoryOperator\\: 'AND'\\|'OR', websiteCategories\\: array\\<string\\>, websiteCategoryOperator\\: 'AND'\\|'OR', tags\\: array\\<int\\>, tagOperator\\: 'AND'\\|'OR', websiteTags\\: array\\<string\\>, websiteTagOperator\\: 'AND'\\|'OR', \\.\\.\\.\\}, array\\<string, mixed\\> given\\.$#"
 			count: 1
 			path: Content/DataProviderResolver/MediaDataProviderResolver.php
 
 		-
-			message: "#^Parameter \\#1 \\$filters of method Sulu\\\\Bundle\\\\AdminBundle\\\\SmartContent\\\\SmartContentProviderInterface\\:\\:findFlatBy\\(\\) expects array\\{categories\\: array\\<int\\>, categoryOperator\\: 'AND'\\|'OR', websiteCategories\\: array\\<string\\>, websiteCategoryOperator\\: 'AND'\\|'OR', tags\\: array\\<string\\>, tagOperator\\: 'AND'\\|'OR', websiteTags\\: array\\<string\\>, websiteTagOperator\\: 'AND'\\|'OR', \\.\\.\\.\\}, array\\<string, mixed\\> given\\.$#"
+			message: "#^Parameter \\#1 \\$filters of method Sulu\\\\Bundle\\\\AdminBundle\\\\SmartContent\\\\SmartContentProviderInterface\\:\\:findFlatBy\\(\\) expects array\\{categories\\: array\\<int\\>, categoryOperator\\: 'AND'\\|'OR', websiteCategories\\: array\\<string\\>, websiteCategoryOperator\\: 'AND'\\|'OR', tags\\: array\\<int\\>, tagOperator\\: 'AND'\\|'OR', websiteTags\\: array\\<string\\>, websiteTagOperator\\: 'AND'\\|'OR', \\.\\.\\.\\}, array\\<string, mixed\\> given\\.$#"
 			count: 1
 			path: Content/DataProviderResolver/PageDataProviderResolver.php
 
 		-
-			message: "#^Parameter \\#1 \\$filters of method Sulu\\\\Bundle\\\\AdminBundle\\\\SmartContent\\\\SmartContentProviderInterface\\:\\:findFlatBy\\(\\) expects array\\{categories\\: array\\<int\\>, categoryOperator\\: 'AND'\\|'OR', websiteCategories\\: array\\<string\\>, websiteCategoryOperator\\: 'AND'\\|'OR', tags\\: array\\<string\\>, tagOperator\\: 'AND'\\|'OR', websiteTags\\: array\\<string\\>, websiteTagOperator\\: 'AND'\\|'OR', \\.\\.\\.\\}, array\\<string, mixed\\> given\\.$#"
+			message: "#^Parameter \\#1 \\$filters of method Sulu\\\\Bundle\\\\AdminBundle\\\\SmartContent\\\\SmartContentProviderInterface\\:\\:findFlatBy\\(\\) expects array\\{categories\\: array\\<int\\>, categoryOperator\\: 'AND'\\|'OR', websiteCategories\\: array\\<string\\>, websiteCategoryOperator\\: 'AND'\\|'OR', tags\\: array\\<int\\>, tagOperator\\: 'AND'\\|'OR', websiteTags\\: array\\<string\\>, websiteTagOperator\\: 'AND'\\|'OR', \\.\\.\\.\\}, array\\<string, mixed\\> given\\.$#"
 			count: 1
 			path: Content/DataProviderResolver/SnippetDataProviderResolver.php
 
