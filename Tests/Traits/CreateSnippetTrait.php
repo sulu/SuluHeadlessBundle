@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * This file is part of Sulu.
  *
@@ -64,7 +62,7 @@ trait CreateSnippetTrait
                 $tagManager = static::getContainer()->get(TagManagerInterface::class);
                 $tagIds = [];
                 foreach ($excerptData['tags'] as $tagName) {
-                    $tag = $tagManager->findOrCreateByName($tagName);
+                    $tag = $tagManager->findByName($tagName) ?? $tagManager->save(['name' => $tagName]);
                     $tagIds[] = $tag->getId();
                 }
                 $snippetData['excerptTags'] = $tagIds;
