@@ -583,5 +583,4 @@ class StructureResolverTest extends TestCase
 
         $this->assertSame('', $result['content']['url']['suffix']);
     }
-
 }
