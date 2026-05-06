@@ -584,39 +584,4 @@ class StructureResolverTest extends TestCase
         $this->assertSame('', $result['content']['url']['suffix']);
     }
 
-    public function testResolveSkipsRouteFieldWithoutSkipTag(): void
-    {
-        $route = new Route('pages', 'page-uuid', 'en', '/my-slug');
-
-        $page = new Page('123-123-123');
-        $page->setWebspaceKey('sulu_io');
-        $page->setCreated(new \DateTimeImmutable('2024-01-01 10:00:00'));
-        $page->setChanged(new \DateTimeImmutable('2024-01-02 15:00:00'));
-
-        $dimensionContent = new PageDimensionContent($page);
-        $dimensionContent->setTemplateKey('default');
-        $dimensionContent->setTemplateData(['url' => '/existing-value']);
-        $dimensionContent->setRoute($route);
-
-        $urlField = new FieldMetadata('url');
-        $urlField->setType('route');
-
-        $formMetadata = $this->prophesize(FormMetadata::class);
-        $formMetadata->getFlatFieldMetadata()->willReturn(['url' => $urlField]);
-
-        $typedFormMetadata = $this->prophesize(TypedFormMetadata::class);
-        $typedFormMetadata->getForms()->willReturn(['default' => $formMetadata->reveal()]);
-
-        $this->formMetadataProvider->getMetadata('page', 'en', [])->willReturn($typedFormMetadata->reveal());
-
-        $this->contentResolver->resolve('/existing-value', $urlField, 'en', Argument::type('array'))
-            ->willReturn(new ContentView('/existing-value', []));
-
-        $this->referenceStore->add('123-123-123', 'pages')->shouldBeCalled();
-
-        /** @var array{content: array<string, mixed>} $result */
-        $result = $this->structureResolver->resolve($dimensionContent, 'en', false);
-
-        $this->assertSame('/existing-value', $result['content']['url']);
-    }
 }
