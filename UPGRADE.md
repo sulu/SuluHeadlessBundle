@@ -26,6 +26,10 @@ Symfony 5.4 support was dropped. Minimum required version is now 6.4.
 - Search hit fields changed: `id`, `title`, `url`, `locale` remain; new fields: `resourceKey`, `resourceId`, `content`, `authoredAt`, `webspaces`, `_formatted`, `media`
 - Media `type` field changed from an object `{"name": "image", "id": 2}` to a plain string (e.g. `"image"`)
 
+### JavaScript reference implementation removed
+
+The `Resources/js-website` directory containing the optional React/MobX single page application reference implementation has been removed. If your project depended on the `sulu-headless-bundle` npm package from this directory, you will need to implement your own frontend integration.
+
 ### HeadlessWebsiteController refactored
 
 The `HeadlessWebsiteController` now extends `ContentController` (from `Sulu\Content\UserInterface\Controller\Website`) instead of `WebsiteController`.

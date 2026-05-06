@@ -14,7 +14,7 @@
         <img src="https://img.shields.io/github/actions/workflow/status/sulu/SuluHeadlessBundle/test-application.yaml" alt="Test workflow status">
     </a>
     <a href="https://github.com/sulu/sulu/releases" target="_blank">
-        <img src="https://img.shields.io/badge/sulu%20compatibility-%3E=2.0-52b6ca.svg" alt="Sulu compatibility">
+        <img src="https://img.shields.io/badge/sulu%20compatibility-%3E=3.0-52b6ca.svg" alt="Sulu compatibility">
     </a>
 </p>
 <br/>
@@ -24,9 +24,7 @@ management system in a headless way.
 
 To achieve this, the bundle includes a controller that allows to retrieve the 
 content of a **Sulu page as plain JSON content**. Furthermore, the bundle provides APIs for accessing features that are 
-available via Twig extensions in traditional templates such as navigation contexts and snippet areas. Finally, the bundle includes
-an optional **single page application setup** that is built upon React and MobX and utilizes the functionality of 
-the bundle.
+available via Twig extensions in traditional templates such as navigation contexts and snippet areas.
 
 
 The SuluHeadlessBundle is compatible with Sulu **starting from version 2.0**. Have a look at the `require` section in 
@@ -68,7 +66,7 @@ sulu_headless:
     resource: "@SuluHeadlessBundle/Resources/config/routing_website.yml"
 ```
 
-### Set the controller of you template
+### Set the controller of your template
 
 To provide an API for retrieving the content of a page in the JSON format, the controller of the page template
 must be set to the `HeadlessWebsiteController` included in this bundle:
@@ -92,7 +90,7 @@ via `{pageUrl}.json`.
 
 The main use-case of the SuluHeadlessBundle is **delivering the content of a page as a JSON object**. This can be 
 enabled individually per template by setting the controller of the template of the page 
-to `Sulu\Bundle\WebsiteBundle\Controller\DefaultController::indexAction`. When using the `HeadlessWebsiteController`
+to `Sulu\Bundle\HeadlessBundle\Controller\HeadlessWebsiteController::indexAction`. When using the `HeadlessWebsiteController`
 as controller for a template, the content of the page is available as JSON object via `{pageUrl}.json`.
 
 Additionally to the content of the page, the JSON object returned by the `HeadlessWebsiteController` contains **meta 
@@ -138,8 +136,8 @@ information** such as the page template and the data of the page excerpt:
          "description": "",
          "categories": [],
          "tags": [],
-         "icon": [],
-         "images": []
+         "icon": null,
+         "image": null
       }
    },
    "author": "2",
@@ -154,9 +152,7 @@ information** such as the page template and the data of the page excerpt:
 If the content of a page that uses the `HeadlessWebsiteController` is requested without the `.json` suffix, the
 controller will render Twig template that is set as `view` of the template of the page. 
 In this case, the data that would have been returned in case of a `.json` request is available in the twig 
-template via a `headless` variable. 
-This behaviour is compatible with the default Sulu `WebsiteController` and **allows to start a javascript application** 
-that utilizes the functionality of the SuluHeadlessBundle after the initial request of the user. 
+template via a `headless` variable.
 
 #### Resolve content data to scalar values via ContentTypeResolver
 
@@ -218,159 +214,6 @@ Example: `/api/snippet-areas/settings?includeExtension=true`
 
 `/api/analytics.json`
 
-### Reference single page application implementation
-
-The SuluHeadlessBundle is completely **frontend independent** and does not require the use of a specific technology or 
-framework. Still, the bundle contains an **independent and optional single page application setup** in the 
-`Resources/js-website` directory that allows you to quick-start your project and serves as a reference implementation
-for utilizing the bundle functionality. 
-
-The provided reference implementation builds upon **React** as rendering library and utilizes **MobX** for state 
-management. It is built around a central `viewRegistry` singleton that allows you to register React components 
-as view for specific types of resources (eg. pages of a specific template). The application contains a router that will 
-intercept the navigation of the browser, load the JSON data for the requested resource and render the respective view
-with the loaded data. 
-
-![Reference Frontend Implementation](https://user-images.githubusercontent.com/1698337/73056284-f7175100-3e8e-11ea-9e67-9371d8c65099.jpg)
-
-To use the provided single page application setup, you need to include the following lines in your Twig template to
-initialize and start the application:
-
-```twig
-{% block content %}
-    {# ... #}
-
-    {# define container element for rendering single page application #}
-    <div id="sulu-headless-container"></div>
-    
-    {# initialize application with json data of current page to prevent second request on first load #}
-    <script>window.SULU_HEADLESS_VIEW_DATA = {{ headless|json_encode|raw }};</script>
-    <script>window.SULU_HEADLESS_API_ENDPOINT = '{{ sulu_content_path('/api') }}';</script>
-    
-    {# start single page application by including built javascript code #}
-    <script src="/build/headless/js/index.js"></script>
-{% endblock %}
-```
-
-Additionally, you need to add the following files to your project to setup the single page application:
-
-<details>
-<summary>assets/headless/package.json</summary>
-
-```json
-{
-  "name": "my-frontend-application",
-  "main": "src/index.js",
-  "private": true,
-  "scripts": {
-    "build": "webpack src/index.js -o ../../public/build/headless/js/index.js --module-bind js=babel-loader -p --display-modules --sort-modules-by size",
-    "watch": "webpack src/index.js -w -o ../../public/build/headless/js/index.js  --module-bind js=babel-loader --mode=development --devtool source-map"
-  },
-  "dependencies": {
-    "sulu-headless-bundle": "file:../../vendor/sulu/headless-bundle/Resources/js-website",
-    "core-js": "^3.0.0",
-    "loglevel": "^1.0.0",
-    "mobx": "^4.0.0",
-    "mobx-react": "^5.0.0",
-    "prop-types": "^15.7.0",
-    "react": "^16.8.0",
-    "react-dom": "^16.8.0",
-    "whatwg-fetch": "^3.0.0",
-    "history": "^4.10.1"
-  },
-  "devDependencies": {
-    "@babel/core": "^7.6.0",
-    "@babel/plugin-proposal-class-properties": "^7.5.5",
-    "@babel/plugin-proposal-decorators": "^7.6.0",
-    "@babel/preset-env": "^7.6.0",
-    "@babel/preset-react": "^7.0.0",
-    "babel-eslint": "^10.0.3",
-    "babel-loader": "^8.0.6",
-    "webpack": "^4.40.2",
-    "webpack-cli": "^3.3.8"
-  }
-}
-```
-</details>
-
-<details>
-<summary>assets/headless/webpack.config.js</summary>
-
-```javascript
-const path = require('path');
-const nodeModulesPath = path.resolve(__dirname, 'node_modules');
-
-/* eslint-disable-next-line no-unused-vars */
-module.exports = (env, argv) => {
-    return {
-        resolve: {
-            modules: [nodeModulesPath, 'node_modules'],
-        },
-        resolveLoader: {
-            modules: [nodeModulesPath, 'node_modules'],
-        },
-    };
-};
-```
-</details>
-
-<details>
-<summary>assets/headless/babel.config.js</summary>
-
-```javascript
-module.exports = {
-    presets: ['@babel/env', '@babel/react'],
-    plugins: [
-        ['@babel/plugin-proposal-decorators', {'legacy': true}],
-        ['@babel/plugin-proposal-class-properties', {'loose': true}]
-    ]
-};
-```
-</details>
-
-<details>
-<summary>assets/headless/src/index.js</summary>
-
-```javascript
-import { startApp } from 'sulu-headless-bundle';
-import viewRegistry from 'sulu-headless-bundle/src/registries/viewRegistry';
-import HeadlessTemplatePage from './views/HeadlessTemplatePage';
-
-// register views for rendering page templates
-viewRegistry.add('page', 'headless-template', HeadlessTemplatePage);
-
-// register views for rendering article templates
-// viewRegistry.add('article', 'headless-template', HeadlessTemplateArticle);
-
-// start react application in specific DOM element
-startApp(document.getElementById('sulu-headless-container'));
-```
-</details>
-
-<details>
-<summary>assets/headless/src/views/HeadlessTemplatePage.js</summary>
-
-```javascript
-import React from 'react';
-import { observer } from 'mobx-react';
-
-@observer
-class HeadlessTemplatePage extends React.Component {
-    render() {
-        const serializedData = JSON.stringify(this.props.data, null, 2);
-
-        return (<pre>{ serializedData }</pre>);
-    }
-}
-
-export default HeadlessTemplatePage;
-```
-</details>
-
-Finally, you can build your frontend application by executing `npm install` and `npm run build` in the `assets/headless`
-directory.
-
-
 ## ❤️&nbsp; Support and Contributions
 
 The Sulu content management system is a **community-driven open source project** backed by various partner companies. 
@@ -378,7 +221,7 @@ We are committed to a fully transparent development process and **highly appreci
 
 In case you have questions, we are happy to welcome you in our official [Slack channel](https://sulu.io/services-and-support).
 If you found a bug or miss a specific feature, feel free to **file a new issue** with a respective title and description 
-on the the [sulu/SuluHeadlessBundle](https://github.com/sulu/SuluHeadlessBundle) repository.
+on the [sulu/SuluHeadlessBundle](https://github.com/sulu/SuluHeadlessBundle) repository.
 
 
 ## 📘&nbsp; License
