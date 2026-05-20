@@ -4,13 +4,16 @@
 
 ### Route file moved
 
-Update inside your `config/routes/sulu_headless_website.yaml` the path:
+If your project still uses `config/routes/sulu_headless_website.yml` from previous versions, rename it to `config/routes/sulu_headless_website.yaml` (or keep the `.yml` filename if you prefer). In either case, update the path inside the route file:
 
 ```diff
- sulu_headless:
-     type: portal
--    resource: "@SuluHeadlessBundle/Resources/config/routing_website.yml"
-+    resource: "@SuluHeadlessBundle/Resources/config/routing_website.yaml"
+- config/routes/sulu_headless_website.yml
++ config/routes/sulu_headless_website.yaml
+
+  sulu_headless:
+      type: portal
+-     resource: "@SuluHeadlessBundle/Resources/config/routing_website.yml"
++     resource: "@SuluHeadlessBundle/Resources/config/routing_website.yaml"
 ```
 
 ### Increased minimum Sulu version to 3.0
