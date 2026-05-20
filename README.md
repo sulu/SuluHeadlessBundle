@@ -58,12 +58,12 @@ return [
 
 ### Include the routes of the bundle
 
-Include the routes of the bundle in a new `config/routes/sulu_headless_website.yml` file in your project:
+Include the routes of the bundle in a new `config/routes/sulu_headless_website.yaml` file in your project:
 
 ```yaml
 sulu_headless:
     type: portal
-    resource: "@SuluHeadlessBundle/Resources/config/routing_website.yml"
+    resource: "@SuluHeadlessBundle/Resources/config/routing_website.yaml"
 ```
 
 ### Set the controller of your template
