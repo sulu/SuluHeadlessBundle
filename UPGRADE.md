@@ -2,6 +2,17 @@
 
 ## 3.0.0
 
+### Route file moved
+
+Update inside your `config/routes/sulu_headless_website.yaml` the path:
+
+```diff
+ sulu_headless:
+     type: portal
+-    resource: "@SuluHeadlessBundle/Resources/config/routing_website.yml"
++    resource: "@SuluHeadlessBundle/Resources/config/routing_website.yaml"
+```
+
 ### Increased minimum Sulu version to 3.0
 
 The minimum Sulu version was increased from 2.6 to 3.0.
