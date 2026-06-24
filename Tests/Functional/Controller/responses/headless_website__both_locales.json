@@ -4,8 +4,8 @@
     "type": "page",
     "template": "default",
     "content": {
-        "title": "Test",
-        "url": "/test",
+        "title": "Both Locales",
+        "url": "/both-locales",
         "article": null
     },
     "view": {
@@ -22,7 +22,7 @@
     "extension": {
         "seo": {
             "title": "",
-            "description": "seo-description",
+            "description": "",
             "keywords": "",
             "canonicalUrl": "",
             "noIndex": false,
@@ -30,7 +30,7 @@
             "hideInSitemap": false
         },
         "excerpt": {
-            "title": "excerpt-title",
+            "title": "",
             "more": "",
             "description": "",
             "categories": [],
@@ -50,7 +50,7 @@
         "en": {
             "url": "@string@",
             "locale": "en",
-            "alternate": false
+            "alternate": true
         }
     }
 }

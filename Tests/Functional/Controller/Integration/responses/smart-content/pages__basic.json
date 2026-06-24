@@ -242,5 +242,17 @@
             "noFollow": false,
             "hideInSitemap": false
         }
+    },
+    "localizations": {
+        "de": {
+            "url": "@string@",
+            "locale": "de",
+            "alternate": true
+        },
+        "en": {
+            "url": "@string@",
+            "locale": "en",
+            "alternate": false
+        }
     }
 }

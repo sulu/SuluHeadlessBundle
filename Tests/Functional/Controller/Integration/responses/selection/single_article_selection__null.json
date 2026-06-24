@@ -101,7 +101,9 @@
             "websiteCategoriesOperator": "OR",
             "websiteTags": [],
             "websiteTagsOperator": "OR",
-            "excluded": ["@uuid@"]
+            "excluded": [
+                "@uuid@"
+            ]
         },
         "blocks": []
     },
@@ -131,6 +133,18 @@
             "noIndex": false,
             "noFollow": false,
             "hideInSitemap": false
+        }
+    },
+    "localizations": {
+        "de": {
+            "url": "@string@",
+            "locale": "de",
+            "alternate": true
+        },
+        "en": {
+            "url": "@string@",
+            "locale": "en",
+            "alternate": false
         }
     }
 }

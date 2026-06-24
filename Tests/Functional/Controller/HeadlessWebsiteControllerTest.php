@@ -15,8 +15,13 @@ namespace Sulu\Bundle\HeadlessBundle\Tests\Functional\Controller;
 
 use Sulu\Bundle\HeadlessBundle\Tests\Functional\BaseTestCase;
 use Sulu\Bundle\HeadlessBundle\Tests\Traits\CreatePageTrait;
+use Sulu\Content\Domain\Model\WorkflowInterface;
+use Sulu\Messenger\Infrastructure\Symfony\Messenger\FlushMiddleware\EnableFlushStamp;
+use Sulu\Page\Application\Message\ApplyWorkflowTransitionPageMessage;
+use Sulu\Page\Application\Message\ModifyPageMessage;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Messenger\Envelope;
 
 class HeadlessWebsiteControllerTest extends BaseTestCase
 {
@@ -39,6 +44,39 @@ class HeadlessWebsiteControllerTest extends BaseTestCase
                 'title' => 'excerpt-title',
             ],
         ]);
+
+        $bothLocalesPage = self::createPage([
+            'title' => 'Both Locales',
+            'url' => '/both-locales',
+        ]);
+
+        $messageBus = static::getContainer()->get('sulu_message_bus');
+
+        $messageBus->dispatch(
+            new Envelope(
+                new ModifyPageMessage(
+                    ['uuid' => $bothLocalesPage->getUuid()],
+                    [
+                        'locale' => 'en',
+                        'template' => 'default',
+                        'title' => 'Both Locales EN',
+                        'url' => '/both-locales',
+                    ]
+                ),
+                [new EnableFlushStamp()]
+            )
+        );
+
+        $messageBus->dispatch(
+            new Envelope(
+                new ApplyWorkflowTransitionPageMessage(
+                    identifier: ['uuid' => $bothLocalesPage->getUuid()],
+                    locale: 'en',
+                    transitionName: WorkflowInterface::WORKFLOW_TRANSITION_PUBLISH
+                ),
+                [new EnableFlushStamp()]
+            )
+        );
 
         // Clear entity manager to ensure fresh state for routing
         self::getEntityManager()->clear();
@@ -88,6 +126,19 @@ class HeadlessWebsiteControllerTest extends BaseTestCase
 
         $this->assertResponseContent(
             'headless_website__test_index.json',
+            $response,
+            Response::HTTP_OK
+        );
+    }
+
+    public function testIndexActionLocalizationsAlternateTrueWhenBothLocalesExist(): void
+    {
+        $this->websiteClient->request('GET', '/both-locales.json');
+
+        $response = $this->websiteClient->getResponse();
+
+        $this->assertResponseContent(
+            'headless_website__both_locales.json',
             $response,
             Response::HTTP_OK
         );
