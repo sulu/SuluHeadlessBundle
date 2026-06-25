@@ -26,7 +26,7 @@ $config->setRiskyAllowed(true)
             'multi_line_extends_each_single_line' => true,
         ] ,
         'linebreak_after_opening_tag' => true,
-//        'declare_strict_types' => true,
+        'declare_strict_types' => true,
         'method_argument_space' => ['on_multiline' => 'ensure_fully_multiline'],
         'native_constant_invocation' => true,
         'native_function_casing' => true,

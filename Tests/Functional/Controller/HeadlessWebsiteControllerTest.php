@@ -15,6 +15,8 @@ namespace Sulu\Bundle\HeadlessBundle\Tests\Functional\Controller;
 
 use Sulu\Bundle\HeadlessBundle\Tests\Functional\BaseTestCase;
 use Sulu\Bundle\HeadlessBundle\Tests\Traits\CreatePageTrait;
+use Sulu\Component\Content\Document\WorkflowStage;
+use Sulu\Component\DocumentManager\DocumentManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -42,6 +44,23 @@ class HeadlessWebsiteControllerTest extends BaseTestCase
             ],
         ]);
 
+        $bothLocalesDocument = self::createPage([
+            'title' => 'Beide Locales',
+            'url' => '/beide-locales',
+        ]);
+
+        /** @var DocumentManagerInterface $documentManager */
+        $documentManager = static::getContainer()->get('sulu_document_manager.document_manager');
+
+        /** @var \Sulu\Bundle\PageBundle\Document\PageDocument $enDocument */
+        $enDocument = $documentManager->find($bothLocalesDocument->getPath(), 'en');
+        $enDocument->setTitle('Both Locales EN');
+        $enDocument->setResourceSegment('/both-locales');
+        $enDocument->setWorkflowStage(WorkflowStage::PUBLISHED);
+        $documentManager->persist($enDocument, 'en', ['parent_path' => '/cmf/sulu_io/contents']);
+        $documentManager->publish($enDocument, 'en');
+        $documentManager->flush();
+
         static::ensureKernelShutdown();
     }
 
@@ -58,6 +77,19 @@ class HeadlessWebsiteControllerTest extends BaseTestCase
 
         $this->assertResponseContent(
             'headless_website__test_index.json',
+            $response,
+            Response::HTTP_OK
+        );
+    }
+
+    public function testIndexActionLocalizationsAlternateTrueWhenBothLocalesExist(): void
+    {
+        $this->websiteClient->request('GET', '/beide-locales.json');
+
+        $response = $this->websiteClient->getResponse();
+
+        $this->assertResponseContent(
+            'headless_website__both_locales.json',
             $response,
             Response::HTTP_OK
         );

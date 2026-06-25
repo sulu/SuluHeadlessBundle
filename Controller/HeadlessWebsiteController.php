@@ -35,6 +35,7 @@ class HeadlessWebsiteController extends WebsiteController
         bool $partial = false
     ): Response {
         $headlessData = $this->resolveStructure($structure);
+        $headlessData['localizations'] = $this->resolveLocalizations($structure);
 
         if ('json' !== $request->getRequestFormat()) {
             return $this->renderStructure($structure, ['headless' => $headlessData], $preview, $partial);
@@ -49,6 +50,19 @@ class HeadlessWebsiteController extends WebsiteController
         }
 
         return $response;
+    }
+
+    /**
+     * @return array<string, array{locale: string, url: string, country: string, alternate: bool}>
+     */
+    private function resolveLocalizations(StructureInterface $structure): array
+    {
+        $attributes = $this->getAttributes([], $structure);
+
+        /** @var array<string, array{locale: string, url: string, country: string, alternate: bool}> $localizations */
+        $localizations = $attributes['localizations'] ?? [];
+
+        return $localizations;
     }
 
     /**

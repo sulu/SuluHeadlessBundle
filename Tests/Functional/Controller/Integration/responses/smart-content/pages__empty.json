@@ -1,5 +1,19 @@
 {
     "id": "@uuid@",
+    "localizations": {
+        "de": {
+            "alternate": true,
+            "country": "",
+            "locale": "de",
+            "url": "@string@"
+        },
+        "en": {
+            "alternate": false,
+            "country": "",
+            "locale": "en",
+            "url": "@string@"
+        }
+    },
     "nodeType": 1,
     "type": "page",
     "template": "smart-content-providers",
