@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Content;
 
+use Sulu\Bundle\HeadlessBundle\Content\StructureResolver\StructureResolverExtensionInterface;
 use Sulu\Bundle\DocumentManagerBundle\Bridge\DocumentInspector;
 use Sulu\Bundle\PageBundle\Document\BasePageDocument;
 use Sulu\Bundle\WebsiteBundle\ReferenceStore\ReferenceStoreNotExistsException;
@@ -49,16 +50,23 @@ class StructureResolver implements StructureResolverInterface
      */
     private $referenceStorePool;
 
+    /**
+     * @var StructureResolverExtensionInterface[]
+     */
+    private iterable $structureResolverExtensions;
+
     public function __construct(
         ContentResolverInterface $contentResolver,
         StructureManagerInterface $structureManager,
         DocumentInspector $documentInspector,
-        ReferenceStorePoolInterface $referenceStorePool
+        ReferenceStorePoolInterface $referenceStorePool,
+        iterable $structureResolverExtensions = []
     ) {
         $this->contentResolver = $contentResolver;
         $this->structureManager = $structureManager;
         $this->documentInspector = $documentInspector;
         $this->referenceStorePool = $referenceStorePool;
+        $this->structureResolverExtensions = $structureResolverExtensions;
     }
 
     /**
@@ -92,6 +100,10 @@ class StructureResolver implements StructureResolverInterface
 
             $data['content'][$property->getName()] = $contentView->getContent();
             $data['view'][$property->getName()] = $contentView->getView();
+        }
+
+        foreach ($this->structureResolverExtensions as $structureResolverExtension) {
+            $data[$structureResolverExtension->getKey()] = $structureResolverExtension->resolve($requestedStructure, $locale);
         }
 
         return $data;
