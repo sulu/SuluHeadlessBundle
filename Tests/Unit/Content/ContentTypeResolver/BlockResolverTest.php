@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
@@ -380,12 +381,13 @@ class BlockResolverTest extends TestCase
         $blockResolver = $this->createBlockResolver([], $requestStack);
         $result = $blockResolver->resolve($data, $this->fieldMetadata, 'en', []);
 
-        $this->assertSame('block-1', $result->getContent()[0]['id']);
+        $content = $result->getContent();
+        $this->assertIsArray($content);
+        $this->assertIsArray($content[0]);
+        $this->assertSame('block-1', $content[0]['id']);
     }
 
-    /**
-     * @dataProvider provideNonDeepLinkRequests
-     */
+    #[DataProvider('provideNonDeepLinkRequests')]
     public function testResolveOmitsIdOutsidePreview(?RequestStack $requestStack): void
     {
         $titleFieldMetadata = new FieldMetadata('title');
@@ -407,7 +409,10 @@ class BlockResolverTest extends TestCase
         $blockResolver = $this->createBlockResolver([], $requestStack);
         $result = $blockResolver->resolve($data, $this->fieldMetadata, 'en', []);
 
-        $this->assertArrayNotHasKey('id', $result->getContent()[0]);
+        $content = $result->getContent();
+        $this->assertIsArray($content);
+        $this->assertIsArray($content[0]);
+        $this->assertArrayNotHasKey('id', $content[0]);
     }
 
     /**
