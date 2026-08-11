@@ -52,6 +52,7 @@ class BlockResolver implements ContentTypeResolverInterface
 
         $content = [];
         $view = [];
+        $deepLinkEnabled = $this->isDeepLinkEnabled();
 
         foreach ($data as $i => $blockItem) {
             if (!\is_array($blockItem) || !isset($blockItem['type'])) {
@@ -85,8 +86,9 @@ class BlockResolver implements ContentTypeResolverInterface
             // Only expose the block id while rendering the admin's own preview - a public/live
             // JSON response has no admin form to navigate to, so exposing it there would just leak
             // internal ids for no benefit (mirrors PreviewDeepLinkExtension in packages/content).
-            if ($this->isDeepLinkEnabled() && isset($blockItem['_id']) && \is_string($blockItem['_id'])) {
-                $content[$i]['id'] = $blockItem['_id'];
+            // Keyed as "_id" (not "id") so it can't collide with a block type's own "id" field.
+            if ($deepLinkEnabled && isset($blockItem['_id']) && \is_string($blockItem['_id'])) {
+                $content[$i]['_id'] = $blockItem['_id'];
             }
 
             $view[$i] = [];
