@@ -384,7 +384,7 @@ class BlockResolverTest extends TestCase
         $content = $result->getContent();
         $this->assertIsArray($content);
         $this->assertIsArray($content[0]);
-        $this->assertSame('block-1', $content[0]['id']);
+        $this->assertSame('block-1', $content[0]['_id']);
     }
 
     #[DataProvider('provideNonDeepLinkRequests')]
@@ -412,7 +412,7 @@ class BlockResolverTest extends TestCase
         $content = $result->getContent();
         $this->assertIsArray($content);
         $this->assertIsArray($content[0]);
-        $this->assertArrayNotHasKey('id', $content[0]);
+        $this->assertArrayNotHasKey('_id', $content[0]);
     }
 
     /**
