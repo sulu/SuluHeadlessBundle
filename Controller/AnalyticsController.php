@@ -17,7 +17,6 @@ use JMS\Serializer\SerializerInterface;
 use Sulu\Bundle\HttpCacheBundle\Cache\SuluHttpCache;
 use Sulu\Bundle\WebsiteBundle\Entity\Analytics;
 use Sulu\Bundle\WebsiteBundle\Entity\AnalyticsRepositoryInterface;
-use Sulu\Component\Rest\RequestParametersTrait;
 use Sulu\Component\Webspace\Analyzer\Attributes\RequestAttributes;
 use Sulu\Component\Webspace\Webspace;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -26,8 +25,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class AnalyticsController
 {
-    use RequestParametersTrait;
-
     /**
      * @var SerializerInterface
      */

@@ -11,6 +11,7 @@ EOF;
 
 $finder = PhpCsFixer\Finder::create()
     ->exclude(['var/cache', 'var/coverage.php'])
+    ->notPath('Tests/Application/config/reference.php')
     ->in(__DIR__);
 
 $config = new PhpCsFixer\Config();

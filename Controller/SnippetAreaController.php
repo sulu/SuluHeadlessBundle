@@ -17,7 +17,6 @@ use Sulu\Bundle\HeadlessBundle\Content\StructureResolverInterface;
 use Sulu\Bundle\HttpCacheBundle\Cache\SuluHttpCache;
 use Sulu\Bundle\HttpCacheBundle\CacheLifetime\CacheLifetimeRequestStore;
 use Sulu\Bundle\HttpCacheBundle\ReferenceStore\ReferenceStoreInterface;
-use Sulu\Component\Rest\RequestParametersTrait;
 use Sulu\Component\Webspace\Analyzer\Attributes\RequestAttributes;
 use Sulu\Component\Webspace\Webspace;
 use Sulu\Content\Application\ContentAggregator\ContentAggregatorInterface;
@@ -33,8 +32,6 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class SnippetAreaController
 {
-    use RequestParametersTrait;
-
     public function __construct(
         private SnippetAreaRepositoryInterface $snippetAreaRepository,
         private SnippetRepositoryInterface $snippetRepository,
@@ -58,7 +55,7 @@ class SnippetAreaController
         $webspaceKey = $webspace->getKey();
         $locale = $request->getLocale();
 
-        $includeExtension = $this->getBooleanRequestParameter($request, 'includeExtension', false, false);
+        $includeExtension = 'true' === $request->query->get('includeExtension');
 
         $snippetArea = $this->snippetAreaRepository->findOneBy([
             'webspaceKey' => $webspaceKey,

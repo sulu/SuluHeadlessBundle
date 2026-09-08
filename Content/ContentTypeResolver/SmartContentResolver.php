@@ -230,7 +230,7 @@ class SmartContentResolver implements ContentTypeResolverInterface
             return 1;
         }
 
-        $page = (int) $this->requestStack->getCurrentRequest()->get($pageParameter, 1);
+        $page = $this->requestStack->getCurrentRequest()->query->getInt($pageParameter, 1);
 
         if ($page <= 1) {
             $page = 1;

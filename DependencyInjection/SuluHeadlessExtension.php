@@ -34,13 +34,13 @@ class SuluHeadlessExtension extends Extension
             $config['snippet_area']['cache_lifetime']
         );
 
-        $loader = new Loader\XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
-        $loader->load('services.xml');
-        $loader->load('controllers.xml');
-        $loader->load('content-type-resolvers.xml');
-        $loader->load('data-provider-resolvers.xml');
-        $loader->load('serializers.xml');
-        $loader->load('event-subscribers.xml');
-        $loader->load('article-resolvers.xml');
+        $loader = new Loader\PhpFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
+        $loader->load('services.php');
+        $loader->load('controllers.php');
+        $loader->load('content-type-resolvers.php');
+        $loader->load('data-provider-resolvers.php');
+        $loader->load('serializers.php');
+        $loader->load('event-subscribers.php');
+        $loader->load('article-resolvers.php');
     }
 }

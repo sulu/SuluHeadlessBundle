@@ -227,9 +227,7 @@ class SmartContentResolverTest extends TestCase
         $tag2->getId()->willReturn(333);
         $this->tagManager->findByName('tag-name-2')->willReturn($tag2->reveal());
 
-        $request = $this->prophesize(Request::class);
-        $request->get('p', 1)->willReturn(2);
-        $this->requestStack->getCurrentRequest()->willReturn($request->reveal());
+        $this->requestStack->getCurrentRequest()->willReturn(new Request(['p' => 2]));
 
         $providerResult = $this->prophesize(DataProviderResult::class);
         $providerResult->getHasNextPage()->willReturn(false);
@@ -460,9 +458,7 @@ class SmartContentResolverTest extends TestCase
         $this->tagRequestHandler->getTags('tags')->willReturn([]);
         $this->categoryRequestHandler->getCategories('categories')->willReturn([]);
 
-        $request = $this->prophesize(Request::class);
-        $request->get('p', 1)->willReturn(0);
-        $this->requestStack->getCurrentRequest()->willReturn($request->reveal());
+        $this->requestStack->getCurrentRequest()->willReturn(new Request(['p' => 0]));
 
         $providerResult = $this->prophesize(DataProviderResult::class);
         $providerResult->getHasNextPage()->willReturn(false);
@@ -502,9 +498,7 @@ class SmartContentResolverTest extends TestCase
         $this->tagRequestHandler->getTags('tags')->willReturn([]);
         $this->categoryRequestHandler->getCategories('categories')->willReturn([]);
 
-        $request = $this->prophesize(Request::class);
-        $request->get('p', 1)->willReturn(-5);
-        $this->requestStack->getCurrentRequest()->willReturn($request->reveal());
+        $this->requestStack->getCurrentRequest()->willReturn(new Request(['p' => -5]));
 
         $providerResult = $this->prophesize(DataProviderResult::class);
         $providerResult->getHasNextPage()->willReturn(false);
