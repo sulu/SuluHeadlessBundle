@@ -1,11 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Cannot cast mixed to int\\.$#"
-			count: 1
-			path: Content/ContentTypeResolver/SmartContentResolver.php
-
-		-
 			message: "#^Parameter \\#1 \\$filters of method Sulu\\\\Bundle\\\\AdminBundle\\\\SmartContent\\\\SmartContentProviderInterface\\:\\:findFlatBy\\(\\) expects array\\{categories\\: array\\<int\\>, categoryOperator\\: 'AND'\\|'OR', websiteCategories\\: array\\<string\\>, websiteCategoryOperator\\: 'AND'\\|'OR', tags\\: array\\<int\\>, tagOperator\\: 'AND'\\|'OR', websiteTags\\: array\\<string\\>, websiteTagOperator\\: 'AND'\\|'OR', \\.\\.\\.\\}, array\\<string, mixed\\> given\\.$#"
 			count: 1
 			path: Content/DataProviderResolver/AccountDataProviderResolver.php

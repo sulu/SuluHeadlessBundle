@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
@@ -26,6 +27,8 @@ use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\BlockResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Content\Application\PropertyResolver\BlockVisitor\BlockVisitorInterface;
 use Symfony\Component\DependencyInjection\Container;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class BlockResolverTest extends TestCase
 {
@@ -352,15 +355,90 @@ class BlockResolverTest extends TestCase
         $this->assertCount(1, $content);
     }
 
+    public function testResolveExposesIdDuringPreview(): void
+    {
+        $titleFieldMetadata = new FieldMetadata('title');
+        $titleFieldMetadata->setType('text_line');
+
+        $titleTypeMetadata = new FormMetadata();
+        $titleTypeMetadata->setKey('title');
+        $titleTypeMetadata->addItem($titleFieldMetadata);
+
+        $this->fieldMetadata->addType($titleTypeMetadata);
+
+        $this->contentResolver->resolve('test-123', $titleFieldMetadata, 'en', [])
+            ->willReturn(new ContentView('test-123', []));
+
+        $data = [
+            ['type' => 'title', 'settings' => [], 'title' => 'test-123', '_id' => 'block-1'],
+        ];
+
+        $request = new Request();
+        $request->attributes->set('preview', true);
+        $requestStack = new RequestStack();
+        $requestStack->push($request);
+
+        $blockResolver = $this->createBlockResolver([], $requestStack);
+        $result = $blockResolver->resolve($data, $this->fieldMetadata, 'en', []);
+
+        $content = $result->getContent();
+        $this->assertIsArray($content);
+        $this->assertIsArray($content[0]);
+        $this->assertSame('block-1', $content[0]['_id']);
+    }
+
+    #[DataProvider('provideNonDeepLinkRequests')]
+    public function testResolveOmitsIdOutsidePreview(?RequestStack $requestStack): void
+    {
+        $titleFieldMetadata = new FieldMetadata('title');
+        $titleFieldMetadata->setType('text_line');
+
+        $titleTypeMetadata = new FormMetadata();
+        $titleTypeMetadata->setKey('title');
+        $titleTypeMetadata->addItem($titleFieldMetadata);
+
+        $this->fieldMetadata->addType($titleTypeMetadata);
+
+        $this->contentResolver->resolve('test-123', $titleFieldMetadata, 'en', [])
+            ->willReturn(new ContentView('test-123', []));
+
+        $data = [
+            ['type' => 'title', 'settings' => [], 'title' => 'test-123', '_id' => 'block-1'],
+        ];
+
+        $blockResolver = $this->createBlockResolver([], $requestStack);
+        $result = $blockResolver->resolve($data, $this->fieldMetadata, 'en', []);
+
+        $content = $result->getContent();
+        $this->assertIsArray($content);
+        $this->assertIsArray($content[0]);
+        $this->assertArrayNotHasKey('_id', $content[0]);
+    }
+
+    /**
+     * @return iterable<string, array{RequestStack|null}>
+     */
+    public static function provideNonDeepLinkRequests(): iterable
+    {
+        yield 'no request stack' => [null];
+        yield 'no active request' => [new RequestStack()];
+
+        $notPreviewRequest = new Request();
+        $notPreviewStack = new RequestStack();
+        $notPreviewStack->push($notPreviewRequest);
+        yield 'not a preview request' => [$notPreviewStack];
+    }
+
     /**
      * @param BlockVisitorInterface[] $blockVisitors
      */
-    private function createBlockResolver(array $blockVisitors = []): BlockResolver
+    private function createBlockResolver(array $blockVisitors = [], ?RequestStack $requestStack = null): BlockResolver
     {
         return new BlockResolver(
             $this->contentResolver->reveal(),
             $this->metadataProviderRegistry,
-            new \ArrayIterator($blockVisitors)
+            new \ArrayIterator($blockVisitors),
+            $requestStack
         );
     }
 }

@@ -20,6 +20,7 @@ use Sulu\Bundle\AdminBundle\Metadata\MetadataProviderRegistry;
 use Sulu\Bundle\HeadlessBundle\Content\ContentResolverInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Content\Application\PropertyResolver\BlockVisitor\BlockVisitorInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class BlockResolver implements ContentTypeResolverInterface
 {
@@ -35,6 +36,7 @@ class BlockResolver implements ContentTypeResolverInterface
         private ContentResolverInterface $contentResolver,
         private MetadataProviderRegistry $metadataProviderRegistry,
         private iterable $blockVisitors = [],
+        private ?RequestStack $requestStack = null,
     ) {
     }
 
@@ -50,6 +52,7 @@ class BlockResolver implements ContentTypeResolverInterface
 
         $content = [];
         $view = [];
+        $deepLinkEnabled = $this->isDeepLinkEnabled();
 
         foreach ($data as $i => $blockItem) {
             if (!\is_array($blockItem) || !isset($blockItem['type'])) {
@@ -79,6 +82,15 @@ class BlockResolver implements ContentTypeResolverInterface
                 'type' => $blockTypeName,
                 'settings' => $blockItem['settings'] ?? [],
             ];
+
+            // Only expose the block id while rendering the admin's own preview - a public/live
+            // JSON response has no admin form to navigate to, so exposing it there would just leak
+            // internal ids for no benefit (mirrors PreviewDeepLinkExtension in the PreviewBundle).
+            // Keyed as "_id" (not "id") so it can't collide with a block type's own "id" field.
+            if ($deepLinkEnabled && isset($blockItem['_id']) && \is_string($blockItem['_id'])) {
+                $content[$i]['_id'] = $blockItem['_id'];
+            }
+
             $view[$i] = [];
 
             $blockFieldMetadata = $blockTypeMetadata->getFlatFieldMetadata();
@@ -108,6 +120,13 @@ class BlockResolver implements ContentTypeResolverInterface
         }
 
         return $typedFormMetadata->getForms();
+    }
+
+    private function isDeepLinkEnabled(): bool
+    {
+        $request = $this->requestStack?->getCurrentRequest();
+
+        return null !== $request && true === $request->attributes->get('preview', false);
     }
 
     private function getGlobalBlockType(FormMetadata $formMetadata): ?string

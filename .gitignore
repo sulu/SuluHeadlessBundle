@@ -21,6 +21,7 @@ var
 
 # tests
 Tests/Application/var
+Tests/Application/config/reference.php
 Tests/Application/.env.local
 Tests/Application/.env.*.local
 
