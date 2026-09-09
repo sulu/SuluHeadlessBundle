@@ -85,7 +85,7 @@ class BlockResolver implements ContentTypeResolverInterface
 
             // Only expose the block id while rendering the admin's own preview - a public/live
             // JSON response has no admin form to navigate to, so exposing it there would just leak
-            // internal ids for no benefit (mirrors PreviewDeepLinkExtension in packages/content).
+            // internal ids for no benefit (mirrors PreviewDeepLinkExtension in the PreviewBundle).
             // Keyed as "_id" (not "id") so it can't collide with a block type's own "id" field.
             if ($deepLinkEnabled && isset($blockItem['_id']) && \is_string($blockItem['_id'])) {
                 $content[$i]['_id'] = $blockItem['_id'];
@@ -125,11 +125,8 @@ class BlockResolver implements ContentTypeResolverInterface
     private function isDeepLinkEnabled(): bool
     {
         $request = $this->requestStack?->getCurrentRequest();
-        if (!$request || true !== $request->attributes->get('preview', false)) {
-            return false;
-        }
 
-        return false !== $request->attributes->get('sulu_preview_deep_link', true);
+        return null !== $request && true === $request->attributes->get('preview', false);
     }
 
     private function getGlobalBlockType(FormMetadata $formMetadata): ?string

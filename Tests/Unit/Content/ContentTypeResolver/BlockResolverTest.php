@@ -427,13 +427,6 @@ class BlockResolverTest extends TestCase
         $notPreviewStack = new RequestStack();
         $notPreviewStack->push($notPreviewRequest);
         yield 'not a preview request' => [$notPreviewStack];
-
-        $deepLinkDisabledRequest = new Request();
-        $deepLinkDisabledRequest->attributes->set('preview', true);
-        $deepLinkDisabledRequest->attributes->set('sulu_preview_deep_link', false);
-        $deepLinkDisabledStack = new RequestStack();
-        $deepLinkDisabledStack->push($deepLinkDisabledRequest);
-        yield 'deep link disabled' => [$deepLinkDisabledStack];
     }
 
     /**
