@@ -26,6 +26,7 @@
             "aiDisclosureDisabled": false,
             "aiDisclosureIconVariant": "auto",
             "origin": "unknown",
+            "mediaLanguages": "@array@.optional()",
             "collection": "@integer@",
             "type": "image",
             "categories": [],

@@ -152,6 +152,7 @@
                         "aiDisclosureDisabled": false,
                         "aiDisclosureIconVariant": "auto",
                         "origin": "unknown",
+                        "mediaLanguages": "@array@.optional()",
                         "tags": [],
                         "url": "@string@",
                         "changed": "@string@.isDateTime()",
