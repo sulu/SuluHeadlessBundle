@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
@@ -28,6 +29,8 @@ use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializerInterface;
 use Sulu\Bundle\MediaBundle\Api\Media;
 use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
 use Symfony\Component\DependencyInjection\Container;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class ImageMapResolverTest extends TestCase
 {
@@ -76,13 +79,14 @@ class ImageMapResolverTest extends TestCase
         $this->imageMapResolver = $this->createResolver();
     }
 
-    private function createResolver(): ImageMapResolver
+    private function createResolver(?RequestStack $requestStack = null): ImageMapResolver
     {
         return new ImageMapResolver(
             $this->mediaManager->reveal(),
             $this->mediaSerializer->reveal(),
             $this->contentResolver->reveal(),
             $this->metadataProviderRegistry,
+            $requestStack,
         );
     }
 
@@ -404,5 +408,70 @@ class ImageMapResolverTest extends TestCase
                 ['type' => 'basic', 'title' => 'Test'],
             ],
         ], $result->getContent());
+    }
+
+    public function testResolveExposesIdDuringPreview(): void
+    {
+        $request = new Request();
+        $request->attributes->set('preview', true);
+        $requestStack = new RequestStack();
+        $requestStack->push($request);
+
+        $result = $this->createResolver($requestStack)->resolve($this->createHotspotData(), $this->fieldMetadata, 'en');
+
+        $content = $result->getContent();
+        self::assertIsArray($content);
+        self::assertSame('hotspot-1', $content['hotspots'][0]['_id']);
+        self::assertSame('hotspot-2', $content['hotspots'][1]['_id']);
+    }
+
+    #[DataProvider('provideNonDeepLinkRequests')]
+    public function testResolveOmitsIdOutsidePreview(?RequestStack $requestStack): void
+    {
+        $result = $this->createResolver($requestStack)->resolve($this->createHotspotData(), $this->fieldMetadata, 'en');
+
+        $content = $result->getContent();
+        self::assertIsArray($content);
+        self::assertArrayNotHasKey('_id', $content['hotspots'][0]);
+        self::assertArrayNotHasKey('_id', $content['hotspots'][1]);
+    }
+
+    /**
+     * @return iterable<string, array{RequestStack|null}>
+     */
+    public static function provideNonDeepLinkRequests(): iterable
+    {
+        yield 'no request stack' => [null];
+        yield 'no active request' => [new RequestStack()];
+
+        $notPreviewRequest = new Request();
+        $notPreviewStack = new RequestStack();
+        $notPreviewStack->push($notPreviewRequest);
+        yield 'not a preview request' => [$notPreviewStack];
+    }
+
+    /**
+     * Returns one hotspot of a known and one of an unknown type, so both output paths are covered.
+     *
+     * @return array<string, mixed>
+     */
+    private function createHotspotData(): array
+    {
+        $basicType = new FormMetadata();
+        $basicType->setKey('basic');
+        $titleField = new FieldMetadata('title');
+        $titleField->setType('text_line');
+        $basicType->addItem($titleField);
+        $this->fieldMetadata->addType($basicType);
+
+        $this->contentResolver->resolve('Test', $titleField, 'en', [])
+            ->willReturn(new ContentView('Test', []));
+
+        return [
+            'hotspots' => [
+                ['type' => 'basic', 'title' => 'Test', '_id' => 'hotspot-1'],
+                ['type' => 'unknown_type', 'title' => 'Test', '_id' => 'hotspot-2'],
+            ],
+        ];
     }
 }
