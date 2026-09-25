@@ -21,7 +21,6 @@ use Sulu\Bundle\HeadlessBundle\Content\ContentResolverInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializerInterface;
 use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
 
 class ImageMapResolver implements ContentTypeResolverInterface
 {
@@ -35,7 +34,6 @@ class ImageMapResolver implements ContentTypeResolverInterface
         private MediaSerializerInterface $mediaSerializer,
         private ContentResolverInterface $contentResolver,
         private MetadataProviderRegistry $metadataProviderRegistry,
-        private ?RequestStack $requestStack = null,
     ) {
     }
 
@@ -59,7 +57,7 @@ class ImageMapResolver implements ContentTypeResolverInterface
 
         $hotspotTypes = $fieldMetadata->getTypes();
         $globalBlocksMetadata = $this->getGlobalBlocksMetadata($locale);
-        $deepLinkEnabled = $this->isDeepLinkEnabled();
+        $exposeHotspotId = $this->shouldExposeHotspotId($fieldMetadata, $attributes);
 
         foreach ($hotspots as $hotspot) {
             if (!\is_array($hotspot) || !isset($hotspot['type'])) {
@@ -67,7 +65,7 @@ class ImageMapResolver implements ContentTypeResolverInterface
             }
 
             // Only expose the hotspot id while rendering the admin's own preview, same as BlockResolver.
-            if (!$deepLinkEnabled) {
+            if (!$exposeHotspotId || !\is_string($hotspot['_id'] ?? null)) {
                 unset($hotspot['_id']);
             }
 
@@ -117,11 +115,13 @@ class ImageMapResolver implements ContentTypeResolverInterface
         return $typedFormMetadata->getForms();
     }
 
-    private function isDeepLinkEnabled(): bool
+    /**
+     * @param array<string, mixed> $attributes
+     */
+    private function shouldExposeHotspotId(FieldMetadata $fieldMetadata, array $attributes): bool
     {
-        $request = $this->requestStack?->getCurrentRequest();
-
-        return null !== $request && true === $request->attributes->get('preview', false);
+        return true === ($attributes['preview'] ?? false)
+            && true === $fieldMetadata->findOption('block_id_generator')?->getValue();
     }
 
     private function getGlobalBlockType(FormMetadata $formMetadata): ?string

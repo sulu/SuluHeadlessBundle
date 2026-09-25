@@ -67,6 +67,9 @@
                 <title lang="en">Image Map</title>
                 <title lang="de">Image Map</title>
             </meta>
+            <params>
+                <param name="block_id_generator" value="true"/>
+            </params>
             <types>
                 <type name="basic">
                     <meta>

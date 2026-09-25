@@ -136,7 +136,6 @@ return static function (ContainerConfigurator $container) {
             new Reference('sulu_headless.content_resolver'),
             new Reference('sulu_admin.metadata_provider_registry'),
             tagged_iterator('sulu_content.block_visitor'),
-            new Reference('request_stack'),
         ])
         ->tag('sulu_headless.content_type_resolver');
 
@@ -195,7 +194,6 @@ return static function (ContainerConfigurator $container) {
             new Reference('sulu_headless.serializer.media'),
             new Reference('sulu_headless.content_resolver'),
             new Reference('sulu_admin.metadata_provider_registry'),
-            new Reference('request_stack'),
         ])
         ->tag('sulu_headless.content_type_resolver');
 

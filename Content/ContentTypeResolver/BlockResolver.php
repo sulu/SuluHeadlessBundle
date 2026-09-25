@@ -20,7 +20,6 @@ use Sulu\Bundle\AdminBundle\Metadata\MetadataProviderRegistry;
 use Sulu\Bundle\HeadlessBundle\Content\ContentResolverInterface;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Content\Application\PropertyResolver\BlockVisitor\BlockVisitorInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
 
 class BlockResolver implements ContentTypeResolverInterface
 {
@@ -36,7 +35,6 @@ class BlockResolver implements ContentTypeResolverInterface
         private ContentResolverInterface $contentResolver,
         private MetadataProviderRegistry $metadataProviderRegistry,
         private iterable $blockVisitors = [],
-        private ?RequestStack $requestStack = null,
     ) {
     }
 
@@ -52,7 +50,7 @@ class BlockResolver implements ContentTypeResolverInterface
 
         $content = [];
         $view = [];
-        $deepLinkEnabled = $this->isDeepLinkEnabled();
+        $exposeBlockId = $this->shouldExposeBlockId($fieldMetadata, $attributes);
 
         foreach ($data as $i => $blockItem) {
             if (!\is_array($blockItem) || !isset($blockItem['type'])) {
@@ -84,7 +82,7 @@ class BlockResolver implements ContentTypeResolverInterface
             ];
 
             // Only exposed in the preview, as "_id" to not collide with a block's own "id" field.
-            if ($deepLinkEnabled && isset($blockItem['_id']) && \is_string($blockItem['_id'])) {
+            if ($exposeBlockId && isset($blockItem['_id']) && \is_string($blockItem['_id'])) {
                 $content[$i]['_id'] = $blockItem['_id'];
             }
 
@@ -119,11 +117,13 @@ class BlockResolver implements ContentTypeResolverInterface
         return $typedFormMetadata->getForms();
     }
 
-    private function isDeepLinkEnabled(): bool
+    /**
+     * @param array<string, mixed> $attributes
+     */
+    private function shouldExposeBlockId(FieldMetadata $fieldMetadata, array $attributes): bool
     {
-        $request = $this->requestStack?->getCurrentRequest();
-
-        return null !== $request && true === $request->attributes->get('preview', false);
+        return true === ($attributes['preview'] ?? false)
+            && true === $fieldMetadata->findOption('block_id_generator')?->getValue();
     }
 
     private function getGlobalBlockType(FormMetadata $formMetadata): ?string

@@ -52,6 +52,7 @@ return static function (ContainerConfigurator $container) {
             new Reference('sulu_headless.content_resolver'),
             new Reference('sulu_http_cache.reference_store'),
             new Reference('sulu_headless.extension_resolver_provider'),
+            new Reference('request_stack'),
         ]);
     $services->alias(StructureResolverInterface::class, 'sulu_headless.structure_resolver');
 

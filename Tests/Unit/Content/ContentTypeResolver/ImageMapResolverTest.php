@@ -19,6 +19,7 @@ use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FormMetadata;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\OptionMetadata;
 use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\TypedFormMetadata;
 use Sulu\Bundle\AdminBundle\Metadata\MetadataProviderInterface;
 use Sulu\Bundle\AdminBundle\Metadata\MetadataProviderRegistry;
@@ -29,8 +30,6 @@ use Sulu\Bundle\HeadlessBundle\Content\Serializer\MediaSerializerInterface;
 use Sulu\Bundle\MediaBundle\Api\Media;
 use Sulu\Bundle\MediaBundle\Media\Manager\MediaManagerInterface;
 use Symfony\Component\DependencyInjection\Container;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
 
 class ImageMapResolverTest extends TestCase
 {
@@ -79,14 +78,13 @@ class ImageMapResolverTest extends TestCase
         $this->imageMapResolver = $this->createResolver();
     }
 
-    private function createResolver(?RequestStack $requestStack = null): ImageMapResolver
+    private function createResolver(): ImageMapResolver
     {
         return new ImageMapResolver(
             $this->mediaManager->reveal(),
             $this->mediaSerializer->reveal(),
             $this->contentResolver->reveal(),
             $this->metadataProviderRegistry,
-            $requestStack,
         );
     }
 
@@ -412,12 +410,11 @@ class ImageMapResolverTest extends TestCase
 
     public function testResolveExposesIdDuringPreview(): void
     {
-        $request = new Request();
-        $request->attributes->set('preview', true);
-        $requestStack = new RequestStack();
-        $requestStack->push($request);
+        $attributes = ['preview' => true];
+        $data = $this->createHotspotData($attributes);
+        $this->setBlockIdGeneratorOption(true);
 
-        $result = $this->createResolver($requestStack)->resolve($this->createHotspotData(), $this->fieldMetadata, 'en');
+        $result = $this->imageMapResolver->resolve($data, $this->fieldMetadata, 'en', $attributes);
 
         $content = $result->getContent();
         self::assertIsArray($content);
@@ -425,10 +422,16 @@ class ImageMapResolverTest extends TestCase
         self::assertSame('hotspot-2', $content['hotspots'][1]['_id']);
     }
 
-    #[DataProvider('provideNonDeepLinkRequests')]
-    public function testResolveOmitsIdOutsidePreview(?RequestStack $requestStack): void
+    /**
+     * @param array<string, mixed> $attributes
+     */
+    #[DataProvider('provideIdOmittedCases')]
+    public function testResolveOmitsId(array $attributes, ?bool $blockIdGenerator): void
     {
-        $result = $this->createResolver($requestStack)->resolve($this->createHotspotData(), $this->fieldMetadata, 'en');
+        $data = $this->createHotspotData($attributes);
+        $this->setBlockIdGeneratorOption($blockIdGenerator);
+
+        $result = $this->imageMapResolver->resolve($data, $this->fieldMetadata, 'en', $attributes);
 
         $content = $result->getContent();
         self::assertIsArray($content);
@@ -437,25 +440,36 @@ class ImageMapResolverTest extends TestCase
     }
 
     /**
-     * @return iterable<string, array{RequestStack|null}>
+     * @return iterable<string, array{array<string, mixed>, bool|null}>
      */
-    public static function provideNonDeepLinkRequests(): iterable
+    public static function provideIdOmittedCases(): iterable
     {
-        yield 'no request stack' => [null];
-        yield 'no active request' => [new RequestStack()];
+        yield 'no preview attribute' => [[], true];
+        yield 'not a preview' => [['preview' => false], true];
+        yield 'block id generator disabled' => [['preview' => true], false];
+        yield 'block id generator not set' => [['preview' => true], null];
+    }
 
-        $notPreviewRequest = new Request();
-        $notPreviewStack = new RequestStack();
-        $notPreviewStack->push($notPreviewRequest);
-        yield 'not a preview request' => [$notPreviewStack];
+    private function setBlockIdGeneratorOption(?bool $value): void
+    {
+        if (null === $value) {
+            return;
+        }
+
+        $option = new OptionMetadata();
+        $option->setName('block_id_generator');
+        $option->setValue($value);
+        $this->fieldMetadata->addOption($option);
     }
 
     /**
      * Returns one hotspot of a known and one of an unknown type, so both output paths are covered.
      *
+     * @param array<string, mixed> $attributes
+     *
      * @return array<string, mixed>
      */
-    private function createHotspotData(): array
+    private function createHotspotData(array $attributes): array
     {
         $basicType = new FormMetadata();
         $basicType->setKey('basic');
@@ -464,7 +478,7 @@ class ImageMapResolverTest extends TestCase
         $basicType->addItem($titleField);
         $this->fieldMetadata->addType($basicType);
 
-        $this->contentResolver->resolve('Test', $titleField, 'en', [])
+        $this->contentResolver->resolve('Test', $titleField, 'en', $attributes)
             ->willReturn(new ContentView('Test', []));
 
         return [
