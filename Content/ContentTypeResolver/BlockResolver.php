@@ -50,6 +50,7 @@ class BlockResolver implements ContentTypeResolverInterface
 
         $content = [];
         $view = [];
+        $exposeBlockId = $this->shouldExposeBlockId($fieldMetadata, $attributes);
 
         foreach ($data as $i => $blockItem) {
             if (!\is_array($blockItem) || !isset($blockItem['type'])) {
@@ -79,6 +80,12 @@ class BlockResolver implements ContentTypeResolverInterface
                 'type' => $blockTypeName,
                 'settings' => $blockItem['settings'] ?? [],
             ];
+
+            // Only exposed in the preview, as "_id" to not collide with a block's own "id" field.
+            if ($exposeBlockId && isset($blockItem['_id']) && \is_string($blockItem['_id'])) {
+                $content[$i]['_id'] = $blockItem['_id'];
+            }
+
             $view[$i] = [];
 
             $blockFieldMetadata = $blockTypeMetadata->getFlatFieldMetadata();
@@ -108,6 +115,15 @@ class BlockResolver implements ContentTypeResolverInterface
         }
 
         return $typedFormMetadata->getForms();
+    }
+
+    /**
+     * @param array<string, mixed> $attributes
+     */
+    private function shouldExposeBlockId(FieldMetadata $fieldMetadata, array $attributes): bool
+    {
+        return true === ($attributes['preview'] ?? false)
+            && true === $fieldMetadata->findOption('block_id_generator')?->getValue();
     }
 
     private function getGlobalBlockType(FormMetadata $formMetadata): ?string

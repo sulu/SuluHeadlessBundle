@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
@@ -33,6 +34,8 @@ use Sulu\Content\Application\ContentDataMapper\DataMapper\TemplateDataMapper;
 use Sulu\Page\Domain\Model\Page;
 use Sulu\Page\Domain\Model\PageDimensionContent;
 use Sulu\Route\Domain\Model\Route;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class StructureResolverTest extends TestCase
 {
@@ -55,6 +58,10 @@ class StructureResolverTest extends TestCase
 
     private StructureResolver $structureResolver;
 
+    private ExtensionResolverProvider $extensionResolverProvider;
+
+    private RequestStack $requestStack;
+
     protected function setUp(): void
     {
         $this->formMetadataProvider = $this->prophesize(MetadataProviderInterface::class);
@@ -72,14 +79,87 @@ class StructureResolverTest extends TestCase
         );
 
         // Create provider with resolvers
-        $extensionResolverProvider = new ExtensionResolverProvider([$excerptResolver, $seoResolver]);
+        $this->extensionResolverProvider = new ExtensionResolverProvider([$excerptResolver, $seoResolver]);
+        $this->requestStack = new RequestStack();
 
         $this->structureResolver = new StructureResolver(
             $this->formMetadataProvider->reveal(),
             $this->contentResolver->reveal(),
             $this->referenceStore->reveal(),
-            $extensionResolverProvider,
+            $this->extensionResolverProvider,
+            $this->requestStack,
         );
+    }
+
+    public function testConstructWithoutRequestStackIsDeprecated(): void
+    {
+        $deprecations = [];
+        \set_error_handler(static function (int $errorNumber, string $message) use (&$deprecations): bool {
+            $deprecations[] = $message;
+
+            return true;
+        }, \E_USER_DEPRECATED);
+
+        try {
+            new StructureResolver(
+                $this->formMetadataProvider->reveal(),
+                $this->contentResolver->reveal(),
+                $this->referenceStore->reveal(),
+                $this->extensionResolverProvider,
+            );
+        } finally {
+            \restore_error_handler();
+        }
+
+        $this->assertSame([
+            'Since sulu/headless-bundle 3.1: Instantiating the StructureResolver class without the $requestStack argument is deprecated.',
+        ], $deprecations);
+    }
+
+    #[DataProvider('providePreviewAttribute')]
+    public function testResolvePassesPreviewAttribute(?Request $request, bool $expectedPreview): void
+    {
+        if ($request) {
+            $this->requestStack->push($request);
+        }
+
+        $page = new Page('123-123-123');
+        $page->setWebspaceKey('sulu_io');
+        $page->setCreated(new \DateTimeImmutable('2024-01-01 10:00:00'));
+        $page->setChanged(new \DateTimeImmutable('2024-01-02 15:00:00'));
+
+        $dimensionContent = new PageDimensionContent($page);
+        $dimensionContent->setTemplateKey('default');
+        $dimensionContent->setTemplateData(['title' => 'Test']);
+
+        $titleField = new FieldMetadata('title');
+        $titleField->setType('text_line');
+
+        $formMetadata = $this->prophesize(FormMetadata::class);
+        $formMetadata->getFlatFieldMetadata()->willReturn(['title' => $titleField]);
+
+        $typedFormMetadata = $this->prophesize(TypedFormMetadata::class);
+        $typedFormMetadata->getForms()->willReturn(['default' => $formMetadata->reveal()]);
+
+        $this->formMetadataProvider->getMetadata('page', 'en', [])->willReturn($typedFormMetadata->reveal());
+
+        $this->contentResolver->resolve('Test', $titleField, 'en', Argument::that(static function ($attributes) use ($expectedPreview) {
+            return \is_array($attributes) && $expectedPreview === $attributes['preview'];
+        }))->willReturn(new ContentView('Test', []))->shouldBeCalled();
+
+        $this->referenceStore->add('123-123-123', 'pages')->shouldBeCalled();
+
+        $this->structureResolver->resolve($dimensionContent, 'en', false);
+    }
+
+    /**
+     * @return iterable<string, array{Request|null, bool}>
+     */
+    public static function providePreviewAttribute(): iterable
+    {
+        yield 'no request' => [null, false];
+        yield 'not a preview request' => [new Request(), false];
+        yield 'preview request' => [new Request([], [], ['preview' => true]), true];
     }
 
     public function testResolve(): void

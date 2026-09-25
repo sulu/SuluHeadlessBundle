@@ -13,11 +13,13 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FormMetadata;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\OptionMetadata;
 use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\TypedFormMetadata;
 use Sulu\Bundle\AdminBundle\Metadata\MetadataProviderInterface;
 use Sulu\Bundle\AdminBundle\Metadata\MetadataProviderRegistry;
@@ -404,5 +406,86 @@ class ImageMapResolverTest extends TestCase
                 ['type' => 'basic', 'title' => 'Test'],
             ],
         ], $result->getContent());
+    }
+
+    public function testResolveExposesIdDuringPreview(): void
+    {
+        $attributes = ['preview' => true];
+        $data = $this->createHotspotData($attributes);
+        $this->setBlockIdGeneratorOption(true);
+
+        $result = $this->imageMapResolver->resolve($data, $this->fieldMetadata, 'en', $attributes);
+
+        $content = $result->getContent();
+        self::assertIsArray($content);
+        self::assertSame('hotspot-1', $content['hotspots'][0]['_id']);
+        self::assertSame('hotspot-2', $content['hotspots'][1]['_id']);
+    }
+
+    /**
+     * @param array<string, mixed> $attributes
+     */
+    #[DataProvider('provideIdOmittedCases')]
+    public function testResolveOmitsId(array $attributes, ?bool $blockIdGenerator): void
+    {
+        $data = $this->createHotspotData($attributes);
+        $this->setBlockIdGeneratorOption($blockIdGenerator);
+
+        $result = $this->imageMapResolver->resolve($data, $this->fieldMetadata, 'en', $attributes);
+
+        $content = $result->getContent();
+        self::assertIsArray($content);
+        self::assertArrayNotHasKey('_id', $content['hotspots'][0]);
+        self::assertArrayNotHasKey('_id', $content['hotspots'][1]);
+    }
+
+    /**
+     * @return iterable<string, array{array<string, mixed>, bool|null}>
+     */
+    public static function provideIdOmittedCases(): iterable
+    {
+        yield 'no preview attribute' => [[], true];
+        yield 'not a preview' => [['preview' => false], true];
+        yield 'block id generator disabled' => [['preview' => true], false];
+        yield 'block id generator not set' => [['preview' => true], null];
+    }
+
+    private function setBlockIdGeneratorOption(?bool $value): void
+    {
+        if (null === $value) {
+            return;
+        }
+
+        $option = new OptionMetadata();
+        $option->setName('block_id_generator');
+        $option->setValue($value);
+        $this->fieldMetadata->addOption($option);
+    }
+
+    /**
+     * Returns one hotspot of a known and one of an unknown type, so both output paths are covered.
+     *
+     * @param array<string, mixed> $attributes
+     *
+     * @return array<string, mixed>
+     */
+    private function createHotspotData(array $attributes): array
+    {
+        $basicType = new FormMetadata();
+        $basicType->setKey('basic');
+        $titleField = new FieldMetadata('title');
+        $titleField->setType('text_line');
+        $basicType->addItem($titleField);
+        $this->fieldMetadata->addType($basicType);
+
+        $this->contentResolver->resolve('Test', $titleField, 'en', $attributes)
+            ->willReturn(new ContentView('Test', []));
+
+        return [
+            'hotspots' => [
+                ['type' => 'basic', 'title' => 'Test', '_id' => 'hotspot-1'],
+                ['type' => 'unknown_type', 'title' => 'Test', '_id' => 'hotspot-2'],
+            ],
+        ];
     }
 }
