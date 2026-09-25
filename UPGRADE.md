@@ -1,5 +1,11 @@
 # Upgrade
 
+## 3.1.0
+
+### StructureResolver requires the request stack
+
+The `StructureResolver` has a new `$requestStack` constructor argument. Instantiating it without the argument is deprecated.
+
 ## 3.0.0
 
 ### Route file moved

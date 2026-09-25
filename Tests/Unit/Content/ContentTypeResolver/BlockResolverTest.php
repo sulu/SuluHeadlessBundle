@@ -19,6 +19,7 @@ use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FormMetadata;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\OptionMetadata;
 use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\TypedFormMetadata;
 use Sulu\Bundle\AdminBundle\Metadata\MetadataProviderInterface;
 use Sulu\Bundle\AdminBundle\Metadata\MetadataProviderRegistry;
@@ -27,8 +28,6 @@ use Sulu\Bundle\HeadlessBundle\Content\ContentTypeResolver\BlockResolver;
 use Sulu\Bundle\HeadlessBundle\Content\ContentView;
 use Sulu\Content\Application\PropertyResolver\BlockVisitor\BlockVisitorInterface;
 use Symfony\Component\DependencyInjection\Container;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
 
 class BlockResolverTest extends TestCase
 {
@@ -357,29 +356,11 @@ class BlockResolverTest extends TestCase
 
     public function testResolveExposesIdDuringPreview(): void
     {
-        $titleFieldMetadata = new FieldMetadata('title');
-        $titleFieldMetadata->setType('text_line');
+        $attributes = ['preview' => true];
+        $data = $this->createBlockDataWithId($attributes);
+        $this->setBlockIdGeneratorOption(true);
 
-        $titleTypeMetadata = new FormMetadata();
-        $titleTypeMetadata->setKey('title');
-        $titleTypeMetadata->addItem($titleFieldMetadata);
-
-        $this->fieldMetadata->addType($titleTypeMetadata);
-
-        $this->contentResolver->resolve('test-123', $titleFieldMetadata, 'en', [])
-            ->willReturn(new ContentView('test-123', []));
-
-        $data = [
-            ['type' => 'title', 'settings' => [], 'title' => 'test-123', '_id' => 'block-1'],
-        ];
-
-        $request = new Request();
-        $request->attributes->set('preview', true);
-        $requestStack = new RequestStack();
-        $requestStack->push($request);
-
-        $blockResolver = $this->createBlockResolver([], $requestStack);
-        $result = $blockResolver->resolve($data, $this->fieldMetadata, 'en', []);
+        $result = $this->createBlockResolver()->resolve($data, $this->fieldMetadata, 'en', $attributes);
 
         $content = $result->getContent();
         $this->assertIsArray($content);
@@ -387,27 +368,16 @@ class BlockResolverTest extends TestCase
         $this->assertSame('block-1', $content[0]['_id']);
     }
 
-    #[DataProvider('provideNonDeepLinkRequests')]
-    public function testResolveOmitsIdOutsidePreview(?RequestStack $requestStack): void
+    /**
+     * @param array<string, mixed> $attributes
+     */
+    #[DataProvider('provideIdOmittedCases')]
+    public function testResolveOmitsId(array $attributes, ?bool $blockIdGenerator): void
     {
-        $titleFieldMetadata = new FieldMetadata('title');
-        $titleFieldMetadata->setType('text_line');
+        $data = $this->createBlockDataWithId($attributes);
+        $this->setBlockIdGeneratorOption($blockIdGenerator);
 
-        $titleTypeMetadata = new FormMetadata();
-        $titleTypeMetadata->setKey('title');
-        $titleTypeMetadata->addItem($titleFieldMetadata);
-
-        $this->fieldMetadata->addType($titleTypeMetadata);
-
-        $this->contentResolver->resolve('test-123', $titleFieldMetadata, 'en', [])
-            ->willReturn(new ContentView('test-123', []));
-
-        $data = [
-            ['type' => 'title', 'settings' => [], 'title' => 'test-123', '_id' => 'block-1'],
-        ];
-
-        $blockResolver = $this->createBlockResolver([], $requestStack);
-        $result = $blockResolver->resolve($data, $this->fieldMetadata, 'en', []);
+        $result = $this->createBlockResolver()->resolve($data, $this->fieldMetadata, 'en', $attributes);
 
         $content = $result->getContent();
         $this->assertIsArray($content);
@@ -416,29 +386,61 @@ class BlockResolverTest extends TestCase
     }
 
     /**
-     * @return iterable<string, array{RequestStack|null}>
+     * @return iterable<string, array{array<string, mixed>, bool|null}>
      */
-    public static function provideNonDeepLinkRequests(): iterable
+    public static function provideIdOmittedCases(): iterable
     {
-        yield 'no request stack' => [null];
-        yield 'no active request' => [new RequestStack()];
+        yield 'no preview attribute' => [[], true];
+        yield 'not a preview' => [['preview' => false], true];
+        yield 'block id generator disabled' => [['preview' => true], false];
+        yield 'block id generator not set' => [['preview' => true], null];
+    }
 
-        $notPreviewRequest = new Request();
-        $notPreviewStack = new RequestStack();
-        $notPreviewStack->push($notPreviewRequest);
-        yield 'not a preview request' => [$notPreviewStack];
+    /**
+     * @param array<string, mixed> $attributes
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function createBlockDataWithId(array $attributes): array
+    {
+        $titleFieldMetadata = new FieldMetadata('title');
+        $titleFieldMetadata->setType('text_line');
+
+        $titleTypeMetadata = new FormMetadata();
+        $titleTypeMetadata->setKey('title');
+        $titleTypeMetadata->addItem($titleFieldMetadata);
+
+        $this->fieldMetadata->addType($titleTypeMetadata);
+
+        $this->contentResolver->resolve('test-123', $titleFieldMetadata, 'en', $attributes)
+            ->willReturn(new ContentView('test-123', []));
+
+        return [
+            ['type' => 'title', 'settings' => [], 'title' => 'test-123', '_id' => 'block-1'],
+        ];
+    }
+
+    private function setBlockIdGeneratorOption(?bool $value): void
+    {
+        if (null === $value) {
+            return;
+        }
+
+        $option = new OptionMetadata();
+        $option->setName('block_id_generator');
+        $option->setValue($value);
+        $this->fieldMetadata->addOption($option);
     }
 
     /**
      * @param BlockVisitorInterface[] $blockVisitors
      */
-    private function createBlockResolver(array $blockVisitors = [], ?RequestStack $requestStack = null): BlockResolver
+    private function createBlockResolver(array $blockVisitors = []): BlockResolver
     {
         return new BlockResolver(
             $this->contentResolver->reveal(),
             $this->metadataProviderRegistry,
-            new \ArrayIterator($blockVisitors),
-            $requestStack
+            new \ArrayIterator($blockVisitors)
         );
     }
 }

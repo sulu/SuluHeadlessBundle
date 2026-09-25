@@ -31,6 +31,7 @@ use Sulu\Content\Domain\Model\ShadowInterface;
 use Sulu\Content\Domain\Model\TaxonomyInterface;
 use Sulu\Content\Domain\Model\TemplateInterface;
 use Sulu\Page\Domain\Model\PageInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class StructureResolver implements StructureResolverInterface
 {
@@ -39,7 +40,15 @@ class StructureResolver implements StructureResolverInterface
         private ContentResolverInterface $contentResolver,
         private ReferenceStoreInterface $referenceStore,
         private ExtensionResolverProvider $extensionResolverProvider,
+        private ?RequestStack $requestStack = null,
     ) {
+        if (null === $this->requestStack) {
+            @trigger_deprecation(
+                'sulu/headless-bundle',
+                '3.1',
+                'Instantiating the StructureResolver class without the $requestStack argument is deprecated.',
+            );
+        }
     }
 
     /**
@@ -293,6 +302,8 @@ class StructureResolver implements StructureResolverInterface
             $attributes['isShadow'] = null !== $shadowLocale;
             $attributes['shadowLocale'] = $shadowLocale;
         }
+
+        $attributes['preview'] = true === $this->requestStack?->getCurrentRequest()?->attributes->get('preview');
 
         return $attributes;
     }
