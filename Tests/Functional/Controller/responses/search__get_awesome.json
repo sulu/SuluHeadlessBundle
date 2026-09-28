@@ -24,6 +24,7 @@
                     "aiDisclosureDisabled": false,
                     "aiDisclosureIconVariant": "auto",
                     "origin": "unknown",
+                    "mediaLanguages": "@array@.optional()",
                     "isImage": true,
                     "isVideo": false,
                     "locale": "de",

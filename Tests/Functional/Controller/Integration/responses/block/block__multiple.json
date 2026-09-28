@@ -37,6 +37,7 @@
                         "aiDisclosureDisabled": false,
                         "aiDisclosureIconVariant": "auto",
                         "origin": "unknown",
+                        "mediaLanguages": "@array@.optional()",
                         "categories": [],
                         "tags": [],
                         "targetGroups": [],
