@@ -57,10 +57,16 @@ class ImageMapResolver implements ContentTypeResolverInterface
 
         $hotspotTypes = $fieldMetadata->getTypes();
         $globalBlocksMetadata = $this->getGlobalBlocksMetadata($locale);
+        $exposeHotspotId = $this->shouldExposeHotspotId($fieldMetadata, $attributes);
 
         foreach ($hotspots as $hotspot) {
             if (!\is_array($hotspot) || !isset($hotspot['type'])) {
                 continue;
+            }
+
+            // Only expose the hotspot id while rendering the admin's own preview, same as BlockResolver.
+            if (!$exposeHotspotId || !\is_string($hotspot['_id'] ?? null)) {
+                unset($hotspot['_id']);
             }
 
             $hotspotTypeName = $hotspot['type'];
@@ -107,6 +113,15 @@ class ImageMapResolver implements ContentTypeResolverInterface
         }
 
         return $typedFormMetadata->getForms();
+    }
+
+    /**
+     * @param array<string, mixed> $attributes
+     */
+    private function shouldExposeHotspotId(FieldMetadata $fieldMetadata, array $attributes): bool
+    {
+        return true === ($attributes['preview'] ?? false)
+            && true === $fieldMetadata->findOption('block_id_generator')?->getValue();
     }
 
     private function getGlobalBlockType(FormMetadata $formMetadata): ?string

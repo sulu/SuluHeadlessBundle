@@ -13,11 +13,13 @@ declare(strict_types=1);
 
 namespace Sulu\Bundle\HeadlessBundle\Tests\Unit\Content\ContentTypeResolver;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
 use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FormMetadata;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\OptionMetadata;
 use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\TypedFormMetadata;
 use Sulu\Bundle\AdminBundle\Metadata\MetadataProviderInterface;
 use Sulu\Bundle\AdminBundle\Metadata\MetadataProviderRegistry;
@@ -350,6 +352,84 @@ class BlockResolverTest extends TestCase
         $content = $result->getContent();
         $this->assertIsArray($content);
         $this->assertCount(1, $content);
+    }
+
+    public function testResolveExposesIdDuringPreview(): void
+    {
+        $attributes = ['preview' => true];
+        $data = $this->createBlockDataWithId($attributes);
+        $this->setBlockIdGeneratorOption(true);
+
+        $result = $this->createBlockResolver()->resolve($data, $this->fieldMetadata, 'en', $attributes);
+
+        $content = $result->getContent();
+        $this->assertIsArray($content);
+        $this->assertIsArray($content[0]);
+        $this->assertSame('block-1', $content[0]['_id']);
+    }
+
+    /**
+     * @param array<string, mixed> $attributes
+     */
+    #[DataProvider('provideIdOmittedCases')]
+    public function testResolveOmitsId(array $attributes, ?bool $blockIdGenerator): void
+    {
+        $data = $this->createBlockDataWithId($attributes);
+        $this->setBlockIdGeneratorOption($blockIdGenerator);
+
+        $result = $this->createBlockResolver()->resolve($data, $this->fieldMetadata, 'en', $attributes);
+
+        $content = $result->getContent();
+        $this->assertIsArray($content);
+        $this->assertIsArray($content[0]);
+        $this->assertArrayNotHasKey('_id', $content[0]);
+    }
+
+    /**
+     * @return iterable<string, array{array<string, mixed>, bool|null}>
+     */
+    public static function provideIdOmittedCases(): iterable
+    {
+        yield 'no preview attribute' => [[], true];
+        yield 'not a preview' => [['preview' => false], true];
+        yield 'block id generator disabled' => [['preview' => true], false];
+        yield 'block id generator not set' => [['preview' => true], null];
+    }
+
+    /**
+     * @param array<string, mixed> $attributes
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function createBlockDataWithId(array $attributes): array
+    {
+        $titleFieldMetadata = new FieldMetadata('title');
+        $titleFieldMetadata->setType('text_line');
+
+        $titleTypeMetadata = new FormMetadata();
+        $titleTypeMetadata->setKey('title');
+        $titleTypeMetadata->addItem($titleFieldMetadata);
+
+        $this->fieldMetadata->addType($titleTypeMetadata);
+
+        $this->contentResolver->resolve('test-123', $titleFieldMetadata, 'en', $attributes)
+            ->willReturn(new ContentView('test-123', []));
+
+        return [
+            ['type' => 'title', 'settings' => [], 'title' => 'test-123', '_id' => 'block-1'],
+        ];
+    }
+
+    private function setBlockIdGeneratorOption(?bool $value): void
+    {
+        if (null === $value) {
+            return;
+        }
+
+        $option = new OptionMetadata();
+        $option->setName('block_id_generator');
+        $option->setValue($value);
+        $this->fieldMetadata->addOption($option);
     }
 
     /**

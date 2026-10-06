@@ -167,6 +167,24 @@ If your project includes custom content types or if you are not satisfied with a
 you can register your own `ContentTypeResolver` by implementing the `ContentTypeResolverInterface` and
 adding a `sulu_headless.content_type_resolver` tag to the service.
 
+#### Block and hotspot ids in the preview
+
+To navigate from the preview to a block or an image map hotspot, the `block` and `image_map` resolvers add the stored
+id of each item as `_id`. The id is only part of the response inside the Sulu preview, a regular `{pageUrl}.json`
+request does not contain it.
+
+The id is only added for fields that have the `block_id_generator` option enabled. Sulu enables it automatically for
+`block` fields. For `image_map` fields it is only enabled automatically since Sulu 3.1, with Sulu 3.0 set it on the
+field in the template:
+
+```xml
+<property name="hotspots" type="image_map">
+    <params>
+        <param name="block_id_generator" value="true"/>
+    </params>
+</property>
+```
+
 ### Provide popular Sulu functionality via JSON APIs
 
 The Sulu content management system comes with various services and Twig extensions to simplify the development and the
